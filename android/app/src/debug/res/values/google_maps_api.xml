@@ -1,0 +1,24 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=FD:64:EF:5C:A8:D7:01:06:F8:05:37:2D:67:95:18:AA:C2:4B:27:1A%3Bcom.perfect.freshair.View
+
+    You can also add your credentials to an existing key, using these values:
+
+    Package name:
+    FD:64:EF:5C:A8:D7:01:06:F8:05:37:2D:67:95:18:AA:C2:4B:27:1A
+
+    SHA-1 certificate fingerprint:
+    FD:64:EF:5C:A8:D7:01:06:F8:05:37:2D:67:95:18:AA:C2:4B:27:1A
+
+    Alternatively, follow the directions here:
+    https://developers.google.com/maps/documentation/android/start#get-key
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBFC2CxWdvd63LS2T5K205N__rN7erBWXU</string>
+</resources>

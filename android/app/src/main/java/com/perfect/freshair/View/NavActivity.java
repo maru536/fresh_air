@@ -1,4 +1,4 @@
-package com.perfect.freshair;
+package com.perfect.freshair.View;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -13,6 +13,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import com.perfect.freshair.R;
 
 public abstract class NavActivity extends AppCompatActivity implements MenuItem.OnMenuItemClickListener {
     private FrameLayout view_stub; //This is the framelayout to keep your content view
@@ -96,7 +98,7 @@ public abstract class NavActivity extends AppCompatActivity implements MenuItem.
                 startActivity(intent);
                 break;
             case R.id.nav_history:
-                intent = new Intent(NavActivity.this, MainActivity.class);
+                intent = new Intent(NavActivity.this, MapsActivity.class);
                 startActivity(intent);
                 break;
             // and so on...

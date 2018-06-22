@@ -1,7 +1,8 @@
-package com.perfect.freshair;
+package com.perfect.freshair.View;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.perfect.freshair.R;
 
 public class MainActivity extends NavActivity {
 
