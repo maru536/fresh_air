@@ -1,27 +1,40 @@
 package com.perfect.freshair.View;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.shapes.Shape;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.perfect.freshair.R;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final int LOCATION_COARSE_REQUEST_CODE = 102;
+    public static final int MIN_LOCATION_UPDATE_TIME = 1000;
+    public static final int MIN_LOCATION_UPDATE_DISTANCE = 10;
+    private LocationManager mLocationManager;
     private String TAG = "MapsActivity";
     private GoogleMap mMap;
+    private LatLng mCurPos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +43,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
         requestPermission(Manifest.permission.ACCESS_COARSE_LOCATION, LOCATION_COARSE_REQUEST_CODE);
+         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mLocationListener);
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                    MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mLocationListener);
+        }
     }
 
 
@@ -67,7 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
-            mMap.setMyLocationEnabled(true);
+            mMap.setMyLocationEnabled(false);
         }
     }
 
@@ -99,4 +121,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
+
+    private final LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            LatLng curPos = new LatLng(location.getLatitude(), location.getLongitude());
+            double alt = location.getAltitude();
+            float acc = location.getAccuracy();
+            Log.i(TAG, "pos: " +curPos.toString()+ "/alt: " +alt+ "/acc: " +acc);
+
+            mMap.addCircle(new CircleOptions()
+                .center(curPos)
+                .radius(acc)
+                    .strokeColor(Color.BLUE)
+                .fillColor(R.color.transparentBlue)
+                .clickable(false));
+
+            if (mCurPos != null) {
+                mMap.addPolyline(new PolylineOptions()
+                    .add(mCurPos, curPos)
+                    .color(Color.RED)
+                    .clickable(false));
+            }
+
+            mCurPos = curPos;
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+
+        }
+    };
 }
