@@ -1,10 +1,11 @@
 package com.perfect.freshair.View;
 
 import android.Manifest;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.drawable.shapes.Shape;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -13,25 +14,51 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.perfect.freshair.DB.LocationDBHandler;
+import com.perfect.freshair.Model.LocationData;
 import com.perfect.freshair.R;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+    public static final long MAX_TIME = 4133948399999L;
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final int LOCATION_COARSE_REQUEST_CODE = 102;
     public static final int MIN_LOCATION_UPDATE_TIME = 1000;
     public static final int MIN_LOCATION_UPDATE_DISTANCE = 10;
     private LocationManager mLocationManager;
+    private Spinner mSpinnerGPSType;
+    private String mGPSType;
+    private Button mBtnStartDate;
+    private Button mBtnStartTime;
+    private Button mBtnEndDate;
+    private Button mBtnEndTime;
+    private Timestamp mStartTime;
+    private Timestamp mEndTime;
+    private EditText mEditMinAcc;
+    private EditText mEditMaxAcc;
+    private int mMinAcc = -1;
+    private int mMaxAcc = Integer.MAX_VALUE;
+    private Button mBtnSearch;
+    private LocationDBHandler mLocDB;
     private String TAG = "MapsActivity";
     private GoogleMap mMap;
     private LatLng mCurPos;
@@ -40,6 +67,142 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        mSpinnerGPSType = (Spinner) findViewById(R.id.select_type);
+        mBtnStartDate = (Button) findViewById(R.id.start_date);
+        mBtnStartTime = (Button) findViewById(R.id.start_time);
+        mBtnEndDate = (Button) findViewById(R.id.end_date);
+        mBtnEndTime = (Button) findViewById(R.id.end_time);
+        mEditMinAcc = (EditText) findViewById(R.id.min_acc);
+        mEditMaxAcc = (EditText) findViewById(R.id.max_acc);
+        mBtnSearch = (Button) findViewById(R.id.search);
+        mStartTime = new Timestamp(0);
+        mEndTime = new Timestamp(MAX_TIME);
+
+        mLocDB = new LocationDBHandler(this);
+
+        ArrayList<String> typeList = new ArrayList<>();
+        typeList.add(LocationData.ALL);
+        typeList.add(LocationData.GPS);
+        typeList.add(LocationData.NETWORK);
+
+        ArrayAdapter spinnerAdapter;
+        spinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, typeList);
+        mSpinnerGPSType.setAdapter(spinnerAdapter);
+
+        mSpinnerGPSType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                mGPSType = (String) mSpinnerGPSType.getItemAtPosition(i);
+                Log.i(TAG, mGPSType);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        mBtnStartDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Timestamp curTime = new Timestamp(System.currentTimeMillis());
+                new DatePickerDialog(
+                        MapsActivity.this,
+                        android.R.style.Theme_Holo_Light_Dialog,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker datePicker, int year, int month, int date) {
+                                mStartTime.setYear(year - 1900);
+                                mStartTime.setMonth(month);
+                                mStartTime.setDate(date);
+                                mBtnStartDate.setText(new SimpleDateFormat("yyyy년 MM월 dd일").format(mStartTime));
+                            }
+                        },
+                        1900 + curTime.getYear(),
+                        curTime.getMonth(),
+                        curTime.getDate()
+                ).show();
+            }
+        });
+
+        mBtnStartTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Timestamp curTime = new Timestamp(System.currentTimeMillis());
+                new TimePickerDialog(
+                        MapsActivity.this,
+                        android.R.style.Theme_Holo_Light_Dialog,
+                        new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker timePicker, int hour, int min) {
+                                mStartTime.setHours(hour);
+                                mStartTime.setMinutes(min);
+                                mBtnStartTime.setText(new SimpleDateFormat("HH시 mm분").format(mStartTime));
+                            }
+                        },
+                        curTime.getHours(),
+                        curTime.getMinutes(),
+                        true
+                ).show();
+            }
+        });
+
+        mBtnEndDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Timestamp curTime = new Timestamp(System.currentTimeMillis());
+                new DatePickerDialog(
+                        MapsActivity.this,
+                        android.R.style.Theme_Holo_Light_Dialog,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker datePicker, int year, int month, int date) {
+                                mEndTime.setYear(year-1900);
+                                mEndTime.setMonth(month);
+                                mEndTime.setDate(date);
+                                mBtnEndDate.setText(new SimpleDateFormat("yyyy년 MM월 dd일").format(mEndTime));
+                            }
+                        },
+                        1900+curTime.getYear(),
+                        curTime.getMonth(),
+                        curTime.getDate()
+                ).show();
+            }
+        });
+
+        mBtnEndTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Timestamp curTime = new Timestamp(System.currentTimeMillis());
+                new TimePickerDialog(
+                        MapsActivity.this,
+                        android.R.style.Theme_Holo_Light_Dialog,
+                        new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker timePicker, int hour, int min) {
+                                mEndTime.setHours(hour);
+                                mEndTime.setMinutes(min);
+                                mBtnEndTime.setText(new SimpleDateFormat("HH시 mm분").format(mEndTime));
+                            }
+                        },
+                        curTime.getHours(),
+                        curTime.getMinutes(),
+                        true
+                ).show();
+            }
+        });
+
+        mBtnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ArrayList<LocationData> locations = mLocDB.search(mGPSType, mStartTime, mEndTime, mMinAcc, mMaxAcc);
+
+                for (LocationData curLoc : locations)
+                    Log.i(TAG, curLoc.toString());
+            }
+        });
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
         requestPermission(Manifest.permission.ACCESS_COARSE_LOCATION, LOCATION_COARSE_REQUEST_CODE);
@@ -128,14 +291,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LatLng curPos = new LatLng(location.getLatitude(), location.getLongitude());
             double alt = location.getAltitude();
             float acc = location.getAccuracy();
-            Log.i(TAG, "pos: " +curPos.toString()+ "/alt: " +alt+ "/acc: " +acc);
+            int locationColor;
+            LocationData newLoc = new LocationData(location);
+            mLocDB.add(newLoc);
+
+            Log.i(TAG, "pos: " +curPos.toString()+ "/alt: " +alt+ "/acc: " +acc+ "/prov: " +location.getProvider());
+
+            if (location.getProvider().equals("network")) {
+                locationColor = getResources().getColor(R.color.transparentGreen, null);
+                Log.i(TAG, "network");
+            } else if (location.getProvider().equals("gps")) {
+                locationColor = getResources().getColor(R.color.transparentBlue, null);;
+                Log.i(TAG, "gps");
+            } else {
+                locationColor = getResources().getColor(R.color.transparentBlack, null);;
+                Log.i(TAG, "etc");
+            }
+
 
             mMap.addCircle(new CircleOptions()
-                .center(curPos)
-                .radius(acc)
-                    .strokeColor(Color.BLUE)
-                .fillColor(R.color.transparentBlue)
-                .clickable(false));
+                    .center(curPos)
+                    .radius(acc)
+                    .strokeColor(locationColor)
+                    .fillColor(locationColor)
+                    .clickable(false));
 
             if (mCurPos != null) {
                 mMap.addPolyline(new PolylineOptions()
