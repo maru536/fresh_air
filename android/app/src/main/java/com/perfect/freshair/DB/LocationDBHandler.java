@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
+import android.util.Log;
 
 import com.perfect.freshair.Model.LocationData;
 
@@ -14,7 +15,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 
 public class LocationDBHandler extends SQLiteOpenHelper {
-
+    public static final String TAG = "LocationDBHandle";
     public static final int DB_VER = 1;
     private static final String DB_NAME = "LocationDB.db";
     public static final String TABLE_LOCATION = "locations";
@@ -85,8 +86,10 @@ public class LocationDBHandler extends SQLiteOpenHelper {
         query += Column.TIME.getKey()+ " >= " +startTime.getTime()+ " AND "
                 +Column.TIME.getKey()+ " <= " +endTime.getTime()+ " AND "
                 +Column.ACC.getKey()+ " >= " +minAcc+ " AND "
-                +Column.ACC.getKey()+ " <= " +maxAcc+ ";";
+                +Column.ACC.getKey()+ " <= " +maxAcc+
+                " ORDER BY " +Column.TIME.getKey()+ " ASC;";
 
+        Log.i(TAG, query);
         Cursor cursor = db.rawQuery(query, null);
 
         if (cursor != null &&  cursor.moveToFirst()) {

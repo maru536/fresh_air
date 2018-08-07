@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.location.Location;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.perfect.freshair.DB.LocationDBHandler;
 
 import java.sql.Timestamp;
@@ -13,8 +14,7 @@ public class LocationData {
     public static final String NETWORK = "network";
     public static final String ALL = "all";
 
-    double mLat;
-    double mLng;
+    LatLng mPos;
     double mAlt;
     float mAcc;
     float mSpeed;
@@ -30,8 +30,7 @@ public class LocationData {
         mProv = location.getProvider();
         mTime = location.getTime();
         mElapseRealtime = location.getElapsedRealtimeNanos();
-        mLat = location.getLatitude();
-        mLng = location.getLongitude();
+        mPos = new LatLng(location.getLatitude(), location.getLongitude());
         mAlt = location.getAltitude();
         mAcc = location.getAccuracy();
         mSpeed = location.getSpeed();
@@ -45,8 +44,8 @@ public class LocationData {
         mProv = cursor.getString(LocationDBHandler.Column.PROVIDER.getIdx());
         mTime = cursor.getLong(LocationDBHandler.Column.TIME.getIdx());
         mElapseRealtime = cursor.getLong(LocationDBHandler.Column.ELAPSE_TIME.getIdx());
-        mLat = cursor.getDouble(LocationDBHandler.Column.LAT.getIdx());
-        mLng = cursor.getDouble(LocationDBHandler.Column.LNG.getIdx());
+        mPos = new LatLng(cursor.getDouble(LocationDBHandler.Column.LAT.getIdx()),
+                    cursor.getDouble(LocationDBHandler.Column.LNG.getIdx()));
         mAlt = cursor.getDouble(LocationDBHandler.Column.ALT.getIdx());
         mAcc = cursor.getFloat(LocationDBHandler.Column.ACC.getIdx());
         mSpeed = cursor.getFloat(LocationDBHandler.Column.SPEED.getIdx());
@@ -62,8 +61,8 @@ public class LocationData {
         locValues.put(Key.PROVIDER.getKey(), mProv);
         locValues.put(Key.TIME.getKey(), mTime);
         locValues.put(Key.ELAPSE_TIME.getKey(), mElapseRealtime);
-        locValues.put(Key.LAT.getKey(), mLat);
-        locValues.put(Key.LNG.getKey(), mLng);
+        locValues.put(Key.LAT.getKey(), mPos.latitude);
+        locValues.put(Key.LNG.getKey(), mPos.longitude);
         locValues.put(Key.ALT.getKey(), mAlt);
         locValues.put(Key.ACC.getKey(), mAcc);
         locValues.put(Key.SPEED.getKey(), mSpeed);
@@ -75,20 +74,12 @@ public class LocationData {
         return locValues;
     }
 
-    public double getLat() {
-        return mLat;
+    public LatLng getPos() {
+        return mPos;
     }
 
-    public void setLat(double lat) {
-        mLat = lat;
-    }
-
-    public double getLng() {
-        return mLng;
-    }
-
-    public void setLng(double lng) {
-        mLng = lng;
+    public void setPos(LatLng pos) {
+        mPos = pos;
     }
 
     public double getAlt() {
@@ -184,7 +175,7 @@ public class LocationData {
     }
 
     public String toString() {
-        return "Prov: " +mProv+ " / Time: " +new Timestamp(mTime).toString()+ " / Lat: " +mLat+
-                " / Lng: " +mLng+ " / Alt: " +mAlt+ " / Acc: " +mAcc;
+        return "Prov: " +mProv+ " / Time: " +new Timestamp(mTime).toString()+ " / Lat: " +mPos.latitude+
+                " / Lng: " +mPos.longitude+ " / Alt: " +mAlt+ " / Acc: " +mAcc;
     }
 }

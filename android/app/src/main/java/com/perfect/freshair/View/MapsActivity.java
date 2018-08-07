@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -46,7 +48,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static final int MIN_LOCATION_UPDATE_DISTANCE = 10;
     private LocationManager mLocationManager;
     private Spinner mSpinnerGPSType;
-    private String mGPSType;
     private Button mBtnStartDate;
     private Button mBtnStartTime;
     private Button mBtnEndDate;
@@ -55,13 +56,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Timestamp mEndTime;
     private EditText mEditMinAcc;
     private EditText mEditMaxAcc;
-    private int mMinAcc = -1;
-    private int mMaxAcc = Integer.MAX_VALUE;
     private Button mBtnSearch;
     private LocationDBHandler mLocDB;
     private String TAG = "MapsActivity";
     private GoogleMap mMap;
-    private LatLng mCurPos;
+    private float mZoom = 16.0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,8 +92,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mSpinnerGPSType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                mGPSType = (String) mSpinnerGPSType.getItemAtPosition(i);
-                Log.i(TAG, mGPSType);
             }
 
             @Override
@@ -158,13 +155,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker datePicker, int year, int month, int date) {
-                                mEndTime.setYear(year-1900);
+                                mEndTime.setYear(year - 1900);
                                 mEndTime.setMonth(month);
                                 mEndTime.setDate(date);
                                 mBtnEndDate.setText(new SimpleDateFormat("yyyy년 MM월 dd일").format(mEndTime));
                             }
                         },
-                        1900+curTime.getYear(),
+                        1900 + curTime.getYear(),
                         curTime.getMonth(),
                         curTime.getDate()
                 ).show();
@@ -196,10 +193,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mBtnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<LocationData> locations = mLocDB.search(mGPSType, mStartTime, mEndTime, mMinAcc, mMaxAcc);
+                int locationColor;
+                LocationData prevLoc = null;
+                String selectedItem = (String) mSpinnerGPSType.getSelectedItem();
+                String strMinAcc = mEditMinAcc.getText().toString();
+                String strMaxAcc = mEditMaxAcc.getText().toString();
+                int minAcc = strMinAcc.length() > 0 ? Integer.valueOf(strMinAcc) : 0;
+                int maxAcc = strMaxAcc.length() > 0 ? Integer.valueOf(strMaxAcc) : Integer.MAX_VALUE;
 
-                for (LocationData curLoc : locations)
+
+                mMap.clear();
+                ArrayList<LocationData> locations = mLocDB.search((String)mSpinnerGPSType.getSelectedItem(),
+                                                                    mStartTime, mEndTime, minAcc, maxAcc);
+
+                for (LocationData curLoc : locations) {
                     Log.i(TAG, curLoc.toString());
+
+                    switch (curLoc.getProv()) {
+                        case "network":
+                            locationColor = getResources().getColor(R.color.transparentGreen, null);
+                            break;
+
+                        case "gps":
+                            locationColor = getResources().getColor(R.color.transparentBlue, null);
+                            break;
+
+                        default:
+                            locationColor = getResources().getColor(R.color.transparentBlack, null);
+                            break;
+                    }
+
+                    mMap.addCircle(new CircleOptions()
+                            .center(curLoc.getPos())
+                            .radius(curLoc.getAcc())
+                            .strokeColor(locationColor)
+                            .fillColor(locationColor)
+                            .clickable(false));
+
+                    if (prevLoc != null) {
+                        mMap.addPolyline(new PolylineOptions()
+                                .add(prevLoc.getPos(), curLoc.getPos())
+                                .color(Color.RED)
+                                .clickable(false));
+                    }
+
+                    prevLoc = curLoc;
+                }
+
+                if (locations.size() > 0) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(locations.get(0).getPos()));
+                }
             }
         });
 
@@ -253,6 +296,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return;
             }
             mMap.setMyLocationEnabled(false);
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(mZoom));
         }
     }
 
@@ -288,13 +332,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
+
+            LocationData newLoc = new LocationData(location);
+            mLocDB.add(newLoc);
+            /*
             LatLng curPos = new LatLng(location.getLatitude(), location.getLongitude());
             double alt = location.getAltitude();
             float acc = location.getAccuracy();
             int locationColor;
-            LocationData newLoc = new LocationData(location);
-            mLocDB.add(newLoc);
-
             Log.i(TAG, "pos: " +curPos.toString()+ "/alt: " +alt+ "/acc: " +acc+ "/prov: " +location.getProvider());
 
             if (location.getProvider().equals("network")) {
@@ -324,6 +369,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             mCurPos = curPos;
+            */
         }
 
         @Override
