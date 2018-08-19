@@ -16,18 +16,23 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.perfect.freshair.DB.LocationDBHandler;
+import com.perfect.freshair.Model.LocationData;
+
+import org.greenrobot.eventbus.EventBus;
 
 public class GPSService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
-    private static final String LOGSERVICE = "#######";
+    private static final String LOGSERVICE = "GPSService";
+    private LocationDBHandler mLocDB;
 
     @Override
     public void onCreate() {
         super.onCreate();
         buildGoogleApiClient();
         Log.i(LOGSERVICE, "onCreate");
-
+        mLocDB = new LocationDBHandler(this);
     }
 
     @Override
@@ -38,7 +43,6 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
             mGoogleApiClient.connect();
         return START_STICKY;
     }
-
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -81,8 +85,11 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     public void onLocationChanged(Location location) {
         Log.i(LOGSERVICE, "lat " + location.getLatitude());
         Log.i(LOGSERVICE, "lng " + location.getLongitude());
+        Log.i(LOGSERVICE, "prov" + location.getProvider());
+        LocationData newLoc = new LocationData(location);
+        mLocDB.add(newLoc);
         LatLng mLocation = (new LatLng(location.getLatitude(), location.getLongitude()));
-        //EventBus.getDefault().post(mLocation);
+        EventBus.getDefault().post(mLocation);
 
     }
 

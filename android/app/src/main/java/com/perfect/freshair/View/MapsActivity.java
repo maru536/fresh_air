@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -35,12 +36,13 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.perfect.freshair.DB.LocationDBHandler;
 import com.perfect.freshair.Model.LocationData;
 import com.perfect.freshair.R;
+import com.perfect.freshair.Service.GPSService;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends NavActivity implements OnMapReadyCallback {
     public static final long MAX_TIME = 4133948399999L;
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final int LOCATION_COARSE_REQUEST_CODE = 102;
@@ -249,11 +251,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
         requestPermission(Manifest.permission.ACCESS_COARSE_LOCATION, LOCATION_COARSE_REQUEST_CODE);
-         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        //mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        /*
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
@@ -261,6 +264,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                     MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mLocationListener);
         }
+        */
     }
 
 
