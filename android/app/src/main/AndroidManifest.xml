@@ -9,7 +9,7 @@
     -->
 
     <permission
-        android:name="com.perfect.freshair.View.MapsActivity.locationapi.maps.permission.MAPS_RECEIVE"
+        android:name="com.perfect.freshair.View.MapActivity.locationapi.maps.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
     <!--bluetooth permission-->
@@ -35,7 +35,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".View.MainActivity" />
+        <activity android:name=".View.DustActivity" />
         <activity android:name=".View.NavActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -50,7 +50,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".View.MapsActivity"
+            android:name=".View.MapActivity"
             android:label="@string/title_activity_maps" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

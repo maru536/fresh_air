@@ -12,6 +12,8 @@
     <string name="end_date">종료 날짜</string>
     <string name="end_time">종료 시간</string>
     <string name="search">검색</string>
+    <string name="title_map">Map</string>
+    <string name="title_dust">Dust</string>
     <!-- junhan -->
     <string name="BLE_NOT_SUPPORTED">sorry, your device doesn't support BLE.</string>
     <string name="CONNECT_DEVICE">Connect your AirSensor Device</string>

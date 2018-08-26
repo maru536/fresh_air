@@ -13,23 +13,28 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.perfect.freshair.Common.CommonEnumeration;
+import com.perfect.freshair.DB.DustLocationDBHandler;
+import com.perfect.freshair.Model.DustWithLocation;
 import com.perfect.freshair.R;
-import com.perfect.freshair.Service.GPSService;
 
-public class MainActivity extends NavActivity implements View.OnClickListener {
+public class DustActivity extends NavActivity implements View.OnClickListener {
+    private static final String TAG = "DustActivity";
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -45,14 +50,19 @@ public class MainActivity extends NavActivity implements View.OnClickListener {
     private int mConnectionState = STATE_DISCONNECTED;
 
     private Handler mHandler;
-    private int airsensorValue = 0;
+    private int airsensorValue = 151;
 
-    
+    private LocationManager mLocationManager;
+    private static final int LOCATION_REQUEST_CODE = 101;
+    private static final int LOCATION_COARSE_REQUEST_CODE = 102;
+    public static final int MIN_LOCATION_UPDATE_TIME = 1000;
+    public static final int MIN_LOCATION_UPDATE_DISTANCE = 10;
+    private DustLocationDBHandler mLocDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_dust);
 
         //check whether or not BLE is supported
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -70,7 +80,7 @@ public class MainActivity extends NavActivity implements View.OnClickListener {
         //for communication with BLE, check the permission
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
         if (permissionCheck == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(MainActivity.this,
+            ActivityCompat.requestPermissions(DustActivity.this,
                     new String[]{
                             android.Manifest.permission.ACCESS_COARSE_LOCATION},
                     CommonEnumeration.REQUEST_COARSE_LOCATION_PERMISSIONS);
@@ -91,12 +101,16 @@ public class MainActivity extends NavActivity implements View.OnClickListener {
 
         txtConnection = (TextView) findViewById(R.id.activity_main_txt_bluetooth_connection);
         txtConnection.setOnClickListener(this);
-        txtValue = (TextView)findViewById(R.id.activity_main_txt_bluetooth_value);
+        txtValue = (TextView) findViewById(R.id.activity_main_txt_bluetooth_value);
         progressBar = (ProgressBar) findViewById(R.id.activity_main_progress);
         setConnectionState(STATE_DISCONNECTED);
 
-        Intent intent = new Intent(this, GPSService.class);
-        startService(intent);
+        requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
+        requestPermission(Manifest.permission.ACCESS_COARSE_LOCATION, LOCATION_COARSE_REQUEST_CODE);
+
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        mLocDB = new DustLocationDBHandler(this);
     }
 
     @Override
@@ -107,6 +121,14 @@ public class MainActivity extends NavActivity implements View.OnClickListener {
                     Intent intent = new Intent(this, ScanDeviceActivity.class);
                     startActivityForResult(intent, CommonEnumeration.REQUEST_ACTIVITY_SCAN);
                 }
+                break;
+
+            case R.id.btn_test:
+                startLocationUpdate();
+                break;
+
+            case R.id.btn_db_init:
+                mLocDB.drop();
                 break;
         }
     }
@@ -139,7 +161,7 @@ public class MainActivity extends NavActivity implements View.OnClickListener {
                 break;
             case STATE_RECEIVED:
                 mConnectionState = STATE_RECEIVED;
-                txtValue.setText(airsensorValue+getResources().getString(R.string.AIRSENSOR_UNIT));
+                txtValue.setText(airsensorValue + getResources().getString(R.string.AIRSENSOR_UNIT));
                 break;
         }
     }
@@ -246,6 +268,77 @@ public class MainActivity extends NavActivity implements View.OnClickListener {
                     super.onCharacteristicChanged(gatt, characteristic);
                     airsensorValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, 0);
                     mHandler.sendEmptyMessage(STATE_RECEIVED);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            startLocationUpdate();
+                        }
+                    });
                 }
             };
+
+    protected void requestPermission(String permissionType, int requestCode) {
+        int permission = ContextCompat.checkSelfPermission(this, permissionType);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{permissionType}, requestCode);
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_REQUEST_CODE: {
+                if (grantResults.length == 0
+                        || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Unable to show location - permission required", Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+
+            case LOCATION_COARSE_REQUEST_CODE: {
+                if (grantResults.length == 0
+                        || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Unable to show  coarse location - permission required", Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+        }
+    }
+
+    private void startLocationUpdate() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mLocationListener);
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                    MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mLocationListener);
+        }
+    }
+
+    private final LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            DustWithLocation newLoc = new DustWithLocation(airsensorValue, location);
+            Toast.makeText(DustActivity.this, newLoc.toString(), Toast.LENGTH_LONG).show();
+            mLocDB.add(newLoc);
+            mLocationManager.removeUpdates(mLocationListener);
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+
+        }
+    };
 }

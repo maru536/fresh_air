@@ -50,8 +50,8 @@ public class DustLocationDBHandler extends SQLiteOpenHelper {
                 +Column.SPEED_ACC+ " REAL,"
                 +Column.VERT_ACC+ " REAL,"
                 +Column.BEARING+ " REAL,"
-                +Column.BEARING_ACC+ " REAL, "
-                +Column.DUST+ "INTEGER);";
+                +Column.BEARING_ACC+ " REAL,"
+                +Column.DUST+ " INTEGER);";
 
         db.execSQL(createQuery);
     }
@@ -62,10 +62,16 @@ public class DustLocationDBHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public void drop() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS " +TABLE_LOCATION+ ";");
+        onCreate(db);
+    }
     public void add(DustWithLocation dustWithLocation) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.insert(TABLE_LOCATION, null, dustWithLocation.toValues());
+        long result = db.insert(TABLE_LOCATION, null, dustWithLocation.toValues());
+
         db.close();
     }
 
@@ -74,9 +80,9 @@ public class DustLocationDBHandler extends SQLiteOpenHelper {
         ArrayList<DustWithLocation> dustWithLocations = new ArrayList<>();
         String query = "SELECT * FROM " +TABLE_LOCATION+ " WHERE ";
 
-        if (!type.equals(DustWithLocation.ProviderType.ALL))
+        /*if (!type.equals(DustWithLocation.ProviderType.ALL))
             query += Column.PROVIDER+ " = \"" +type+ "\" AND ";
-
+        */
         query += Column.TIME+ " >= " +startTime.getTime()+ " AND "
                 +Column.TIME+ " <= " +endTime.getTime()+ " AND "
                 +Column.ACC+ " >= " +minAcc+ " AND "

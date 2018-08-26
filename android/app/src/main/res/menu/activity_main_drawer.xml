@@ -7,20 +7,10 @@
         <item
             android:id="@+id/nav_recommend"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="Recommend" />
+            android:title="@string/title_dust" />
         <item
             android:id="@+id/nav_history"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="History" />
+            android:title="@string/title_map" />
     </group>
-
-    <item android:title="Database">
-        <!--menu>
-            <item
-                android:id="@+id/nav_cpro"
-                android:icon="@drawable/ic_menu_manage"
-                android:title="CPRO" />
-        </menu-->
-    </item>
-
 </menu>

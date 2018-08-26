@@ -27,7 +27,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.perfect.freshair.DB.DustLocationDBHandler;
 import com.perfect.freshair.Model.DustWithLocation;
@@ -37,7 +36,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-public class MapsActivity extends NavActivity implements OnMapReadyCallback {
+public class MapActivity extends NavActivity implements OnMapReadyCallback {
     public static final long MAX_TIME = 4133948399999L;
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final int LOCATION_COARSE_REQUEST_CODE = 102;
@@ -55,14 +54,14 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
     private EditText mEditMaxAcc;
     private Button mBtnSearch;
     private DustLocationDBHandler mLocDB;
-    private String TAG = "MapsActivity";
+    private String TAG = "MapActivity";
     private GoogleMap mMap;
     private float mZoom = 16.0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_map);
 
         mSpinnerGPSType = (Spinner) findViewById(R.id.select_type);
         mBtnStartDate = (Button) findViewById(R.id.start_date);
@@ -103,7 +102,7 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
             public void onClick(View view) {
                 Timestamp curTime = new Timestamp(System.currentTimeMillis());
                 new DatePickerDialog(
-                        MapsActivity.this,
+                        MapActivity.this,
                         android.R.style.Theme_Holo_Light_Dialog,
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
@@ -126,7 +125,7 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
             public void onClick(View view) {
                 Timestamp curTime = new Timestamp(System.currentTimeMillis());
                 new TimePickerDialog(
-                        MapsActivity.this,
+                        MapActivity.this,
                         android.R.style.Theme_Holo_Light_Dialog,
                         new TimePickerDialog.OnTimeSetListener() {
                             @Override
@@ -148,7 +147,7 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
             public void onClick(View view) {
                 Timestamp curTime = new Timestamp(System.currentTimeMillis());
                 new DatePickerDialog(
-                        MapsActivity.this,
+                        MapActivity.this,
                         android.R.style.Theme_Holo_Light_Dialog,
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
@@ -171,7 +170,7 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
             public void onClick(View view) {
                 Timestamp curTime = new Timestamp(System.currentTimeMillis());
                 new TimePickerDialog(
-                        MapsActivity.this,
+                        MapActivity.this,
                         android.R.style.Theme_Holo_Light_Dialog,
                         new TimePickerDialog.OnTimeSetListener() {
                             @Override
@@ -207,19 +206,7 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
                 for (DustWithLocation currentData : searchedData) {
                     Log.i(TAG, currentData.toString());
 
-                    switch (currentData.getCurrentLocation().getProvider()) {
-                        case "network":
-                            locationColor = getResources().getColor(R.color.transparentGreen, null);
-                            break;
-
-                        case "gps":
-                            locationColor = getResources().getColor(R.color.transparentBlue, null);
-                            break;
-
-                        default:
-                            locationColor = getResources().getColor(R.color.transparentBlack, null);
-                            break;
-                    }
+                    locationColor = transDustToColor(currentData.getDust());
 
                     mMap.addCircle(new CircleOptions()
                             .center(currentData.getPosition())
@@ -244,23 +231,20 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
             }
         });
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
-        requestPermission(Manifest.permission.ACCESS_COARSE_LOCATION, LOCATION_COARSE_REQUEST_CODE);
-
-        //mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mLocationListener);
-            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                    MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mLocationListener);
-        }
-
+    private int transDustToColor(int dust) {
+        if (dust < 50)
+            return getResources().getColor(R.color.transparentBlue, null);
+        else if (dust < 100)
+            return getResources().getColor(R.color.transparentGreen, null);
+        else if (dust < 150)
+            return getResources().getColor(R.color.transparentYello, null);
+        else
+            return getResources().getColor(R.color.transparentRed, null);
     }
 
 

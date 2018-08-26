@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".View.MainActivity">
+    android:orientation="vertical"
+    tools:context=".View.DustActivity">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_test"
+        android:text="테스트"
+        android:onClick="onClick" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_db_init"
+        android:text="DB 초기화"
+        android:onClick="onClick" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -32,6 +47,8 @@
             android:textSize="30dp"
             android:visibility="invisible" />
 
+
+
         <ProgressBar
             android:id="@+id/activity_main_progress"
             android:layout_width="wrap_content"
@@ -40,4 +57,4 @@
             android:visibility="invisible" />
 
     </RelativeLayout>
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

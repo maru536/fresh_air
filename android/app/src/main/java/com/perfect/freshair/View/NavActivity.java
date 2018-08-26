@@ -94,11 +94,11 @@ public abstract class NavActivity extends AppCompatActivity implements MenuItem.
         Intent intent;
         switch (item.getItemId()) {
             case R.id.nav_recommend:
-                intent = new Intent(NavActivity.this, MainActivity.class);
+                intent = new Intent(NavActivity.this, DustActivity.class);
                 startActivity(intent);
                 break;
             case R.id.nav_history:
-                intent = new Intent(NavActivity.this, MapsActivity.class);
+                intent = new Intent(NavActivity.this, MapActivity.class);
                 startActivity(intent);
                 break;
             // and so on...

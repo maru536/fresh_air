@@ -16,7 +16,13 @@ public class DustWithLocation {
         mCurrentLocation = currentLocation;
     }
 
+    public DustWithLocation() {
+        mDust = -1;
+        mCurrentLocation = new Location("");
+    }
+
     public DustWithLocation(Cursor cursor) {
+        this();
         mCurrentLocation.setProvider(cursor.getString(DustLocationDBHandler.Column.PROVIDER.getIdx()));
         mCurrentLocation.setTime(cursor.getLong(DustLocationDBHandler.Column.TIME.getIdx()));
         mCurrentLocation.setElapsedRealtimeNanos(cursor.getLong(DustLocationDBHandler.Column.ELAPSE_TIME.getIdx()));
@@ -58,10 +64,8 @@ public class DustWithLocation {
 
     public String toString() {
         String str = "";
-        str += "Provider: " +mCurrentLocation.getProvider();
         str += " / Lat: " +mCurrentLocation.getLatitude();
         str += " / Lng: " +mCurrentLocation.getLongitude();
-        str += " / Acc: " +mCurrentLocation.getAccuracy();
         str += " / Dust: " +mDust;
 
         return str;
