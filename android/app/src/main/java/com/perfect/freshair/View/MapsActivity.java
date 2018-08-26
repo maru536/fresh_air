@@ -3,16 +3,11 @@ package com.perfect.freshair.View;
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -33,10 +28,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.perfect.freshair.DB.LocationDBHandler;
-import com.perfect.freshair.Model.LocationData;
+import com.perfect.freshair.DB.DustLocationDBHandler;
+import com.perfect.freshair.Model.DustWithLocation;
 import com.perfect.freshair.R;
-import com.perfect.freshair.Service.GPSService;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -59,7 +53,7 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
     private EditText mEditMinAcc;
     private EditText mEditMaxAcc;
     private Button mBtnSearch;
-    private LocationDBHandler mLocDB;
+    private DustLocationDBHandler mLocDB;
     private String TAG = "MapsActivity";
     private GoogleMap mMap;
     private float mZoom = 16.0f;
@@ -80,12 +74,12 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
         mStartTime = new Timestamp(0);
         mEndTime = new Timestamp(MAX_TIME);
 
-        mLocDB = new LocationDBHandler(this);
+        mLocDB = new DustLocationDBHandler(this);
 
         ArrayList<String> typeList = new ArrayList<>();
-        typeList.add(LocationData.ALL);
-        typeList.add(LocationData.GPS);
-        typeList.add(LocationData.NETWORK);
+        typeList.add(DustWithLocation.ProviderType.ALL.name());
+        typeList.add(DustWithLocation.ProviderType.GPS.name());
+        typeList.add(DustWithLocation.ProviderType.NETWORK.name());
 
         ArrayAdapter spinnerAdapter;
         spinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, typeList);
@@ -196,7 +190,7 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
             @Override
             public void onClick(View view) {
                 int locationColor;
-                LocationData prevLoc = null;
+                DustWithLocation prevData = null;
                 String selectedItem = (String) mSpinnerGPSType.getSelectedItem();
                 String strMinAcc = mEditMinAcc.getText().toString();
                 String strMaxAcc = mEditMaxAcc.getText().toString();
@@ -205,13 +199,13 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
 
 
                 mMap.clear();
-                ArrayList<LocationData> locations = mLocDB.search((String)mSpinnerGPSType.getSelectedItem(),
+                ArrayList<DustWithLocation> searchedData = mLocDB.search((String)mSpinnerGPSType.getSelectedItem(),
                                                                     mStartTime, mEndTime, minAcc, maxAcc);
 
-                for (LocationData curLoc : locations) {
-                    Log.i(TAG, curLoc.toString());
+                for (DustWithLocation currentData : searchedData) {
+                    Log.i(TAG, currentData.toString());
 
-                    switch (curLoc.getProv()) {
+                    switch (currentData.getCurrentLocation().getProvider()) {
                         case "network":
                             locationColor = getResources().getColor(R.color.transparentGreen, null);
                             break;
@@ -226,24 +220,24 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
                     }
 
                     mMap.addCircle(new CircleOptions()
-                            .center(curLoc.getPos())
-                            .radius(curLoc.getAcc())
+                            .center(currentData.getPosition())
+                            .radius(currentData.getCurrentLocation().getAccuracy())
                             .strokeColor(locationColor)
                             .fillColor(locationColor)
                             .clickable(false));
 
-                    if (prevLoc != null) {
+                    if (prevData != null) {
                         mMap.addPolyline(new PolylineOptions()
-                                .add(prevLoc.getPos(), curLoc.getPos())
-                                .color(Color.RED)
+                                .add(prevData.getPosition(), currentData.getPosition())
+                                .color(Color.BLACK)
                                 .clickable(false));
                     }
 
-                    prevLoc = curLoc;
+                    prevData = currentData;
                 }
 
-                if (locations.size() > 0) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(locations.get(0).getPos()));
+                if (searchedData.size() > 0) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(searchedData.get(searchedData.size()-1).getPosition()));
                 }
             }
         });
@@ -332,63 +326,4 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
             }
         }
     }
-
-    private final LocationListener mLocationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-
-            LocationData newLoc = new LocationData(location);
-            mLocDB.add(newLoc);
-            /*
-            LatLng curPos = new LatLng(location.getLatitude(), location.getLongitude());
-            double alt = location.getAltitude();
-            float acc = location.getAccuracy();
-            int locationColor;
-            Log.i(TAG, "pos: " +curPos.toString()+ "/alt: " +alt+ "/acc: " +acc+ "/prov: " +location.getProvider());
-
-            if (location.getProvider().equals("network")) {
-                locationColor = getResources().getColor(R.color.transparentGreen, null);
-                Log.i(TAG, "network");
-            } else if (location.getProvider().equals("gps")) {
-                locationColor = getResources().getColor(R.color.transparentBlue, null);;
-                Log.i(TAG, "gps");
-            } else {
-                locationColor = getResources().getColor(R.color.transparentBlack, null);;
-                Log.i(TAG, "etc");
-            }
-
-
-            mMap.addCircle(new CircleOptions()
-                    .center(curPos)
-                    .radius(acc)
-                    .strokeColor(locationColor)
-                    .fillColor(locationColor)
-                    .clickable(false));
-
-            if (mCurPos != null) {
-                mMap.addPolyline(new PolylineOptions()
-                    .add(mCurPos, curPos)
-                    .color(Color.RED)
-                    .clickable(false));
-            }
-
-            mCurPos = curPos;
-            */
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
-
-        }
-    };
 }
