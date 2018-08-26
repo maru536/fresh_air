@@ -47,6 +47,8 @@ public class MainActivity extends NavActivity implements View.OnClickListener {
     private Handler mHandler;
     private int airsensorValue = 0;
 
+    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

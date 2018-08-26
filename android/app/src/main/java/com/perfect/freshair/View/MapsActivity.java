@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
@@ -80,6 +81,7 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
         typeList.add(DustWithLocation.ProviderType.ALL.name());
         typeList.add(DustWithLocation.ProviderType.GPS.name());
         typeList.add(DustWithLocation.ProviderType.NETWORK.name());
+        typeList.add(DustWithLocation.ProviderType.FUSED.name());
 
         ArrayAdapter spinnerAdapter;
         spinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, typeList);
@@ -250,7 +252,7 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        /*
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
@@ -258,7 +260,7 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                     MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mLocationListener);
         }
-        */
+
     }
 
 
@@ -326,4 +328,58 @@ public class MapsActivity extends NavActivity implements OnMapReadyCallback {
             }
         }
     }
+
+    private final LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+
+            DustWithLocation newLoc = new DustWithLocation(0, location);
+            mLocDB.add(newLoc);
+            /*
+            LatLng curPos = new LatLng(location.getLatitude(), location.getLongitude());
+            double alt = location.getAltitude();
+            float acc = location.getAccuracy();
+            int locationColor;
+            Log.i(TAG, "pos: " +curPos.toString()+ "/alt: " +alt+ "/acc: " +acc+ "/prov: " +location.getProvider());
+            if (location.getProvider().equals("network")) {
+                locationColor = getResources().getColor(R.color.transparentGreen, null);
+                Log.i(TAG, "network");
+            } else if (location.getProvider().equals("gps")) {
+                locationColor = getResources().getColor(R.color.transparentBlue, null);;
+                Log.i(TAG, "gps");
+            } else {
+                locationColor = getResources().getColor(R.color.transparentBlack, null);;
+                Log.i(TAG, "etc");
+            }
+            mMap.addCircle(new CircleOptions()
+                    .center(curPos)
+                    .radius(acc)
+                    .strokeColor(locationColor)
+                    .fillColor(locationColor)
+                    .clickable(false));
+            if (mCurPos != null) {
+                mMap.addPolyline(new PolylineOptions()
+                    .add(mCurPos, curPos)
+                    .color(Color.RED)
+                    .clickable(false));
+            }
+            mCurPos = curPos;
+            */
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+
+        }
+    };
 }
