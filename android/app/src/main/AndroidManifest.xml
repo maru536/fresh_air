@@ -12,6 +12,11 @@
         android:name="com.perfect.freshair.View.MapsActivity.locationapi.maps.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
+    <!--bluetooth permission-->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <uses-permission android:name="com.perfect.freshair.View.MapsActivity.locationapi.maps.permission.MAPS_RECEIVE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -53,6 +58,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".View.ScanDeviceActivity"></activity>
 
         <service
             android:name=".Service.GPSService"
