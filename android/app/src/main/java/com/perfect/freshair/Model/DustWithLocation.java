@@ -7,6 +7,8 @@ import android.location.Location;
 import com.google.android.gms.maps.model.LatLng;
 import com.perfect.freshair.DB.DustLocationDBHandler;
 
+import java.sql.Timestamp;
+
 public class DustWithLocation {
     int mDust;
     Location mCurrentLocation;
@@ -63,7 +65,9 @@ public class DustWithLocation {
     }
 
     public String toString() {
-        String str = "";
+        String str;
+        Timestamp time = new Timestamp(mCurrentLocation.getTime());
+        str = "Time: " +time.toString();
         str += " / Lat: " +mCurrentLocation.getLatitude();
         str += " / Lng: " +mCurrentLocation.getLongitude();
         str += " / Dust: " +mDust;

@@ -12,7 +12,9 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -23,6 +25,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -30,8 +33,11 @@ import android.widget.Toast;
 
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.DustLocationDBHandler;
+import com.perfect.freshair.Listener.GPSListener;
 import com.perfect.freshair.Model.DustWithLocation;
 import com.perfect.freshair.R;
+import com.perfect.freshair.Utils.GPSUtils;
+import com.perfect.freshair.Utils.PreferencesUtils;
 
 public class DustActivity extends NavActivity implements View.OnClickListener {
     private static final String TAG = "DustActivity";
@@ -55,9 +61,10 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
     private LocationManager mLocationManager;
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final int LOCATION_COARSE_REQUEST_CODE = 102;
-    public static final int MIN_LOCATION_UPDATE_TIME = 1000;
-    public static final int MIN_LOCATION_UPDATE_DISTANCE = 10;
+    public static final int MIN_LOCATION_UPDATE_TIME = 0;
+    public static final int MIN_LOCATION_UPDATE_DISTANCE = 0;
     private DustLocationDBHandler mLocDB;
+    GPSUtils mGPSUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +93,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                     CommonEnumeration.REQUEST_COARSE_LOCATION_PERMISSIONS);
         }
 
-        mHandler = new Handler() {
+        mHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
@@ -108,8 +115,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
         requestPermission(Manifest.permission.ACCESS_COARSE_LOCATION, LOCATION_COARSE_REQUEST_CODE);
 
-        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
+        mGPSUtils = new GPSUtils(this.getApplicationContext());
         mLocDB = new DustLocationDBHandler(this);
     }
 
@@ -124,7 +130,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                 break;
 
             case R.id.btn_test:
-                startLocationUpdate();
+                mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mGPSListener);
                 break;
 
             case R.id.btn_db_init:
@@ -199,6 +205,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                     mBluetoothAdapter.cancelDiscovery();
                     BluetoothDevice device = data.getParcelableExtra("device");
                     if (device != null) {
+                        PreferencesUtils.saveDeviceAddress(this.getApplicationContext(), device.getAddress());
                         mBluetoothGatt = device.connectGatt(this, false, mGattCallback, BluetoothDevice.TRANSPORT_LE);
                         mHandler.sendEmptyMessage(STATE_CONNECTING);
                     }
@@ -268,12 +275,8 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                     super.onCharacteristicChanged(gatt, characteristic);
                     airsensorValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, 0);
                     mHandler.sendEmptyMessage(STATE_RECEIVED);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            startLocationUpdate();
-                        }
-                    });
+                    Log.i(TAG, "Received value: " + airsensorValue);
+                    mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mGPSListener);
                 }
             };
 
@@ -307,38 +310,13 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
         }
     }
 
-    private void startLocationUpdate() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mLocationListener);
-            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                    MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mLocationListener);
-        }
-    }
-
-    private final LocationListener mLocationListener = new LocationListener() {
+    private final GPSListener mGPSListener = new GPSListener() {
         @Override
-        public void onLocationChanged(Location location) {
-            DustWithLocation newLoc = new DustWithLocation(airsensorValue, location);
-            Toast.makeText(DustActivity.this, newLoc.toString(), Toast.LENGTH_LONG).show();
+        public void onGPSReceive(Location _location) {
+            DustWithLocation newLoc = new DustWithLocation(airsensorValue, _location);
+            Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
+            //Toast.makeText(appContext, newLoc.toString(), Toast.LENGTH_LONG).show();
             mLocDB.add(newLoc);
-            mLocationManager.removeUpdates(mLocationListener);
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
-
         }
     };
 }

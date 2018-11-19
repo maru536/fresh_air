@@ -70,6 +70,7 @@ public class DustLocationDBHandler extends SQLiteOpenHelper {
     public void add(DustWithLocation dustWithLocation) {
         SQLiteDatabase db = this.getWritableDatabase();
 
+        Log.i(TAG, dustWithLocation.toString());
         long result = db.insert(TABLE_LOCATION, null, dustWithLocation.toValues());
 
         db.close();
