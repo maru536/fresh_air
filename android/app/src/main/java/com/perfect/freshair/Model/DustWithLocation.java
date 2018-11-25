@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.location.Location;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.JsonObject;
 import com.perfect.freshair.DB.DustLocationDBHandler;
 
 import java.sql.Timestamp;
@@ -93,5 +94,18 @@ public class DustWithLocation {
 
     public LatLng getPosition() {
         return new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+    }
+
+    public JsonObject toJsonObject() {
+        JsonObject jsonObject = new JsonObject();
+        JsonObject gps = new JsonObject();
+
+        gps.addProperty("lat", mCurrentLocation.getLatitude());
+        gps.addProperty("lng", mCurrentLocation.getLongitude());
+
+        jsonObject.addProperty("dust", mDust);
+        jsonObject.add("gps", gps);
+
+        return jsonObject;
     }
 }

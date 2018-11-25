@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.DustLocationDBHandler;
 import com.perfect.freshair.Listener.GPSListener;
@@ -56,11 +57,13 @@ public class BootReceiver extends BroadcastReceiver {
     private Context appContext;
     private DustLocationDBHandler mLocDB;
     private GPSUtils mGPSUtils;
+    private GPSServerInterface mServerInterface;
 
     @Override
     public void onReceive(Context _context, Intent _intent) {
         this.appContext = _context;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mServerInterface = new GPSServerInterface();
         mLocDB = new DustLocationDBHandler(appContext);
 
         this.handler = new Handler(Looper.getMainLooper()) {
@@ -184,6 +187,7 @@ public class BootReceiver extends BroadcastReceiver {
         @Override
         public void onGPSReceive(Location _location) {
             DustWithLocation newLoc = new DustWithLocation(dustVaule, _location);
+            mServerInterface.postDustWithGPS(newLoc);
             Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
             //Toast.makeText(appContext, newLoc.toString(), Toast.LENGTH_LONG).show();
             mLocDB.add(newLoc);

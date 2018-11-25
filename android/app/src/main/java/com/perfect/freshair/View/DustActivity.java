@@ -31,6 +31,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.DustLocationDBHandler;
 import com.perfect.freshair.Listener.GPSListener;
@@ -65,12 +66,14 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
     public static final int MIN_LOCATION_UPDATE_DISTANCE = 0;
     private DustLocationDBHandler mLocDB;
     GPSUtils mGPSUtils;
+    GPSServerInterface mServerInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dust);
 
+        mServerInterface = new GPSServerInterface();
         //check whether or not BLE is supported
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, R.string.BLE_NOT_SUPPORTED, Toast.LENGTH_SHORT).show();
@@ -314,6 +317,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
         @Override
         public void onGPSReceive(Location _location) {
             DustWithLocation newLoc = new DustWithLocation(airsensorValue, _location);
+            mServerInterface.postDustWithGPS(newLoc);
             Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
             //Toast.makeText(appContext, newLoc.toString(), Toast.LENGTH_LONG).show();
             mLocDB.add(newLoc);
