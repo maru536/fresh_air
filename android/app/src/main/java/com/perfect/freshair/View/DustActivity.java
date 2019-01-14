@@ -32,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.perfect.freshair.API.GPSServerInterface;
+import com.perfect.freshair.Callback.ResultCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.DustLocationDBHandler;
 import com.perfect.freshair.Listener.GPSListener;
@@ -317,7 +318,12 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
         @Override
         public void onGPSReceive(Location _location) {
             DustWithLocation newLoc = new DustWithLocation(airsensorValue, _location);
-            mServerInterface.postDustWithGPS(newLoc);
+            mServerInterface.postDustWithGPS(newLoc, new ResultCallback() {
+                @Override
+                public void resultCallback(boolean result) {
+
+                }
+            });
             Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
             //Toast.makeText(appContext, newLoc.toString(), Toast.LENGTH_LONG).show();
             mLocDB.add(newLoc);

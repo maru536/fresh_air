@@ -27,7 +27,7 @@
         android:glEsVersion="0x00020000"
         android:required="true" />
 
-    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <!-- To auto-complete the id text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -56,23 +56,13 @@
 
         <activity
             android:name=".View.MapActivity"
-            android:label="@string/title_activity_maps">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:label="@string/title_activity_maps" />
         <activity android:name=".View.ScanDeviceActivity" />
 
         <service
             android:name=".Service.GPSService"
             android:enabled="true"
             android:exported="true" />
-
-        <activity
-            android:name=".View.LoginActivity"
-            android:label="@string/title_activity_login" />
 
         <receiver
             android:name=".Receiver.BootReceiver"
@@ -82,6 +72,17 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name=".View.SignInActivity"
+            android:label="@string/title_activity_login">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".View.SignUpActivity" />
     </application>
 
 </manifest>
