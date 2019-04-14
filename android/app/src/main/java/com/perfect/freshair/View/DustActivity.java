@@ -47,32 +47,40 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
     private static final int STATE_DISCOVERED = 3;
     private static final int STATE_RECEIVED = 4;
 
-    private TextView txtConnection;
-    private TextView txtValue;
-    private ProgressBar progressBar;
-    private BluetoothAdapter mBluetoothAdapter;
-    private BluetoothGatt mBluetoothGatt;
-    private int mConnectionState = STATE_DISCONNECTED;
-
-    private Handler mHandler;
-    private int airsensorValue = 151;
-    private Context mContext;
-
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final int LOCATION_COARSE_REQUEST_CODE = 102;
     public static final int MIN_LOCATION_UPDATE_TIME = 0;
     public static final int MIN_LOCATION_UPDATE_DISTANCE = 0;
+
+    private TextView txtConnection;
+    private TextView txtValue;
+    private ProgressBar progressBar;
+
+    private Handler mHandler;
+    private Context mContext;
+
+    private GPSUtils mGPSUtils;
     private DustGPSDBHandler mLocDB;
-    GPSUtils mGPSUtils;
-    GPSServerInterface mServerInterface;
+    private GPSServerInterface mServerInterface;
+    private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothGatt mBluetoothGatt;
+
+    private int mConnectionState = STATE_DISCONNECTED;
+    private int mDust = 151;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dust);
 
-        mContext = this.getApplicationContext();
         mServerInterface = new GPSServerInterface();
+        mGPSUtils = new GPSUtils((LocationManager)getSystemService(Context.LOCATION_SERVICE), mLocationListener);
+        mLocDB = new DustGPSDBHandler(this);
+        mContext = this.getApplicationContext();
+
+        txtConnection = findViewById(R.id.activity_main_txt_bluetooth_connection);
+        txtValue = findViewById(R.id.activity_main_txt_bluetooth_value);
+        progressBar = findViewById(R.id.activity_main_progress);
 
         // Initializes Bluetooth adapter.
         final BluetoothManager bluetoothManager =
@@ -93,15 +101,6 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
             }
         }
 
-        //for communication with BLE, check the permission
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
-        if (permissionCheck == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(DustActivity.this,
-                    new String[]{
-                            android.Manifest.permission.ACCESS_COARSE_LOCATION},
-                    CommonEnumeration.REQUEST_COARSE_LOCATION_PERMISSIONS);
-        }
-
         mHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
@@ -110,18 +109,12 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
             }
         };
 
-
-        txtConnection = (TextView) findViewById(R.id.activity_main_txt_bluetooth_connection);
         txtConnection.setOnClickListener(this);
-        txtValue = (TextView) findViewById(R.id.activity_main_txt_bluetooth_value);
-        progressBar = (ProgressBar) findViewById(R.id.activity_main_progress);
         setConnectionState(STATE_DISCONNECTED);
 
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
         requestPermission(Manifest.permission.ACCESS_COARSE_LOCATION, LOCATION_COARSE_REQUEST_CODE);
 
-        mGPSUtils = new GPSUtils((LocationManager)getSystemService(Context.LOCATION_SERVICE), mLocationListener);
-        mLocDB = new DustGPSDBHandler(this);
     }
 
     @Override
@@ -172,7 +165,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                 break;
             case STATE_RECEIVED:
                 mConnectionState = STATE_RECEIVED;
-                txtValue.setText(airsensorValue + getResources().getString(R.string.AIRSENSOR_UNIT));
+                txtValue.setText(mDust + getResources().getString(R.string.AIRSENSOR_UNIT));
                 break;
         }
     }
@@ -278,9 +271,9 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                 @Override
                 public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                     super.onCharacteristicChanged(gatt, characteristic);
-                    airsensorValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, 0);
+                    mDust = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, 0);
                     mHandler.sendEmptyMessage(STATE_RECEIVED);
-                    Log.i(TAG, "Received value: " + airsensorValue);
+                    Log.i(TAG, "Received value: " + mDust);
                     mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE);
                 }
             };
@@ -318,7 +311,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location _location) {
-            DustGPS newLoc = new DustGPS(airsensorValue, _location);
+            DustGPS newLoc = new DustGPS(mDust, _location);
             mServerInterface.postDustGPS(PreferencesUtils.getUser(mContext), newLoc, mPostDustGPSCallback);
             Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
             mLocDB.add(newLoc);

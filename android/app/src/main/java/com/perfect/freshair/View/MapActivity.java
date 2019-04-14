@@ -61,17 +61,17 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        mSpinnerGPSType = (Spinner) findViewById(R.id.select_type);
-        mBtnStartDate = (Button) findViewById(R.id.start_date);
-        mBtnStartTime = (Button) findViewById(R.id.start_time);
-        mBtnEndDate = (Button) findViewById(R.id.end_date);
-        mBtnEndTime = (Button) findViewById(R.id.end_time);
-        mEditMinAcc = (EditText) findViewById(R.id.min_acc);
-        mEditMaxAcc = (EditText) findViewById(R.id.max_acc);
-        mBtnSearch = (Button) findViewById(R.id.search);
+        mSpinnerGPSType = findViewById(R.id.select_type);
+        mBtnStartDate = findViewById(R.id.start_date);
+        mBtnStartTime = findViewById(R.id.start_time);
+        mBtnEndDate = findViewById(R.id.end_date);
+        mBtnEndTime = findViewById(R.id.end_time);
+        mEditMinAcc = findViewById(R.id.min_acc);
+        mEditMaxAcc = findViewById(R.id.max_acc);
+        mBtnSearch = findViewById(R.id.search);
+
         mStartTime = new Timestamp(0);
         mEndTime = new Timestamp(MAX_TIME);
-
         mLocDB = new DustGPSDBHandler(this);
 
         ArrayList<String> typeList = new ArrayList<>();

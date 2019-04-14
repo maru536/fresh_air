@@ -30,7 +30,7 @@
     <string name="sign_in_fail">ID or Password is incorrect</string>
     <string name="sign_up_short">Sign up</string>
     <string name="sign_up_fail">ID is duplicate</string>
-    <string name="error_invalid_email">This id address is invalid</string>
+    <string name="error_invalid_id">This id is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>

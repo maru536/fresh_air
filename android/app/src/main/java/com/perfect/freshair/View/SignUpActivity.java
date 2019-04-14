@@ -24,44 +24,32 @@ import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
 /**
- * A login screen that offers login via email/password.
+ * A login screen that offers login via id/password.
  */
 public class SignUpActivity extends AppCompatActivity {
-
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
-    private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-
-    // UI references.
     private AutoCompleteTextView mIdView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
     private TextView mFailText;
-    private GPSServerInterface mServerInterface;
+    Button mRegistButton;
+
     private String mId;
     private String mPasswd;
+    private GPSServerInterface mServerInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
         // Set up the login form.
-        mIdView = (AutoCompleteTextView) findViewById(R.id.id);
+        mIdView = findViewById(R.id.id);
+        mPasswordView = findViewById(R.id.password);
+        mRegistButton = findViewById(R.id.sign_up_button);
+        mLoginFormView = findViewById(R.id.login_form);
+        mProgressView = findViewById(R.id.login_progress);
+        mFailText = (TextView)findViewById(R.id.fail_text);
 
-        mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -73,22 +61,17 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
 
-        Button mIdSignInButton = (Button) findViewById(R.id.sign_up_button);
-        mIdSignInButton.setOnClickListener(new OnClickListener() {
+        mRegistButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptSignUp();
             }
         });
-
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
-        mFailText = (TextView)findViewById(R.id.fail_text);
     }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
+     * If there are form errors (invalid id, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
     private void attemptSignUp() {
@@ -100,38 +83,30 @@ public class SignUpActivity extends AppCompatActivity {
         mId = mIdView.getText().toString();
         mPasswd = mPasswordView.getText().toString();
 
-        boolean cancel = false;
+        boolean isInvalid = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
+        if (!isIdValid(mId)) {
+            mIdView.setError(getString(R.string.error_invalid_id));
+            focusView = mIdView;
+            isInvalid = true;
+        }
+
         if (!TextUtils.isEmpty(mPasswd) && !isPasswordValid(mPasswd)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
-            cancel = true;
+            isInvalid = true;
         }
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(mId)) {
-            mIdView.setError(getString(R.string.error_field_required));
-            focusView = mIdView;
-            cancel = true;
-        } else if (!isEmailValid(mId)) {
-            mIdView.setError(getString(R.string.error_invalid_email));
-            focusView = mIdView;
-            cancel = true;
-        }
 
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
+        if (isInvalid)
             focusView.requestFocus();
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
+        else {
             showProgress(true);
+
             if (mServerInterface == null)
                 mServerInterface = new GPSServerInterface();
-            //request Id
+
             mServerInterface.userRegist(mId, mPasswd, new ResponseCallback() {
                 @Override
                 public void responseCallback(int _resultCode) {
@@ -148,14 +123,14 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isEmailValid(String email) {
+    private boolean isIdValid(String _id) {
         //TODO: Replace this with your own logic
-        return true;
+        return _id.length() > 4;
     }
 
-    private boolean isPasswordValid(String password) {
+    private boolean isPasswordValid(String _password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return _password.length() > 4;
     }
 
     /**
