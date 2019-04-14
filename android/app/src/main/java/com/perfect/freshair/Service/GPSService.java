@@ -13,17 +13,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
-import com.perfect.freshair.DB.DustLocationDBHandler;
-import com.perfect.freshair.Model.DustWithLocation;
-
-import org.greenrobot.eventbus.EventBus;
+import com.perfect.freshair.DB.DustGPSDBHandler;
+import com.perfect.freshair.Model.DustGPS;
 
 public class GPSService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
     private static final String LOGSERVICE = "GPSService";
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
-    private DustLocationDBHandler mLocDB;
+    private DustGPSDBHandler mLocDB;
     private int mDust;
 
     @Override
@@ -32,7 +29,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
         buildGoogleApiClient();
         initLocationRequest();
         Log.i(LOGSERVICE, "onCreate");
-        mLocDB = new DustLocationDBHandler(this);
+        mLocDB = new DustGPSDBHandler(this);
     }
 
     @Override
@@ -63,9 +60,9 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
 
     @Override
     public void onLocationChanged(android.location.Location location) {
-        DustWithLocation newDustWithLocation = new DustWithLocation(mDust, location);
-        Log.i(LOGSERVICE, newDustWithLocation.toString());
-        mLocDB.add(newDustWithLocation);
+        DustGPS newDustGPS = new DustGPS(mDust, location);
+        Log.i(LOGSERVICE, newDustGPS.toString());
+        mLocDB.add(newDustGPS);
         stopLocationUpdate();
     }
 

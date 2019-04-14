@@ -5,8 +5,6 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
@@ -28,8 +26,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.perfect.freshair.DB.DustLocationDBHandler;
-import com.perfect.freshair.Model.DustWithLocation;
+import com.perfect.freshair.DB.DustGPSDBHandler;
+import com.perfect.freshair.Model.DustGPS;
 import com.perfect.freshair.R;
 
 import java.sql.Timestamp;
@@ -53,7 +51,7 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
     private EditText mEditMinAcc;
     private EditText mEditMaxAcc;
     private Button mBtnSearch;
-    private DustLocationDBHandler mLocDB;
+    private DustGPSDBHandler mLocDB;
     private String TAG = "MapActivity";
     private GoogleMap mMap;
     private float mZoom = 16.0f;
@@ -74,13 +72,13 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
         mStartTime = new Timestamp(0);
         mEndTime = new Timestamp(MAX_TIME);
 
-        mLocDB = new DustLocationDBHandler(this);
+        mLocDB = new DustGPSDBHandler(this);
 
         ArrayList<String> typeList = new ArrayList<>();
-        typeList.add(DustWithLocation.ProviderType.ALL.name());
-        typeList.add(DustWithLocation.ProviderType.GPS.name());
-        typeList.add(DustWithLocation.ProviderType.NETWORK.name());
-        typeList.add(DustWithLocation.ProviderType.FUSED.name());
+        typeList.add(DustGPS.ProviderType.ALL.name());
+        typeList.add(DustGPS.ProviderType.GPS.name());
+        typeList.add(DustGPS.ProviderType.NETWORK.name());
+        typeList.add(DustGPS.ProviderType.FUSED.name());
 
         ArrayAdapter spinnerAdapter;
         spinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, typeList);
@@ -191,7 +189,7 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
             @Override
             public void onClick(View view) {
                 int locationColor;
-                DustWithLocation prevData = null;
+                DustGPS prevData = null;
                 String selectedItem = (String) mSpinnerGPSType.getSelectedItem();
                 String strMinAcc = mEditMinAcc.getText().toString();
                 String strMaxAcc = mEditMaxAcc.getText().toString();
@@ -200,10 +198,10 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
 
 
                 mMap.clear();
-                ArrayList<DustWithLocation> searchedData = mLocDB.search((String)mSpinnerGPSType.getSelectedItem(),
+                ArrayList<DustGPS> searchedData = mLocDB.search((String)mSpinnerGPSType.getSelectedItem(),
                                                                     mStartTime, mEndTime, minAcc, maxAcc);
 
-                for (DustWithLocation currentData : searchedData) {
+                for (DustGPS currentData : searchedData) {
                     Log.i(TAG, currentData.toString());
 
                     locationColor = transDustToColor(currentData.getDust());

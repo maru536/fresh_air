@@ -4,8 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
@@ -21,11 +19,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.perfect.freshair.API.GPSServerInterface;
-import com.perfect.freshair.Callback.ResultCallback;
+import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.PreferencesUtils;
-
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
@@ -70,18 +66,18 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
+                    attemptSignUp();
                     return true;
                 }
                 return false;
             }
         });
 
-        Button mIdSignInButton = (Button) findViewById(R.id.sign_in_button);
+        Button mIdSignInButton = (Button) findViewById(R.id.sign_up_button);
         mIdSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                attemptSignUp();
             }
         });
 
@@ -95,7 +91,7 @@ public class SignUpActivity extends AppCompatActivity {
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    private void attemptLogin() {
+    private void attemptSignUp() {
         // Reset errors.
         mIdView.setError(null);
         mPasswordView.setError(null);
@@ -136,10 +132,10 @@ public class SignUpActivity extends AppCompatActivity {
             if (mServerInterface == null)
                 mServerInterface = new GPSServerInterface();
             //request Id
-            mServerInterface.userRegist(mId, mPasswd, new ResultCallback() {
+            mServerInterface.userRegist(mId, mPasswd, new ResponseCallback() {
                 @Override
-                public void resultCallback(boolean result) {
-                    if (result) {
+                public void responseCallback(int _resultCode) {
+                    if (_resultCode == 200) {
                         PreferencesUtils.saveUser(SignUpActivity.this.getApplicationContext(), mId);
                         startActivity(new Intent(SignUpActivity.this.getApplicationContext(), DustActivity.class));
                     }

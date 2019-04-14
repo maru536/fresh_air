@@ -1,6 +1,5 @@
 package com.perfect.freshair.Receiver;
 
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -20,21 +19,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import com.perfect.freshair.API.GPSServerInterface;
-import com.perfect.freshair.Callback.ResultCallback;
+import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
-import com.perfect.freshair.DB.DustLocationDBHandler;
-import com.perfect.freshair.Listener.GPSListener;
-import com.perfect.freshair.Model.DustWithLocation;
-import com.perfect.freshair.R;
+import com.perfect.freshair.DB.DustGPSDBHandler;
+import com.perfect.freshair.Model.DustGPS;
 import com.perfect.freshair.Utils.GPSUtils;
 import com.perfect.freshair.Utils.PreferencesUtils;
-import com.perfect.freshair.View.DustActivity;
 
 import java.util.Set;
 
@@ -56,16 +49,17 @@ public class BootReceiver extends BroadcastReceiver {
     private BluetoothAdapter bluetoothAdapter;
     private Handler handler;
     private Context appContext;
-    private DustLocationDBHandler mLocDB;
     private GPSUtils mGPSUtils;
-    private GPSServerInterface mServerInterface;
+    private GPSServerInterface mAPIServer;
+    private DustGPSDBHandler mLocDB;
 
     @Override
     public void onReceive(Context _context, Intent _intent) {
         this.appContext = _context;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        mServerInterface = new GPSServerInterface();
-        mLocDB = new DustLocationDBHandler(appContext);
+        mGPSUtils = new GPSUtils((LocationManager)_context.getSystemService(Context.LOCATION_SERVICE), mLocationListener);
+        mAPIServer = new GPSServerInterface();
+        mLocDB = new DustGPSDBHandler(_context);
 
         this.handler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -161,7 +155,7 @@ public class BootReceiver extends BroadcastReceiver {
                     handler.sendEmptyMessage(STATE_RECEIVED);
                     Log.i(TAG, "Received value: " + dustVaule);
                     //Toast.makeText(appContext, "Received value: ", Toast.LENGTH_LONG).show();
-                    mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, mGPSListener);
+                    mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE);
                 }
             };
 
@@ -184,19 +178,36 @@ public class BootReceiver extends BroadcastReceiver {
         gatt.writeDescriptor(descriptor);
     }
 
-    private final GPSListener mGPSListener = new GPSListener() {
+    private final LocationListener mLocationListener = new LocationListener() {
         @Override
-        public void onGPSReceive(Location _location) {
-            DustWithLocation newLoc = new DustWithLocation(dustVaule, _location);
-            mServerInterface.postDustWithGPS(newLoc, new ResultCallback() {
-                @Override
-                public void resultCallback(boolean result) {
-
-                }
-            });
+        public void onLocationChanged(Location _location) {
+            DustGPS newLoc = new DustGPS(dustVaule, _location);
+            mAPIServer.postDustGPS(PreferencesUtils.getUser(appContext), newLoc, mResponseCallback);
             Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
-            //Toast.makeText(appContext, newLoc.toString(), Toast.LENGTH_LONG).show();
             mLocDB.add(newLoc);
+            mGPSUtils.stopGPS();
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+            Log.i(TAG, "onStatusChanged: String) " + s + "/int) " + i + "/bundle) " + bundle.toString());
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+            Log.i(TAG, "onProviderEnabled: " + s);
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+            Log.i(TAG, "onProviderDisabled: " + s);
+        }
+    };
+
+    private final ResponseCallback mResponseCallback = new ResponseCallback() {
+        @Override
+        public void responseCallback(int _resultCode) {
+
         }
     };
 }

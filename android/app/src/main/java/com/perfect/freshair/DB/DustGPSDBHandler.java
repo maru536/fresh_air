@@ -1,37 +1,30 @@
 package com.perfect.freshair.DB;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.perfect.freshair.Model.DustWithLocation;
+import com.perfect.freshair.Model.DustGPS;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
-public class DustLocationDBHandler extends SQLiteOpenHelper {
+public class DustGPSDBHandler extends SQLiteOpenHelper {
     public static final String TAG = "LocationDBHandle";
     public static final int DB_VER = 2;
     private static final String DB_NAME = "LocationDB.db";
     public static final String TABLE_LOCATION = "locations";
 
     public enum Column {
-        ID(0), PROVIDER(1), TIME(2), ELAPSE_TIME(3),
-        LAT(4), LNG(5), ALT(6), ACC(7),
-        SPEED(8), SPEED_ACC(9), VERT_ACC(10), BEARING(11),
-        BEARING_ACC(12), DUST(13);
-
-        private int mIdx;
-
-        private Column(int idx) { mIdx = idx; }
-
-        public int getIdx() { return mIdx; }
+        ID, PROVIDER, TIME, ELAPSE_TIME,
+        LAT, LNG, ALT, ACC,
+        SPEED, SPEED_ACC, VERT_ACC, BEARING,
+        BEARING_ACC, DUST, IS_POSTED;
     }
 
-    public DustLocationDBHandler(Context context) {
+    public DustGPSDBHandler(Context context) {
         super(context, DB_NAME, null, DB_VER);
     }
 
@@ -67,21 +60,21 @@ public class DustLocationDBHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " +TABLE_LOCATION+ ";");
         onCreate(db);
     }
-    public void add(DustWithLocation dustWithLocation) {
+    public void add(DustGPS dustGPS) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        Log.i(TAG, dustWithLocation.toString());
-        long result = db.insert(TABLE_LOCATION, null, dustWithLocation.toValues());
+        Log.i(TAG, dustGPS.toString());
+        long result = db.insert(TABLE_LOCATION, null, dustGPS.toValues());
 
         db.close();
     }
 
-    public ArrayList<DustWithLocation> search(String type, Timestamp startTime, Timestamp endTime, int minAcc, int maxAcc) {
+    public ArrayList<DustGPS> search(String type, Timestamp startTime, Timestamp endTime, int minAcc, int maxAcc) {
         SQLiteDatabase db = this.getReadableDatabase();
-        ArrayList<DustWithLocation> dustWithLocations = new ArrayList<>();
+        ArrayList<DustGPS> dustGPS = new ArrayList<>();
         String query = "SELECT * FROM " +TABLE_LOCATION+ " WHERE ";
 
-        /*if (!type.equals(DustWithLocation.ProviderType.ALL))
+        /*if (!type.equals(DustGPS.ProviderType.ALL))
             query += Column.PROVIDER+ " = \"" +type+ "\" AND ";
         */
         query += Column.TIME+ " >= " +startTime.getTime()+ " AND "
@@ -95,13 +88,13 @@ public class DustLocationDBHandler extends SQLiteOpenHelper {
 
         if (cursor != null &&  cursor.moveToFirst()) {
             do {
-                dustWithLocations.add(new DustWithLocation (cursor));
+                dustGPS.add(new DustGPS(cursor));
             } while (cursor.moveToNext());
         }
 
         cursor.close();
         db.close();
 
-        return dustWithLocations;
+        return dustGPS;
     }
 }
