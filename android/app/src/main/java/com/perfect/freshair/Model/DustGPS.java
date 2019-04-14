@@ -26,19 +26,19 @@ public class DustGPS {
 
     public DustGPS(Cursor cursor) {
         this();
-        mCurrentLocation.setProvider(cursor.getString(DustGPSDBHandler.Column.PROVIDER.getIdx()));
-        mCurrentLocation.setTime(cursor.getLong(DustGPSDBHandler.Column.TIME.getIdx()));
-        mCurrentLocation.setElapsedRealtimeNanos(cursor.getLong(DustGPSDBHandler.Column.ELAPSE_TIME.getIdx()));
-        mCurrentLocation.setLatitude(cursor.getDouble(DustGPSDBHandler.Column.LAT.getIdx()));
-        mCurrentLocation.setLongitude(cursor.getDouble(DustGPSDBHandler.Column.LNG.getIdx()));
-        mCurrentLocation.setAltitude(cursor.getDouble(DustGPSDBHandler.Column.ALT.getIdx()));
-        mCurrentLocation.setAccuracy(cursor.getFloat(DustGPSDBHandler.Column.ACC.getIdx()));
-        mCurrentLocation.setSpeed(cursor.getFloat(DustGPSDBHandler.Column.SPEED.getIdx()));
-        mCurrentLocation.setSpeedAccuracyMetersPerSecond(cursor.getFloat(DustGPSDBHandler.Column.SPEED_ACC.getIdx()));
-        mCurrentLocation.setVerticalAccuracyMeters(cursor.getFloat(DustGPSDBHandler.Column.VERT_ACC.getIdx()));
-        mCurrentLocation.setBearing(cursor.getFloat(DustGPSDBHandler.Column.BEARING.getIdx()));
-        mCurrentLocation.setBearingAccuracyDegrees(cursor.getFloat(DustGPSDBHandler.Column.BEARING_ACC.getIdx()));
-        mDust = cursor.getInt(DustGPSDBHandler.Column.DUST.getIdx());
+        mCurrentLocation.setProvider(cursor.getString(DustGPSDBHandler.Column.PROVIDER.ordinal()));
+        mCurrentLocation.setTime(cursor.getLong(DustGPSDBHandler.Column.TIME.ordinal()));
+        mCurrentLocation.setElapsedRealtimeNanos(cursor.getLong(DustGPSDBHandler.Column.ELAPSE_TIME.ordinal()));
+        mCurrentLocation.setLatitude(cursor.getDouble(DustGPSDBHandler.Column.LAT.ordinal()));
+        mCurrentLocation.setLongitude(cursor.getDouble(DustGPSDBHandler.Column.LNG.ordinal()));
+        mCurrentLocation.setAltitude(cursor.getDouble(DustGPSDBHandler.Column.ALT.ordinal()));
+        mCurrentLocation.setAccuracy(cursor.getFloat(DustGPSDBHandler.Column.ACC.ordinal()));
+        mCurrentLocation.setSpeed(cursor.getFloat(DustGPSDBHandler.Column.SPEED.ordinal()));
+        mCurrentLocation.setSpeedAccuracyMetersPerSecond(cursor.getFloat(DustGPSDBHandler.Column.SPEED_ACC.ordinal()));
+        mCurrentLocation.setVerticalAccuracyMeters(cursor.getFloat(DustGPSDBHandler.Column.VERT_ACC.ordinal()));
+        mCurrentLocation.setBearing(cursor.getFloat(DustGPSDBHandler.Column.BEARING.ordinal()));
+        mCurrentLocation.setBearingAccuracyDegrees(cursor.getFloat(DustGPSDBHandler.Column.BEARING_ACC.ordinal()));
+        mDust = cursor.getInt(DustGPSDBHandler.Column.DUST.ordinal());
     }
 
     public ContentValues toValues() {
