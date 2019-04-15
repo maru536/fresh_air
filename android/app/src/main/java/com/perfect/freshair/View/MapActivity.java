@@ -3,8 +3,11 @@ package com.perfect.freshair.View;
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
@@ -16,7 +19,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -25,10 +30,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.DB.DustGPSDBHandler;
 import com.perfect.freshair.Model.DustGPS;
 import com.perfect.freshair.R;
+import com.perfect.freshair.Utils.GPSUtils;
+import com.perfect.freshair.Utils.PreferencesUtils;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -38,9 +47,8 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
     public static final long MAX_TIME = 4133948399999L;
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final int LOCATION_COARSE_REQUEST_CODE = 102;
-    public static final int MIN_LOCATION_UPDATE_TIME = 1000;
-    public static final int MIN_LOCATION_UPDATE_DISTANCE = 10;
-    private LocationManager mLocationManager;
+    public static final int MIN_LOCATION_UPDATE_TIME = 0;
+    public static final int MIN_LOCATION_UPDATE_DISTANCE = 0;
     private Spinner mSpinnerGPSType;
     private Button mBtnStartDate;
     private Button mBtnStartTime;
@@ -51,10 +59,14 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
     private EditText mEditMinAcc;
     private EditText mEditMaxAcc;
     private Button mBtnSearch;
+    private ImageButton mBtnCurLocation;
+    private TextView mCurrentLocationInfo;
     private DustGPSDBHandler mLocDB;
     private String TAG = "MapActivity";
     private GoogleMap mMap;
     private float mZoom = 16.0f;
+
+    private GPSUtils mGPSUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,10 +81,13 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
         mEditMinAcc = findViewById(R.id.min_acc);
         mEditMaxAcc = findViewById(R.id.max_acc);
         mBtnSearch = findViewById(R.id.search);
+        mBtnCurLocation = findViewById(R.id.current_location);
+        mCurrentLocationInfo = findViewById(R.id.current_location_info);
 
         mStartTime = new Timestamp(0);
         mEndTime = new Timestamp(MAX_TIME);
         mLocDB = new DustGPSDBHandler(this);
+        mGPSUtils = new GPSUtils((LocationManager)getSystemService(Context.LOCATION_SERVICE), mLocationListener);
 
         ArrayList<String> typeList = new ArrayList<>();
         typeList.add(DustGPS.ProviderType.ALL.name());
@@ -196,7 +211,6 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
                 int minAcc = strMinAcc.length() > 0 ? Integer.valueOf(strMinAcc) : 0;
                 int maxAcc = strMaxAcc.length() > 0 ? Integer.valueOf(strMaxAcc) : Integer.MAX_VALUE;
 
-
                 mMap.clear();
                 ArrayList<DustGPS> searchedData = mLocDB.search((String)mSpinnerGPSType.getSelectedItem(),
                                                                     mStartTime, mEndTime, minAcc, maxAcc);
@@ -229,20 +243,44 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
             }
         });
 
+        mBtnCurLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                requestCurrentLocation();
+            }
+        });
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
-    private int transDustToColor(int dust) {
-        if (dust < 50)
+    private int transDustToColor(int _dust) {
+        if (_dust < 50)
             return getResources().getColor(R.color.transparentBlue, null);
-        else if (dust < 100)
+        else if (_dust < 100)
             return getResources().getColor(R.color.transparentGreen, null);
-        else if (dust < 150)
+        else if (_dust < 150)
             return getResources().getColor(R.color.transparentYello, null);
         else
             return getResources().getColor(R.color.transparentRed, null);
+    }
+
+    private int transProviderToColor(String _provider) {
+        if (_provider.equals("gps"))
+            return getResources().getColor(R.color.transparentBlue, null);
+        else if (_provider.equals("network"))
+            return getResources().getColor(R.color.transparentGreen, null);
+        else if (_provider.equals("fused"))
+            return getResources().getColor(R.color.transparentRed, null);
+        else
+            return getResources().getColor(R.color.transparentBlack, null);
+    }
+
+    private void requestCurrentLocation() {
+        mMap.clear();
+        mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE);
+        mCurrentLocationInfo.setText(" ");
     }
 
 
@@ -310,4 +348,43 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
             }
         }
     }
+
+    private final LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location _location) {
+            mGPSUtils.stopGPS();
+            mCurrentLocationInfo.setText("Provder: " +_location.getProvider()+ " / Accuracy: " +_location.getAccuracy());
+            int locationColor = transProviderToColor(_location.getProvider());
+            mMap.addCircle(new CircleOptions()
+                    .center(new LatLng(_location.getLatitude(), _location.getLongitude()))
+                    .radius(_location.getAccuracy())
+                    .strokeColor(locationColor)
+                    .fillColor(locationColor)
+                    .clickable(false));
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(_location.getLatitude(), _location.getLongitude())));
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+            Log.i(TAG, "onStatusChanged: String) " + s + "/int) " + i + "/bundle) " + bundle.toString());
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+            Log.i(TAG, "onProviderEnabled: " + s);
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+            Log.i(TAG, "onProviderDisabled: " + s);
+        }
+    };
+
+    private final ResponseCallback mPostDustGPSCallback = new ResponseCallback() {
+        @Override
+        public void responseCallback(int _resultCode) {
+
+        }
+    };
 }

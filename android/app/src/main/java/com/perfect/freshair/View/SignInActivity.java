@@ -4,10 +4,13 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,7 +22,9 @@ import android.widget.TextView;
 
 import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Callback.ResponseCallback;
+import com.perfect.freshair.Model.DustGPS;
 import com.perfect.freshair.R;
+import com.perfect.freshair.Utils.GPSUtils;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
 /**
@@ -42,6 +47,10 @@ public class SignInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+
+        if (!PreferencesUtils.getUser(this).isEmpty()) {
+            startActivity(new Intent(SignInActivity.this.getApplicationContext(), DustActivity.class));
+        }
         // Set up the login form.
         mIdView = findViewById(R.id.id);
         mPasswordView = findViewById(R.id.password);

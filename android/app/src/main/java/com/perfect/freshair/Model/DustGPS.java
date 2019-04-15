@@ -68,10 +68,12 @@ public class DustGPS {
     public String toString() {
         String str;
         Timestamp time = new Timestamp(mCurrentLocation.getTime());
-        str = "Time: " +time.toString();
-        str += " / Lat: " +mCurrentLocation.getLatitude();
-        str += " / Lng: " +mCurrentLocation.getLongitude();
-        str += " / Dust: " +mDust;
+        str = "Time: " +time.toString()
+                + " / Dust: " +mDust
+                + " / Provider: " +mCurrentLocation.getProvider()
+                + " / Accuracy: " +mCurrentLocation.getAccuracy()
+                + " / Lat: " +mCurrentLocation.getLatitude()
+                + " / Lng: " +mCurrentLocation.getLongitude();
 
         return str;
     }
