@@ -1,0 +1,4 @@
+<resources>
+    <string name="nav_drawer_open">open drawer</string>
+    <string name="nav_drawer_close">close drawer</string>
+</resources>
