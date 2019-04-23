@@ -1,24 +1,42 @@
 package com.perfect.freshair.View;
 
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.perfect.freshair.Control.DrawerItemClickListener;
+import com.perfect.freshair.Control.NavArrayAdapter;
+import com.perfect.freshair.Model.TempData;
 import com.perfect.freshair.R;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String[] mPlanetTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
+    private NavArrayAdapter arrayAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
+    private String[] mNavigationMenu;
+    LineChart lineChart;
+    TempData[] dataList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,17 +49,23 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.round_menu_24);
 
+        //drawer view
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-
+        mNavigationMenu = getResources().getStringArray(R.array.nav_strings);
+        arrayAdapter = new NavArrayAdapter(this);
+        for(String menu : mNavigationMenu)
+        {
+            arrayAdapter.addItem(menu);
+        }
+        mDrawerList.setAdapter(arrayAdapter);
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener(this));
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,R.string.nav_drawer_open,R.string.nav_drawer_close ) {
-
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
-
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
@@ -51,6 +75,40 @@ public class MainActivity extends AppCompatActivity {
 
         mDrawerLayout.addDrawerListener(mDrawerToggle);
 
+        //chart view
+        lineChart = (LineChart) findViewById(R.id.main_chart);
+        XAxis xAxis = lineChart.getXAxis(); // x 축 설정
+        xAxis.setPosition(XAxis.XAxisPosition.TOP); //x 축 표시에 대한 위치 설정
+        //xAxis.setValueFormatter(new ChartXValueFormatter()); //X축의 데이터를 제 가공함. new ChartXValueFormatter은 Custom한 소스
+        xAxis.setLabelCount(5, true); //X축의 데이터를 최대 몇개 까지 나타낼지에 대한 설정 5개 force가 true 이면 반드시 보여줌
+        xAxis.setTextColor(ContextCompat.getColor(this, R.color.transparentGreen)); // X축 텍스트컬러설정
+        xAxis.setGridColor(ContextCompat.getColor(this, R.color.transparentGreen)); // X축 줄의 컬러 설정
+
+        YAxis yAxisLeft = lineChart.getAxisLeft(); //Y축의 왼쪽면 설정
+        yAxisLeft.setTextColor(ContextCompat.getColor(this, R.color.transparentGreen)); //Y축 텍스트 컬러 설정
+        yAxisLeft.setGridColor(ContextCompat.getColor(this, R.color.transparentGreen)); // Y축 줄의 컬러 설정
+
+        YAxis yAxisRight = lineChart.getAxisRight(); //Y축의 오른쪽면 설정
+        yAxisRight.setDrawLabels(false);
+        yAxisRight.setDrawAxisLine(false);
+        yAxisRight.setDrawGridLines(false);
+
+        dataList = new TempData[100];
+        Random random = new Random();
+        for(int i=0;i<dataList.length;i++)
+        {
+            dataList[i] = new TempData(i, random.nextInt(100));
+        }
+
+        List<Entry> entries = new ArrayList<Entry>();
+        for (TempData mydata : dataList) {
+            // turn your data into Entry objects
+            entries.add(new Entry(mydata.getX(), mydata.getY()));
+        }
+        LineDataSet dataSet = new LineDataSet(entries, "Label");
+        LineData lineData = new LineData(dataSet);
+        lineChart.setData(lineData);
+        lineChart.invalidate(); // refresh
 
     }
 
