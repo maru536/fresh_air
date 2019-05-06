@@ -19,7 +19,6 @@
     <string name="CONNECT_DEVICE">Connect your AirSensor Device</string>
     <string name="AIRSENSOR_UNIT">㎍/㎥</string>
     <string name="title_activity_login">Sign in</string>
-
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
