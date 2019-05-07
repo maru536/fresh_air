@@ -36,7 +36,7 @@
         android:theme="@style/MyAppTheme">
         <activity android:name=".View.TestGPSActivity"></activity>
         <activity android:name=".View.AppInfoActivity" />
-        <activity android:name=".View.DeviceConnectionActivity" />
+        <activity android:name=".View.DeviceRegisterActivity" />
         <activity android:name=".View.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case PermissionEnumeration.MY_BLUETOOTH_ADMIN : {
+            case PermissionEnumeration.MY_ACCESS_COARSE_LOCATION : {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the

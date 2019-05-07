@@ -90,7 +90,6 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
         //check whether or not BLE is supported
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             //Bluetooth is not available
-            Toast.makeText(this, R.string.BLE_NOT_SUPPORTED, Toast.LENGTH_SHORT).show();
             finish();
         } else {
             // Ensures Bluetooth is available on the device and it is enabled. If not,
@@ -194,7 +193,6 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                 if (resultCode == RESULT_OK) {
                     //go ahead...
                 } else {
-                    Toast.makeText(this, R.string.BLE_NOT_SUPPORTED, Toast.LENGTH_SHORT).show();
                     finish();
                 }
                 break;

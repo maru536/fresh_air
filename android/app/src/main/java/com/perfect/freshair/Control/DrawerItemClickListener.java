@@ -5,11 +5,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.perfect.freshair.View.AppInfoActivity;
-import com.perfect.freshair.View.DeviceConnectionActivity;
+import com.perfect.freshair.View.DeviceRegisterActivity;
 import com.perfect.freshair.View.TestGPSActivity;
 
 public class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -25,7 +24,7 @@ public class DrawerItemClickListener implements ListView.OnItemClickListener {
         switch(position)
         {
             case 0://디바이스 연결
-                activity.startActivity(new Intent(activity.getApplicationContext(), DeviceConnectionActivity.class));
+                activity.startActivity(new Intent(activity.getApplicationContext(), DeviceRegisterActivity.class));
                 break;
             case 1://GPS 테스트
                 activity.startActivity(new Intent(activity.getApplicationContext(), TestGPSActivity.class));
