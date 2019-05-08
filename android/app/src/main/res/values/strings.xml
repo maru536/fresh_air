@@ -14,6 +14,19 @@
     <string name="search">검색</string>
     <string name="title_map">Map</string>
     <string name="title_dust">Dust</string>
+    <string name="title_setting">Setting</string>
+    <string name="title_map_test">Map Test</string>
+    <string name="gps_request_type">GPS Request Type</string>
+    <string name="tpye_gps">GPS</string>
+    <string name="type_network">Network</string>
+    <string name="type_passive">Passive</string>
+    <string name="threshold">Threshold</string>
+    <string name="acc">Accuracy</string>
+    <string name="num_sate">Satellite Count</string>
+    <string name="elapsed_time">Time</string>
+    <string name="timeout">Timeout</string>
+    <string name="iterate">Iterate</string>
+
     <!-- junhan -->
     <string name="BLE_NOT_SUPPORTED">sorry, your device doesn\'t support BLE.</string>
     <string name="CONNECT_DEVICE">Connect your AirSensor Device</string>

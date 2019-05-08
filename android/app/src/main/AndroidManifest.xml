@@ -83,6 +83,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".View.SignUpActivity" />
+        <activity android:name=".View.SettingActivity" />
+        <activity android:name=".View.MapTestActivity"></activity>
     </application>
 
 </manifest>
