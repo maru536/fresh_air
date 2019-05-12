@@ -23,8 +23,6 @@ public class BlueToothUtils {
     private Context context;
     private BluetoothAdapter bluetoothAdapter;
     private boolean mScanning = false;
-    private Handler mHandler = null;
-    private ScanCallback mScanCallback = null;
 
     public BlueToothUtils(Context context) {
         this.context = context;
@@ -34,18 +32,9 @@ public class BlueToothUtils {
         bluetoothAdapter = bluetoothManager.getAdapter();
     }
 
-    public void setHandler(Handler handler)
-    {
-        mHandler = handler;
-    }
-
-    public void setScanCallback(ScanCallback callback)
-    {
-        mScanCallback = callback;
-    }
-
-    public boolean getBLESupported()
-    {
+    public boolean getBLESupported() {
+        if(bluetoothAdapter == null)
+            return false;
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Log.e(toString(), "ble is not supported");
             return false;
@@ -53,30 +42,44 @@ public class BlueToothUtils {
         return true;
     }
 
-    public boolean getBLEEnabled()
-    {
+    public boolean getBLEEnabled() {
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
-            Log.e(toString(),"ble is not enabled");
+            Log.e(toString(), "ble is not enabled");
             return false;
         }
         return true;
     }
 
-    public void scanLeDevice(final boolean enable, List<ScanFilter> filters, ScanSettings scanSettings) {
-        if (enable && mScanCallback != null) {
-            // Stops scanning after a pre-defined scan period.
-            mScanning = true;
-            bluetoothAdapter.getBluetoothLeScanner().startScan(filters, scanSettings, mScanCallback);
-        } else {
-            mScanning = false;
-            bluetoothAdapter.getBluetoothLeScanner().stopScan(mScanCallback);
+    public void scanLeDevice(final boolean enable, List<ScanFilter> filters, ScanSettings scanSettings, ScanCallback callback) {
+        if (bluetoothAdapter != null && callback != null && filters != null && scanSettings != null) {
+            if(enable)
+            {
+                mScanning = true;
+                bluetoothAdapter.getBluetoothLeScanner().startScan(filters, scanSettings, callback);
+            }else
+            {
+                mScanning = false;
+                bluetoothAdapter.getBluetoothLeScanner().stopScan(callback);
+            }
         }
     }
 
-    public boolean isScanning()
-    {
+    public void scanLeDevice(final boolean enable, ScanCallback callback) {
+        if(bluetoothAdapter != null && callback != null) {
+            if (enable ) {
+                // Stops scanning after a pre-defined scan period.
+                mScanning = true;
+                bluetoothAdapter.getBluetoothLeScanner().startScan(callback);
+            } else {
+                mScanning = false;
+                bluetoothAdapter.getBluetoothLeScanner().stopScan(callback);
+            }
+        }
+    }
+
+    public boolean isScanning() {
         return mScanning;
     }
 }

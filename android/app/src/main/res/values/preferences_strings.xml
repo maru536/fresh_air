@@ -1,0 +1,4 @@
+<resources>
+    <string name="my_preference_ble_file_key">preference_ble_file_key</string>
+    <string name="my_preference_ble_addr_key">my_preference_ble_addr_key</string>
+</resources>
