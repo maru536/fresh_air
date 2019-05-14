@@ -48,7 +48,7 @@ public class GPSUtils {
         mLocationManager.registerGnssStatusCallback(mGnssCallback);
 
         if (setting.isRequestGps()) {
-            Log.i(TAG, "Request GPS");
+            Log.i(TAG, "Request Gps");
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     _minUpdateTime, _minUpdateDist, mLocationListener, Looper.getMainLooper());
 

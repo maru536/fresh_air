@@ -16,7 +16,13 @@ import android.widget.TextView;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.perfect.freshair.Callback.TimeoutCallback;
+import com.perfect.freshair.DB.StatusDBHandler;
+import com.perfect.freshair.Model.CurrentStatus;
+import com.perfect.freshair.Model.Dust;
+import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.Model.GpsSetting;
+import com.perfect.freshair.Model.Position;
+import com.perfect.freshair.Model.PositionStatus;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.GPSUtils;
 import com.perfect.freshair.Utils.JsonUtils;
@@ -48,6 +54,7 @@ public class MapTestActivity extends NavActivity {
     private LayoutInflater mResultInflater;
     private GnssStatus mGnssStatus;
     private JsonArray mGpsArray;
+    private StatusDBHandler statusDBHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +63,7 @@ public class MapTestActivity extends NavActivity {
 
         mBtnCurLocation = findViewById(R.id.current_location);
         mGpsResultLayout = findViewById(R.id.gps_result);
+        this.statusDBHandler = new StatusDBHandler(this);
 
         mAppContext = getApplicationContext();
         mResultInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -75,6 +83,7 @@ public class MapTestActivity extends NavActivity {
         mBtnCurLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 initIter();
                 requestCurrentLocation();
             }
@@ -104,6 +113,12 @@ public class MapTestActivity extends NavActivity {
 
     private void initIter() {
         mGpsResultLayout.removeAllViews();
+
+        CurrentStatus latestStatus = statusDBHandler.latestRow();
+        if (latestStatus != null)
+            addTextView(latestStatus.toString());
+        else
+            addTextView("latest status not found");
 
         this.mCurIterate = 0;
         this.mTimeoutTime = 0;
@@ -173,13 +188,19 @@ public class MapTestActivity extends NavActivity {
 
             mGpsArray.add(gpsInfo);
 
-            String info = "GPS Timeout / Satellite Count: " +mNumSate+ " / Sate User Count: " +mNumUseSate+ " / result: ";
+            String info = System.currentTimeMillis() +") Gps Timeout / Satellite Count: " +mNumSate+ " / Sate User Count: " +mNumUseSate+ " / result: ";
 
-            if (mNumSate >= mThresholdNumSate)
+            CurrentStatus currentStatus;
+            if (mNumSate >= mThresholdNumSate) {
+                currentStatus = new CurrentStatus(System.currentTimeMillis(), new Dust(10, 20), new Gps(new Position(-1.0, -1.0), -1, mNumSate, mNumUseSate, 5000), PositionStatus.INDOOR);
                 info += "실외";
-            else
+            }
+            else {
+                currentStatus = new CurrentStatus(System.currentTimeMillis(), new Dust(10, 20), new Gps(new Position(-1.0, -1.0), -1, mNumSate, mNumUseSate, 5000), PositionStatus.INDOOR);
                 info += "실내";
+            }
 
+            statusDBHandler.add(currentStatus);
             addTextView(info);
 
             if (mCurIterate < mTotalIterate && mTimeoutTime < mThresholdTimeout)
@@ -209,15 +230,19 @@ public class MapTestActivity extends NavActivity {
         gpsInfo.add("SateInfoList", JsonUtils.toJsonArray(mGnssStatus));
 
         mGpsArray.add(gpsInfo);
+        CurrentStatus currentStatus;
+        String info = System.currentTimeMillis() +") Provder: " + mLocation.getProvider() + " / Accuracy: " + mLocation.getAccuracy() + " / Satellite Count: " + mNumSate + " / Sate Use Count: " + mNumUseSate + " / time: " + elapsedTime + " / result: ";
 
-        String info = "Provder: " + mLocation.getProvider() + " / Accuracy: " + mLocation.getAccuracy() + " / Satellite Count: " + mNumSate + " / Sate Use Count: " + mNumUseSate + " / time: " + elapsedTime + " / result: ";
-
-        if (mLocation.getAccuracy() <= mThresholdAcc || mNumSate >= mThresholdNumSate || elapsedTime <= mThresholdTime)
+        if (mLocation.getAccuracy() <= mThresholdAcc || mNumSate >= mThresholdNumSate || elapsedTime <= mThresholdTime) {
+            currentStatus = new CurrentStatus(System.currentTimeMillis(), new Dust(10, 20), new Gps(new Position(mLocation.getLatitude(), mLocation.getLongitude()), mLocation.getAccuracy(), mNumSate, mNumUseSate, elapsedTime), PositionStatus.OUTDOOR);
             info += "실외";
-        else
+        }
+        else {
+            currentStatus = new CurrentStatus(System.currentTimeMillis(), new Dust(10, 20), new Gps(new Position(mLocation.getLatitude(), mLocation.getLongitude()), mLocation.getAccuracy(), mNumSate, mNumUseSate, elapsedTime), PositionStatus.INDOOR);
             info += "실내";
-
+        }
         //mLocationInfo.setText(info);
+        statusDBHandler.add(currentStatus);
         addTextView(info);
 
         if (mCurIterate < mTotalIterate)

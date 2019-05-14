@@ -102,8 +102,6 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
 
         Context appContext = this.getApplicationContext();
 
-
-
         mSpinnerGPSType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
