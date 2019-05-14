@@ -26,6 +26,7 @@ import com.perfect.freshair.Control.BLEScanArrayAdapter;
 import com.perfect.freshair.Model.MyBLEDevice;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
+import com.perfect.freshair.Utils.MyBLEPacketUtilis;
 
 import java.util.ArrayList;
 
@@ -57,6 +58,10 @@ public class DeviceRegisterActivity extends AppCompatActivity {
             super.onScanResult(callbackType, result);
             final MyBLEDevice tempDevice = new MyBLEDevice(result.getDevice().getName(), result.getDevice().getAddress());
             final ScanRecord scanRecord = result.getScanRecord();
+            byte[] data = scanRecord.getBytes();
+            byte[] majorMinor = MyBLEPacketUtilis.getMajorMinor(data);
+            Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor)+"");
+            Log.i("Minor", MyBLEPacketUtilis.getMajor(majorMinor)+"");
             if (!items.contains(tempDevice)) {
                 runOnUiThread(new Runnable() {
                     @Override
@@ -64,13 +69,9 @@ public class DeviceRegisterActivity extends AppCompatActivity {
                         items.add(tempDevice);
                         listAdapter.notifyDataSetChanged();
                         byte[] data = scanRecord.getBytes();
-                        StringBuilder builder = new StringBuilder();
-                        for(int i=0;i<data.length; i++)
-                        {
-                            int temp = data[i] & 0xff;
-                            builder.append(temp+" ");
-                        }
-                        Log.i("bytes", builder.toString());
+                        byte[] majorMinor = MyBLEPacketUtilis.getMajorMinor(data);
+                        Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor)+"");
+                        Log.i("Minor", MyBLEPacketUtilis.getMajor(majorMinor)+"");
                     }
                 });
 

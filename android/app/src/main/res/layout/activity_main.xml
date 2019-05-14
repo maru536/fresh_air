@@ -27,22 +27,37 @@
 
 
             <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_below="@id/main_toolbar"
                 android:id="@+id/main_dust_information"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_below="@id/main_toolbar"
                 android:background="#ffffffff">
 
+                <TextView
+                    android:layout_width="360dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:fontFamily="@font/roboto_medium"
+                    android:id="@+id/ac_main_dust_value"
+                    android:textSize="16sp"
+                    android:gravity="start|bottom"
+                    android:textAlignment="center"
+                    android:textColor="#FD000000"
+                    android:text="현재 미세먼지 농도는 10㎍/㎥으로 &quot;좋음&quot;입니다"
+                    />
+
             </RelativeLayout>
+
+
 
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/main_chart"
                 android:layout_width="match_parent"
-                android:layout_marginTop="8dp"
-                android:layout_below="@id/main_dust_information"
                 android:layout_height="240dp"
+                android:layout_below="@id/main_dust_information"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
+                android:layout_marginTop="8dp"
                 android:background="#ffffffff" />
 
 

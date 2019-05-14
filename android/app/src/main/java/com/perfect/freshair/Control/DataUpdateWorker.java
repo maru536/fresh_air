@@ -8,18 +8,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
-import com.perfect.freshair.Utils.MyByteUtils;
+import com.perfect.freshair.Utils.MyBLEPacketUtilis;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class DataUpdateWorker extends Worker {
 
@@ -29,14 +27,10 @@ public class DataUpdateWorker extends Worker {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             byte[] data = result.getScanRecord().getBytes();
-            StringBuilder builder = new StringBuilder();
-            for(int i=0;i<data.length; i++)
-            {
-                builder.append(data[i]);
-                builder.append(",");
-            }
+            byte[] majorMinor = MyBLEPacketUtilis.getMajorMinor(data);
             blueToothUtils.scanLeDevice(false, scanCallback);
-            Log.i("worker", builder.toString());
+            Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor)+"");
+            Log.i("Minor", MyBLEPacketUtilis.getMajor(majorMinor)+"");
         }
 
         @Override

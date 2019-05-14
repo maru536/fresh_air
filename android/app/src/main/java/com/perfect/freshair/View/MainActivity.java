@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.work.BackoffPolicy;
@@ -36,6 +37,9 @@ import com.perfect.freshair.Control.DrawerItemClickListener;
 import com.perfect.freshair.Control.NavArrayAdapter;
 import com.perfect.freshair.Model.TempData;
 import com.perfect.freshair.R;
+import com.perfect.freshair.Utils.MicroDustUtils;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
+    private TextView textDust;
     private ListView mDrawerList;
     private NavArrayAdapter arrayAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -140,6 +145,11 @@ public class MainActivity extends AppCompatActivity {
                 new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 20, TimeUnit.MINUTES, 5, TimeUnit.MINUTES).build();
         WorkManager.getInstance().enqueueUniquePeriodicWork(DataUpdateWorker.class.getName(),ExistingPeriodicWorkPolicy.KEEP,saveRequest);
         //WorkManager.getInstance().cancelUniqueWork(DataUpdateWorker.class.getName());
+
+        //dust information
+        int tempMajor = 30; // have to get the value from local database
+        textDust = (TextView)findViewById(R.id.ac_main_dust_value);
+        textDust.setText(String.format("현재 미세먼지 농도는 %d㎍/㎥로 \"%s\"입니다.", tempMajor, MicroDustUtils.parseDustValue(tempMajor)));
     }
 
     @Override
