@@ -26,6 +26,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -35,9 +36,13 @@ import com.perfect.freshair.Common.PermissionEnumeration;
 import com.perfect.freshair.Control.DataUpdateWorker;
 import com.perfect.freshair.Control.DrawerItemClickListener;
 import com.perfect.freshair.Control.NavArrayAdapter;
+import com.perfect.freshair.DB.StatusDBHandler;
+import com.perfect.freshair.Model.CurrentStatus;
 import com.perfect.freshair.Model.TempData;
 import com.perfect.freshair.R;
+import com.perfect.freshair.Utils.BlueToothUtils;
 import com.perfect.freshair.Utils.MicroDustUtils;
+import com.perfect.freshair.Utils.MyBLEPacketUtilis;
 
 import org.w3c.dom.Text;
 
@@ -50,12 +55,16 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
     private TextView textDust;
+    private TextView textNoValue;
+    private TextView textNoDevice;
     private ListView mDrawerList;
     private NavArrayAdapter arrayAdapter;
+    private StatusDBHandler statusDBHandler;
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mNavigationMenu;
     LineChart lineChart;
     TempData[] dataList;
+    private BlueToothUtils blueToothUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
         {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PermissionEnumeration.MY_ACCESS_FINE_LOCATION);
         }
+
+        statusDBHandler = new StatusDBHandler(getApplicationContext());
+        blueToothUtils = new BlueToothUtils(getApplicationContext());
 
         //drawer view
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -107,16 +119,24 @@ public class MainActivity extends AppCompatActivity {
         //chart view
         lineChart = (LineChart) findViewById(R.id.main_chart);
         lineChart.getLegend().setEnabled(false);
+        Description description = new Description();
+        description.setText("");
+        lineChart.setDescription(description);
+        lineChart.setDrawGridBackground(false);
+        lineChart.setNoDataText("기록이 없습니다.");
         XAxis xAxis = lineChart.getXAxis(); // x 축 설정
+        xAxis.setDrawGridLines(false);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM); //x 축 표시에 대한 위치 설정
         xAxis.setLabelCount(24, true); //X축의 데이터를 최대 몇개 까지 나타낼지에 대한 설정 5개 force가 true 이면 반드시 보여줌
         xAxis.setTextColor(Color.BLACK); // X축 텍스트컬러설정
         xAxis.setGridColor(ContextCompat.getColor(this, R.color.colorPrimaryDark)); // X축 줄의 컬러 설정
 
         YAxis yAxisLeft = lineChart.getAxisLeft(); //Y축의 왼쪽면 설정
+        yAxisLeft.setGridLineWidth((float)1);
+        yAxisLeft.setGridColor(getColor(R.color.charYGridColor));
+        yAxisLeft.setDrawAxisLine(false);
         yAxisLeft.setTextColor(Color.BLACK); //Y축 텍스트 컬러 설정
         yAxisLeft.setLabelCount(5, true);
-        yAxisLeft.setGridColor(ContextCompat.getColor(this, R.color.colorPrimaryDark)); // Y축 줄의 컬러 설정
 
         YAxis yAxisRight = lineChart.getAxisRight(); //Y축의 오른쪽면 설정
         yAxisRight.setDrawLabels(false);
@@ -137,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
         }
         LineDataSet dataSet = new LineDataSet(entries, "Label");
         LineData lineData = new LineData(dataSet);
+        lineData.setValueTextSize(10);
         lineChart.setData(lineData);
         lineChart.invalidate(); // refresh
 
@@ -149,7 +170,42 @@ public class MainActivity extends AppCompatActivity {
         //dust information
         int tempMajor = 30; // have to get the value from local database
         textDust = (TextView)findViewById(R.id.ac_main_dust_value);
-        textDust.setText(String.format("현재 미세먼지 농도는 %d㎍/㎥로 \"%s\"입니다.", tempMajor, MicroDustUtils.parseDustValue(tempMajor)));
+        textNoDevice = (TextView)findViewById(R.id.ac_main_dust_no_device);
+        textNoValue = (TextView)findViewById(R.id.ac_main_dust_no_value);
+        checkDustDisplay();
+
+
+    }
+
+    private String getDustString(int value)
+    {
+        return String.format("현재 미세먼지 농도는 %d㎍/㎥로 \"%s\"입니다.", value, MicroDustUtils.parseDustValue(value));
+    }
+
+    private void checkDustDisplay()
+    {
+        if(!blueToothUtils.getBLEEnabled())
+        {
+            textDust.setVisibility(View.INVISIBLE);
+            textNoDevice.setVisibility(View.VISIBLE);
+            textNoValue.setVisibility(View.INVISIBLE);
+        }
+        else
+        {
+            CurrentStatus currentStatus = statusDBHandler.latestRow();
+            if(currentStatus!=null)
+            {
+                textDust.setText(getDustString(currentStatus.getDust().getPm25()));
+                textDust.setVisibility(View.VISIBLE);
+                textNoDevice.setVisibility(View.INVISIBLE);
+                textNoValue.setVisibility(View.INVISIBLE);
+            }else
+            {
+                textDust.setVisibility(View.INVISIBLE);
+                textNoDevice.setVisibility(View.INVISIBLE);
+                textNoValue.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     @Override

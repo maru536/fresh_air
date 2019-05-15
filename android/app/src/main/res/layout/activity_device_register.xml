@@ -24,6 +24,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="디바이스를 검색하여 등록해주세요."
+                android:fontFamily="@font/roboto_medium"
+                android:id="@+id/ac_div_register_text"
+                android:textSize="16sp"
+                android:gravity="start|bottom"
+                android:textColor="#F0000000"
+                android:layout_centerInParent="true"
+                />
+
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

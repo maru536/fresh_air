@@ -31,8 +31,8 @@
     <string name="CONNECT_DEVICE">Connect your AirSensor Device</string>
     <string name="AIRSENSOR_UNIT">㎍/㎥</string>
     <string name="title_activity_login">Sign in</string>
-    <string name="MY_BLE_SCAN">SCAN</string>
-    <string name="MY_BLE_SCANNING">STOP</string>
+    <string name="MY_BLE_SCAN">검색</string>
+    <string name="MY_BLE_SCANNING">중단</string>
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
