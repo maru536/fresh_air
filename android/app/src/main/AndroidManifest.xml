@@ -54,6 +54,38 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
+        <activity
+            android:name=".View.MapActivity"
+            android:label="@string/title_activity_maps" />
+        <activity android:name=".View.ScanDeviceActivity" />
+
+        <service
+            android:name=".Service.GPSService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver
+            android:name=".Receiver.BootReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".View.SignInActivity"
+            android:label="@string/title_activity_login">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".View.SignUpActivity" />
+        <activity android:name=".View.SettingActivity" />
+        <activity android:name=".View.MapTestActivity"></activity>
     </application>
 
 </manifest>

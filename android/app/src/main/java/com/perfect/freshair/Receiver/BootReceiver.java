@@ -12,6 +12,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.GnssStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -23,9 +24,11 @@ import android.util.Log;
 
 import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Callback.ResponseCallback;
+import com.perfect.freshair.Callback.TimeoutCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.DustGPSDBHandler;
 import com.perfect.freshair.Model.DustGPS;
+import com.perfect.freshair.Model.GpsSetting;
 import com.perfect.freshair.Utils.GPSUtils;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
@@ -52,14 +55,31 @@ public class BootReceiver extends BroadcastReceiver {
     private GPSUtils mGPSUtils;
     private GPSServerInterface mAPIServer;
     private DustGPSDBHandler mLocDB;
+    private GpsSetting gpsSetting;
 
     @Override
     public void onReceive(Context _context, Intent _intent) {
         this.appContext = _context;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        mGPSUtils = new GPSUtils((LocationManager)_context.getSystemService(Context.LOCATION_SERVICE), mLocationListener);
+        mGPSUtils = new GPSUtils((LocationManager) this.appContext.getSystemService(Context.LOCATION_SERVICE), mLocationListener, new GnssStatus.Callback() {
+            @Override
+            public void onSatelliteStatusChanged(GnssStatus status) {
+                super.onSatelliteStatusChanged(status);
+            }
+        }, new TimeoutCallback() {
+            @Override
+            public void onTimeout() {
+
+            }
+        });
         mAPIServer = new GPSServerInterface();
-        mLocDB = new DustGPSDBHandler(_context);
+        mLocDB = new DustGPSDBHandler(this.appContext);
+
+        this.gpsSetting = new GpsSetting(
+                PreferencesUtils.getGpsRequest(this.appContext),
+                PreferencesUtils.getNetworkRequest(this.appContext),
+                PreferencesUtils.getPassiveRequest(this.appContext)
+        );
 
         this.handler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -69,8 +89,8 @@ public class BootReceiver extends BroadcastReceiver {
             }
         };
 
-        if (this.bluetoothAdapter != null && this.bluetoothAdapter.isEnabled() && _context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            String addr = PreferencesUtils.getDeviceAddress(_context);
+        if (this.bluetoothAdapter != null && this.bluetoothAdapter.isEnabled() && this.appContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            String addr = PreferencesUtils.getDeviceAddress(this.appContext);
             if (addr != null) {
                 BluetoothDevice device = null;
                 Set<BluetoothDevice> pairedDevices = this.bluetoothAdapter.getBondedDevices();
@@ -155,7 +175,7 @@ public class BootReceiver extends BroadcastReceiver {
                     handler.sendEmptyMessage(STATE_RECEIVED);
                     Log.i(TAG, "Received value: " + dustVaule);
                     //Toast.makeText(appContext, "Received value: ", Toast.LENGTH_LONG).show();
-                    mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE);
+                    mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, gpsSetting);
                 }
             };
 

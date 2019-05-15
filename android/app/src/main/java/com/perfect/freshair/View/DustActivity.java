@@ -13,6 +13,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.GnssStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -31,9 +32,11 @@ import android.widget.Toast;
 
 import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Callback.ResponseCallback;
+import com.perfect.freshair.Callback.TimeoutCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.DustGPSDBHandler;
 import com.perfect.freshair.Model.DustGPS;
+import com.perfect.freshair.Model.GpsSetting;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.GPSUtils;
 import com.perfect.freshair.Utils.PreferencesUtils;
@@ -57,7 +60,8 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
     private ProgressBar progressBar;
 
     private Handler mHandler;
-    private Context mContext;
+    private Context appContext;
+    private GpsSetting gpsSetting;
 
     private GPSUtils mGPSUtils;
     private DustGPSDBHandler mLocDB;
@@ -74,13 +78,29 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
         setContentView(R.layout.activity_dust);
 
         mServerInterface = new GPSServerInterface();
-        mGPSUtils = new GPSUtils((LocationManager)getSystemService(Context.LOCATION_SERVICE), mLocationListener);
+        mGPSUtils = new GPSUtils((LocationManager) getSystemService(Context.LOCATION_SERVICE), mLocationListener, new GnssStatus.Callback() {
+            @Override
+            public void onSatelliteStatusChanged(GnssStatus status) {
+                super.onSatelliteStatusChanged(status);
+            }
+        }, new TimeoutCallback() {
+            @Override
+            public void onTimeout() {
+
+            }
+        });
         mLocDB = new DustGPSDBHandler(this);
-        mContext = this.getApplicationContext();
+        appContext = this.getApplicationContext();
 
         txtConnection = findViewById(R.id.activity_main_txt_bluetooth_connection);
         txtValue = findViewById(R.id.activity_main_txt_bluetooth_value);
         progressBar = findViewById(R.id.activity_main_progress);
+
+        this.gpsSetting = new GpsSetting(
+                PreferencesUtils.getGpsRequest(this.appContext),
+                PreferencesUtils.getNetworkRequest(this.appContext),
+                PreferencesUtils.getPassiveRequest(this.appContext)
+        );
 
         // Initializes Bluetooth adapter.
         final BluetoothManager bluetoothManager =
@@ -127,7 +147,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                 break;
 
             case R.id.btn_test:
-                mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE);
+                mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, this.gpsSetting);
                 break;
 
             case R.id.btn_db_init:
@@ -272,7 +292,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                     mDust = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, 0);
                     mHandler.sendEmptyMessage(STATE_RECEIVED);
                     Log.i(TAG, "Received value: " + mDust);
-                    mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE);
+                    mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, gpsSetting);
                 }
             };
 
@@ -310,7 +330,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
         @Override
         public void onLocationChanged(Location _location) {
             DustGPS newLoc = new DustGPS(mDust, _location);
-            mServerInterface.postDustGPS(PreferencesUtils.getUser(mContext), newLoc, mPostDustGPSCallback);
+            mServerInterface.postDustGPS(PreferencesUtils.getUser(appContext), newLoc, mPostDustGPSCallback);
             Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
             mLocDB.add(newLoc);
             mGPSUtils.stopGPS();
