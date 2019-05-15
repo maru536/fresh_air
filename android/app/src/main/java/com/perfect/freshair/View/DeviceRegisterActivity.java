@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.perfect.freshair.Common.BluetoothEnumeration;
@@ -35,6 +36,7 @@ public class DeviceRegisterActivity extends AppCompatActivity {
 
     private Button button;
     private ListView list;
+    private TextView textInformation;
     private BLEScanArrayAdapter listAdapter;
     private ArrayList<MyBLEDevice> items;
 
@@ -57,24 +59,15 @@ public class DeviceRegisterActivity extends AppCompatActivity {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             final MyBLEDevice tempDevice = new MyBLEDevice(result.getDevice().getName(), result.getDevice().getAddress());
-            final ScanRecord scanRecord = result.getScanRecord();
-            byte[] data = scanRecord.getBytes();
-            byte[] majorMinor = MyBLEPacketUtilis.getMajorMinor(data);
-            Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor)+"");
-            Log.i("Minor", MyBLEPacketUtilis.getMajor(majorMinor)+"");
             if (!items.contains(tempDevice)) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         items.add(tempDevice);
+                        checkInformation();
                         listAdapter.notifyDataSetChanged();
-                        byte[] data = scanRecord.getBytes();
-                        byte[] majorMinor = MyBLEPacketUtilis.getMajorMinor(data);
-                        Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor)+"");
-                        Log.i("Minor", MyBLEPacketUtilis.getMajor(majorMinor)+"");
                     }
                 });
-
             }
         }
 
@@ -118,6 +111,7 @@ public class DeviceRegisterActivity extends AppCompatActivity {
                 }
             }
         });
+        textInformation = (TextView)findViewById(R.id.ac_div_register_text);
 
         //list
         items = new ArrayList<MyBLEDevice>();
@@ -131,7 +125,8 @@ public class DeviceRegisterActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString(getString(R.string.my_preference_ble_addr_key), items.get(position).getAddr());
                 editor.commit();
-                Toast.makeText(getApplicationContext(), items.get(position).getAddr(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), String.format("%s가 등록되었습니다.",items.get(position).getName()), Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
 
@@ -145,6 +140,8 @@ public class DeviceRegisterActivity extends AppCompatActivity {
             Toast.makeText(this, "Bluetooth service is not supported in this device", Toast.LENGTH_SHORT).show();
             finish();
         }
+
+        checkInformation();
 
     }
 
@@ -210,6 +207,19 @@ public class DeviceRegisterActivity extends AppCompatActivity {
                     bleUtil.scanLeDevice(false, scanCallback);
                     break;
             }
+        }
+    }
+
+    private void checkInformation()
+    {
+        if(items.isEmpty())
+        {
+            textInformation.setVisibility(View.VISIBLE);
+            list.setVisibility(View.INVISIBLE);
+        }else
+        {
+            textInformation.setVisibility(View.INVISIBLE);
+            list.setVisibility(View.VISIBLE);
         }
     }
 

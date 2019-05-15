@@ -30,6 +30,7 @@
                 android:id="@+id/main_dust_information"
                 android:layout_width="match_parent"
                 android:layout_height="160dp"
+                android:padding="12dp"
                 android:layout_below="@id/main_toolbar"
                 android:background="#ffffffff">
 
@@ -44,6 +45,33 @@
                     android:textAlignment="center"
                     android:textColor="#FD000000"
                     android:text="현재 미세먼지 농도는 10㎍/㎥으로 &quot;좋음&quot;입니다"
+                    />
+                <TextView
+                    android:layout_width="360dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:fontFamily="@font/roboto_medium"
+                    android:id="@+id/ac_main_dust_no_device"
+                    android:textSize="16sp"
+                    android:gravity="start|bottom"
+                    android:textAlignment="center"
+                    android:textColor="#FD000000"
+                    android:visibility="invisible"
+                    android:text="등록된 디바이스가 없거나 블루투스가 비활성 상태여서 값을 가져올 수 없습니다."
+                    />
+
+                <TextView
+                    android:layout_width="360dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:fontFamily="@font/roboto_medium"
+                    android:id="@+id/ac_main_dust_no_value"
+                    android:textSize="16sp"
+                    android:gravity="start|bottom"
+                    android:textAlignment="center"
+                    android:textColor="#FD000000"
+                    android:visibility="invisible"
+                    android:text="측정된 미세먼지 값이 없습니다."
                     />
 
             </RelativeLayout>
