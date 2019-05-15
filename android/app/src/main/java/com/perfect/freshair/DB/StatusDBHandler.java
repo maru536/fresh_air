@@ -4,13 +4,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.perfect.freshair.Model.CurrentStatus;
-import com.perfect.freshair.Model.DustGPS;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 
 public class StatusDBHandler extends SQLiteOpenHelper {
     public static final String TAG = "StatusDBHandler";
@@ -73,5 +71,27 @@ public class StatusDBHandler extends SQLiteOpenHelper {
             return new CurrentStatus(cursor);
         else
             return null;
+    }
+
+    public List<CurrentStatus> search(long startTime, long endTime) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<CurrentStatus> searchedList = new ArrayList<>();
+        String query = "SELECT * FROM " +TABLE_LOCATION+ " WHERE ";
+
+        query += DustGPSDBHandler.Column.TIME+ " >= " +startTime+ " AND "
+                + DustGPSDBHandler.Column.TIME+ " < " +endTime+ ";";
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor != null &&  cursor.moveToFirst()) {
+            do {
+                searchedList.add(new CurrentStatus(cursor));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+
+        return searchedList;
     }
 }
