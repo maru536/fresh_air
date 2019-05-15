@@ -12,6 +12,12 @@ import android.util.Log;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.perfect.freshair.DB.StatusDBHandler;
+import com.perfect.freshair.Model.CurrentStatus;
+import com.perfect.freshair.Model.Dust;
+import com.perfect.freshair.Model.Gps;
+import com.perfect.freshair.Model.Position;
+import com.perfect.freshair.Model.PositionStatus;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
 import com.perfect.freshair.Utils.MyBLEPacketUtilis;
@@ -29,6 +35,8 @@ public class DataUpdateWorker extends Worker {
             byte[] data = result.getScanRecord().getBytes();
             byte[] majorMinor = MyBLEPacketUtilis.getMajorMinor(data);
             blueToothUtils.scanLeDevice(false, scanCallback);
+            StatusDBHandler statusDBHandler = new StatusDBHandler(getApplicationContext());
+            statusDBHandler.add(new CurrentStatus(System.currentTimeMillis(), new Dust(MyBLEPacketUtilis.getMajor(majorMinor), MyBLEPacketUtilis.getMajor(majorMinor)), new Gps(new Position(-1.0, -1.0), -1, 1, 1, 5000), PositionStatus.INDOOR));
             Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor)+"");
             Log.i("Minor", MyBLEPacketUtilis.getMajor(majorMinor)+"");
         }
