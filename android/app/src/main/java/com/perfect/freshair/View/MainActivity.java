@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateChartData()
     {
-        long eightHouresInMilis = 8*60*1000;
+        long eightHouresInMilis = 8*60*1000*60;
         long currentTime = System.currentTimeMillis();
         List<CurrentStatus> data = statusDBHandler.search(currentTime-eightHouresInMilis, currentTime);
 
