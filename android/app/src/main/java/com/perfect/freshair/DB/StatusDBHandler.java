@@ -65,7 +65,7 @@ public class StatusDBHandler extends SQLiteOpenHelper {
 
     public CurrentStatus latestRow() {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " +TABLE_LOCATION+ " LIMIT 1;";
+        String query = "SELECT * FROM " +TABLE_LOCATION+ " ORDER BY " +Column.TIMESTAMP+ " DESC LIMIT 1;";
         Cursor cursor = db.rawQuery(query, null);
 
         if (cursor != null && cursor.moveToFirst())
@@ -79,8 +79,8 @@ public class StatusDBHandler extends SQLiteOpenHelper {
         List<CurrentStatus> searchedList = new ArrayList<>();
         String query = "SELECT * FROM " +TABLE_LOCATION+ " WHERE ";
 
-        query += DustGPSDBHandler.Column.TIME+ " >= " +startTime+ " AND "
-                + DustGPSDBHandler.Column.TIME+ " < " +endTime+ ";";
+        query += Column.TIMESTAMP+ " >= " +startTime+ " AND "
+                + Column.TIMESTAMP+ " < " +endTime+ ";";
 
         Cursor cursor = db.rawQuery(query, null);
 

@@ -13,10 +13,8 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.GnssStatus;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,14 +31,13 @@ import android.widget.Toast;
 import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Callback.GpsCallback;
 import com.perfect.freshair.Callback.ResponseCallback;
-import com.perfect.freshair.Callback.TimeoutCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.DustGPSDBHandler;
 import com.perfect.freshair.Model.DustGPS;
 import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.Model.GpsSetting;
 import com.perfect.freshair.R;
-import com.perfect.freshair.Utils.GPSUtils;
+import com.perfect.freshair.Utils.GpsUtils;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
 public class DustActivity extends NavActivity implements View.OnClickListener {
@@ -65,7 +62,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
     private Context appContext;
     private GpsSetting gpsSetting;
 
-    private GPSUtils mGPSUtils;
+    private GpsUtils mGpsUtils;
     private DustGPSDBHandler mLocDB;
     private GPSServerInterface mServerInterface;
     private BluetoothAdapter mBluetoothAdapter;
@@ -80,7 +77,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
         setContentView(R.layout.activity_dust);
 
         mServerInterface = new GPSServerInterface();
-        mGPSUtils = new GPSUtils(getApplicationContext());
+        mGpsUtils = new GpsUtils(getApplicationContext());
         mLocDB = new DustGPSDBHandler(this);
         appContext = this.getApplicationContext();
 
@@ -139,7 +136,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                 break;
 
             case R.id.btn_test:
-                mGPSUtils.requestGPS(new GpsCallback() {
+                mGpsUtils.requestGPS(new GpsCallback() {
                     @Override
                     public void onGpsChanged(Gps gps) {
 
@@ -289,7 +286,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                     mDust = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, 0);
                     mHandler.sendEmptyMessage(STATE_RECEIVED);
                     Log.i(TAG, "Received value: " + mDust);
-                    mGPSUtils.requestGPS(new GpsCallback() {
+                    mGpsUtils.requestGPS(new GpsCallback() {
                         @Override
                         public void onGpsChanged(Gps gps) {
 
@@ -335,7 +332,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
             mServerInterface.postDustGPS(PreferencesUtils.getUser(appContext), newLoc, mPostDustGPSCallback);
             Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
             mLocDB.add(newLoc);
-            mGPSUtils.stopGPS();
+            mGpsUtils.stopGPS();
         }
 
         @Override

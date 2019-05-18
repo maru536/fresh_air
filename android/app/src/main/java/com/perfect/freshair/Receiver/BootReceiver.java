@@ -12,10 +12,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.GnssStatus;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -25,13 +23,12 @@ import android.util.Log;
 import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Callback.GpsCallback;
 import com.perfect.freshair.Callback.ResponseCallback;
-import com.perfect.freshair.Callback.TimeoutCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.DustGPSDBHandler;
 import com.perfect.freshair.Model.DustGPS;
 import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.Model.GpsSetting;
-import com.perfect.freshair.Utils.GPSUtils;
+import com.perfect.freshair.Utils.GpsUtils;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
 import java.util.Set;
@@ -54,7 +51,7 @@ public class BootReceiver extends BroadcastReceiver {
     private BluetoothAdapter bluetoothAdapter;
     private Handler handler;
     private Context appContext;
-    private GPSUtils mGPSUtils;
+    private GpsUtils mGpsUtils;
     private GPSServerInterface mAPIServer;
     private DustGPSDBHandler mLocDB;
     private GpsSetting gpsSetting;
@@ -63,7 +60,7 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context _context, Intent _intent) {
         this.appContext = _context;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        mGPSUtils = new GPSUtils(_context);
+        mGpsUtils = new GpsUtils(_context);
         mAPIServer = new GPSServerInterface();
         mLocDB = new DustGPSDBHandler(this.appContext);
 
@@ -167,7 +164,7 @@ public class BootReceiver extends BroadcastReceiver {
                     handler.sendEmptyMessage(STATE_RECEIVED);
                     Log.i(TAG, "Received value: " + dustVaule);
                     //Toast.makeText(appContext, "Received value: ", Toast.LENGTH_LONG).show();
-                    mGPSUtils.requestGPS(new GpsCallback() {
+                    mGpsUtils.requestGPS(new GpsCallback() {
                         @Override
                         public void onGpsChanged(Gps gps) {
 
@@ -202,7 +199,7 @@ public class BootReceiver extends BroadcastReceiver {
             mAPIServer.postDustGPS(PreferencesUtils.getUser(appContext), newLoc, mResponseCallback);
             Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
             mLocDB.add(newLoc);
-            mGPSUtils.stopGPS();
+            mGpsUtils.stopGPS();
         }
 
         @Override

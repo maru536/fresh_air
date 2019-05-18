@@ -23,8 +23,8 @@ import com.perfect.freshair.Model.Position;
 import com.perfect.freshair.Model.PositionStatus;
 import com.perfect.freshair.Model.Satellite;
 
-public class GPSUtils {
-    private static final String TAG = "GPSUtils";
+public class GpsUtils {
+    private static final String TAG = "GpsUtils";
 
     public final long TIMEOUT = 5000;
     private static final long WAIT_TERM = 1000;
@@ -48,7 +48,7 @@ public class GPSUtils {
     private int mGpsCount = 0;
     private int mTimeoutCount = 0;
 
-    public GPSUtils(Context _appContext) {
+    public GpsUtils(Context _appContext) {
         this.locationManager = (LocationManager)_appContext.getSystemService(Context.LOCATION_SERVICE);
         mThresholdAcc = PreferencesUtils.getThresholdAcc(_appContext);
         mThresholdNumSate = PreferencesUtils.getThresholdNumSate(_appContext);

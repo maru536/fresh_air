@@ -51,7 +51,7 @@ public class Gps {
     }
 
     private boolean isAccNull() {
-        return this.acc < 0.0f;
+        return this.acc <= 0.0f;
     }
 
     private boolean isPositionNull() {
@@ -63,7 +63,7 @@ public class Gps {
     }
 
     private boolean isElapsedTimeNull() {
-        return this.elapsedTime < 0;
+        return this.elapsedTime <= 0;
     }
 
     public String toString() {

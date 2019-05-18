@@ -6,11 +6,7 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.GnssStatus;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -21,7 +17,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -32,15 +27,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.perfect.freshair.Callback.TimeoutCallback;
 import com.perfect.freshair.DB.DustGPSDBHandler;
 import com.perfect.freshair.Model.DustGPS;
-import com.perfect.freshair.Model.GpsSetting;
 import com.perfect.freshair.R;
-import com.perfect.freshair.Utils.GPSUtils;
-import com.perfect.freshair.Utils.PreferencesUtils;
+import com.perfect.freshair.Utils.GpsUtils;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -69,7 +60,7 @@ public class MapActivity extends NavActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     private float mZoom = 16.0f;
 
-    private GPSUtils mGPSUtils;
+    private GpsUtils mGpsUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

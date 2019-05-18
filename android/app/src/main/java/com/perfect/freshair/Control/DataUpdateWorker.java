@@ -12,6 +12,7 @@ import android.util.Log;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.perfect.freshair.Callback.GpsCallback;
 import com.perfect.freshair.DB.StatusDBHandler;
 import com.perfect.freshair.Model.CurrentStatus;
 import com.perfect.freshair.Model.Dust;
@@ -22,6 +23,7 @@ import com.perfect.freshair.Model.PositionStatus;
 import com.perfect.freshair.Model.Satellite;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
+import com.perfect.freshair.Utils.GpsUtils;
 import com.perfect.freshair.Utils.MyBLEPacketUtilis;
 
 import java.util.ArrayList;
@@ -30,15 +32,22 @@ import java.util.List;
 public class DataUpdateWorker extends Worker {
 
     private BlueToothUtils blueToothUtils;
+    private boolean isDustReceive;
+    private Dust receivedDust;
+    private StatusDBHandler statusDBHandler;
+    private GpsUtils gpsUtils;
+
     private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             byte[] data = result.getScanRecord().getBytes();
             byte[] majorMinor = MyBLEPacketUtilis.getMajorMinor(data);
+
+            isDustReceive = true;
+            receivedDust = new Dust(MyBLEPacketUtilis.getMajor(majorMinor), MyBLEPacketUtilis.getMajor(majorMinor));
+            gpsUtils.requestGPS(gpsCallback);
             blueToothUtils.scanLeDevice(false, scanCallback);
-            StatusDBHandler statusDBHandler = new StatusDBHandler(getApplicationContext());
-            statusDBHandler.add(new CurrentStatus(System.currentTimeMillis(), new Dust(MyBLEPacketUtilis.getMajor(majorMinor), MyBLEPacketUtilis.getMajor(majorMinor)), new Gps(new Position(-1.0, -1.0), GpsProvider.GPS, -1, new Satellite(-1, -1), 5000, PositionStatus.INDOOR)));
             Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor)+"");
             Log.i("Minor", MyBLEPacketUtilis.getMajor(majorMinor)+"");
         }
@@ -51,6 +60,8 @@ public class DataUpdateWorker extends Worker {
 
     public DataUpdateWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
+        statusDBHandler = new StatusDBHandler(getApplicationContext());
+        gpsUtils = new GpsUtils(getApplicationContext());
     }
 
     @NonNull
@@ -75,9 +86,18 @@ public class DataUpdateWorker extends Worker {
             ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
             ScanSettings scanSettings = scanSettingsBuilder.build();
 
+            isDustReceive = false;
+            receivedDust = null;
             blueToothUtils.scanLeDevice(true, filters, scanSettings, scanCallback);
         }
         return Result.success();
     }
 
+    private GpsCallback gpsCallback = new GpsCallback() {
+        @Override
+        public void onGpsChanged(Gps gps) {
+            if (isDustReceive)
+                statusDBHandler.add(new CurrentStatus(System.currentTimeMillis(), receivedDust, gps));
+        }
+    };
 }

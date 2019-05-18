@@ -106,7 +106,7 @@ public abstract class NavActivity extends AppCompatActivity implements MenuItem.
                 startActivity(intent);
                 break;
             case R.id.nav_map_test:
-                intent = new Intent(NavActivity.this, MapTestActivity.class);
+                intent = new Intent(NavActivity.this, TestGPSActivity.class);
                 startActivity(intent);
                 break;
             // and so on...

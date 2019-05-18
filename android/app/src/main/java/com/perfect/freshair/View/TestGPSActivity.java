@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.perfect.freshair.Callback.GpsCallback;
 import com.perfect.freshair.DB.StatusDBHandler;
@@ -18,7 +17,7 @@ import com.perfect.freshair.Model.CurrentStatus;
 import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.R;
-import com.perfect.freshair.Utils.GPSUtils;
+import com.perfect.freshair.Utils.GpsUtils;
 
 public class TestGPSActivity extends AppCompatActivity {
     public static final int MIN_LOCATION_UPDATE_TIME = 0;
@@ -26,7 +25,7 @@ public class TestGPSActivity extends AppCompatActivity {
 
     private String TAG = "MapTestActivity";
     ImageButton mBtnCurLocation;
-    private GPSUtils mGPSUtils;
+    private GpsUtils mGpsUtils;
     private LinearLayout mGpsResultLayout;
     private LayoutInflater mResultInflater;
     private StatusDBHandler statusDBHandler;
@@ -46,12 +45,20 @@ public class TestGPSActivity extends AppCompatActivity {
 
         mResultInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        mGPSUtils = new GPSUtils(getApplicationContext());
+        mGpsUtils = new GpsUtils(getApplicationContext());
 
         mBtnCurLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mGPSUtils.requestGPS(mGpsCallback);
+                mGpsResultLayout.removeAllViews();
+                CurrentStatus status = statusDBHandler.latestRow();
+
+                if (status != null)
+                    addTextView(status.toString());
+                else
+                    addTextView("Empty!!!");
+
+                mGpsUtils.requestGPS(mGpsCallback);
             }
         });
     }
