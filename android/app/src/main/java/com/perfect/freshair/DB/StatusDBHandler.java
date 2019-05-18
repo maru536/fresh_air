@@ -78,8 +78,8 @@ public class StatusDBHandler extends SQLiteOpenHelper {
         List<CurrentStatus> searchedList = new ArrayList<>();
         String query = "SELECT * FROM " +TABLE_LOCATION+ " WHERE ";
 
-        query += DustGPSDBHandler.Column.TIME+ " >= " +startTime+ " AND "
-                + DustGPSDBHandler.Column.TIME+ " < " +endTime+ ";";
+        query += Column.TIMESTAMP+ " >= " +startTime+ " AND "
+                + Column.TIMESTAMP+ " < " +endTime+ ";";
 
         Cursor cursor = db.rawQuery(query, null);
 

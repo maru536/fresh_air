@@ -33,6 +33,7 @@
     <string name="title_activity_login">Sign in</string>
     <string name="MY_BLE_SCAN">검색</string>
     <string name="MY_BLE_SCANNING">중단</string>
+    <string name="APP_BACKGROUND_WORKER_TAG">com.perfect.freshair.my_background_work</string>
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
@@ -50,4 +51,12 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing id
         completions."
     </string>
+
+    <string name="nav_drawer_open">open drawer</string>
+    <string name="nav_drawer_close">close drawer</string>
+    <string-array name="nav_strings">
+        <item>디바이스 등록</item>
+        <item>GPS 테스트</item>
+        <item>앱 정보</item>
+    </string-array>
 </resources>

@@ -5,13 +5,17 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.StatusDBHandler;
 import com.perfect.freshair.Model.CurrentStatus;
 import com.perfect.freshair.Model.Dust;
@@ -37,8 +41,12 @@ public class DataUpdateWorker extends Worker {
             blueToothUtils.scanLeDevice(false, scanCallback);
             StatusDBHandler statusDBHandler = new StatusDBHandler(getApplicationContext());
             statusDBHandler.add(new CurrentStatus(System.currentTimeMillis(), new Dust(MyBLEPacketUtilis.getMajor(majorMinor), MyBLEPacketUtilis.getMajor(majorMinor)), new Gps(new Position(-1.0, -1.0), -1, 1, 1, 5000), PositionStatus.INDOOR));
-            Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor)+"");
-            Log.i("Minor", MyBLEPacketUtilis.getMajor(majorMinor)+"");
+            Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor) + "");
+            Log.i("Minor", MyBLEPacketUtilis.getMajor(majorMinor) + "");
+
+            Intent intent = new Intent();
+            intent.setAction(CommonEnumeration.dataUpdateAction);
+            getApplicationContext().sendBroadcast(intent);
         }
 
         @Override
@@ -54,28 +62,26 @@ public class DataUpdateWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        Log.i("worker","working");
+        Log.i(this.toString(), "working");
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getApplicationContext().getString(R.string.my_preference_ble_file_key), Context.MODE_PRIVATE);
         String defaultValue = "none";
         String deviceAddr = sharedPreferences.getString(getApplicationContext().getString(R.string.my_preference_ble_addr_key), defaultValue);
-        if(deviceAddr.equals(defaultValue))
-        {
-            return Result.success();
-        }else
-        {
-            Log.i("worker",deviceAddr);
+        if (!deviceAddr.equals(defaultValue)) {
+            Log.i(this.toString(), deviceAddr);
             blueToothUtils = new BlueToothUtils(getApplicationContext());
-            List<ScanFilter> filters = new ArrayList<ScanFilter>();
-            ScanFilter.Builder scanFilterBuilder = new ScanFilter.Builder();
-            ScanFilter scanFilter = scanFilterBuilder.setDeviceAddress(deviceAddr).build();
-            filters.add(scanFilter);
-
-            ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
-            ScanSettings scanSettings = scanSettingsBuilder.build();
-
-            blueToothUtils.scanLeDevice(true, filters, scanSettings, scanCallback);
+            if (blueToothUtils.getBLEEnabled() && blueToothUtils.getBLESupported()) {
+                List<ScanFilter> filters = new ArrayList<ScanFilter>();
+                ScanFilter.Builder scanFilterBuilder = new ScanFilter.Builder();
+                ScanFilter scanFilter = scanFilterBuilder.setDeviceAddress(deviceAddr).build();
+                filters.add(scanFilter);
+                ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
+                ScanSettings scanSettings = scanSettingsBuilder.build();
+                blueToothUtils.scanLeDevice(true, filters, scanSettings, scanCallback);
+            } else {
+                Log.i(this.toString(), "bluetooth is not enabled or supported.");
+            }
         }
-        return Result.success();
+        return Result.retry();
     }
 
 }
