@@ -1,84 +1,102 @@
 package com.perfect.freshair.Utils;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
+import android.content.Context;
 import android.location.GnssStatus;
-import android.location.GpsSatellite;
-import android.location.GpsStatus;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Looper;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.google.gson.JsonObject;
+import com.perfect.freshair.Callback.GpsCallback;
 import com.perfect.freshair.Callback.TimeoutCallback;
+import com.perfect.freshair.Model.CurrentStatus;
+import com.perfect.freshair.Model.Dust;
+import com.perfect.freshair.Model.Gps;
+import com.perfect.freshair.Model.GpsProvider;
 import com.perfect.freshair.Model.GpsSetting;
-
-import java.util.Iterator;
+import com.perfect.freshair.Model.Position;
+import com.perfect.freshair.Model.PositionStatus;
+import com.perfect.freshair.Model.Satellite;
 
 public class GPSUtils {
     private static final String TAG = "GPSUtils";
 
     public final long TIMEOUT = 5000;
     private static final long WAIT_TERM = 1000;
+    public static final int MIN_LOCATION_UPDATE_TIME = 0;
+    public static final int MIN_LOCATION_UPDATE_DISTANCE = 0;
 
-    private LocationManager mLocationManager;
-    private LocationListener mLocationListener;
-    private GnssStatus.Callback mGnssCallback;
-    private TimeoutCallback mTimeoutCallback;
+    private LocationManager locationManager;
+    private Location mLocation;
+    private boolean mIsGpsDone;
+    private GnssStatus mGnssStatus;
+    private boolean mIsGnssCallbackDone;
+    private boolean mIsTimeout;
+    private GpsCallback mGpsCallback;
     private long requestTime;
-    private TimeoutTask mTimeoutTask;
+    private TimeoutTask timeoutTask;
+    private int mThresholdAcc = 0;
+    private int mThresholdNumSate = 0;
+    private int mThresholdTime = 0;
+    private int mThresholdTimeout = 0;
+    private int mTotalIterate = 0;
+    private int mGpsCount = 0;
+    private int mTimeoutCount = 0;
 
-    public GPSUtils(LocationManager _manager, LocationListener _locationListener, GnssStatus.Callback gnssCallback, TimeoutCallback timeoutCallback) {
-        mLocationManager = _manager;
-        mLocationListener = _locationListener;
-        mGnssCallback = gnssCallback;
-        mTimeoutCallback = timeoutCallback;
+    public GPSUtils(Context _appContext) {
+        this.locationManager = (LocationManager)_appContext.getSystemService(Context.LOCATION_SERVICE);
+        mThresholdAcc = PreferencesUtils.getThresholdAcc(_appContext);
+        mThresholdNumSate = PreferencesUtils.getThresholdNumSate(_appContext);
+        mThresholdTime = PreferencesUtils.getThresholdElapsedTime(_appContext);
+        mThresholdTimeout = PreferencesUtils.getThresholdTimeout(_appContext);
+        mTotalIterate = PreferencesUtils.getIterate(_appContext);
     }
 
-    private void unregistRequest() {
-        mLocationManager.removeUpdates(mLocationListener);
-        mLocationManager.unregisterGnssStatusCallback(mGnssCallback);
+    private void init() {
+        mGpsCount = 0;
+        mTimeoutCount = 0;
     }
 
     @SuppressLint("MissingPermission")
-    private void registRequest(int _minUpdateTime, int _minUpdateDist, GpsSetting setting) {
-        mLocationManager.registerGnssStatusCallback(mGnssCallback);
-
-        if (setting.isRequestGps()) {
-            Log.i(TAG, "Request Gps");
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    _minUpdateTime, _minUpdateDist, mLocationListener, Looper.getMainLooper());
-
-        }
-
-        if (setting.isRequestNetwork()) {
-            Log.i(TAG, "Request Network");
-            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                    _minUpdateTime, _minUpdateDist, mLocationListener, Looper.getMainLooper());
-        }
-
-        if (setting.isRequestPassive()) {
-            Log.i(TAG, "Request Passive");
-            mLocationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                    _minUpdateTime, _minUpdateDist, mLocationListener, Looper.getMainLooper());
-        }
+    private void registRequest() {
+        this.requestTime = System.currentTimeMillis();
+        this.mGnssStatus = null;
+        this.mIsGnssCallbackDone = false;
+        this.mLocation = null;
+        this.mIsGpsDone = false;
+        this.mIsTimeout = false;
+        this.locationManager.registerGnssStatusCallback(this.mSatelliteCallback);
+        this.timeoutTask = new TimeoutTask();
+        this.timeoutTask.execute();
+        this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                this.MIN_LOCATION_UPDATE_TIME, this.MIN_LOCATION_UPDATE_DISTANCE, this.mLocationListener, Looper.getMainLooper());
     }
 
-    public void requestGPS(int _minUpdateTime, int _minUpdateDist, GpsSetting setting) {
-        unregistRequest();
-        registRequest(_minUpdateTime, _minUpdateDist, setting);
+    private void unregistRequest() {
+        this.locationManager.removeUpdates(this.mLocationListener);
+        this.locationManager.unregisterGnssStatusCallback(this.mSatelliteCallback);
+    }
 
-        this.requestTime = System.currentTimeMillis();
-        mTimeoutTask = new TimeoutTask();
-        mTimeoutTask.execute();
+    public void requestGPS(GpsCallback _gpsCallback) {
+        this.init();
+        this.mGpsCallback = _gpsCallback;
+        registRequest();
     }
 
     public void stopGPS() {
         unregistRequest();
-        mTimeoutTask.cancel(true);
+    }
+
+    private PositionStatus getPoisition(Satellite sate) {
+        if (sate.getUseSate() > this.mThresholdNumSate)
+            return PositionStatus.OUTDOOR;
+        else
+            return PositionStatus.INDOOR;
     }
 
     private class TimeoutTask extends AsyncTask<Object, Object, Boolean> {
@@ -90,11 +108,10 @@ public class GPSUtils {
 
         @Override
         protected void onPostExecute(Boolean isTimeout) {
-            unregistRequest();
+            mIsTimeout = isTimeout;
 
-            if (isTimeout)
-                mTimeoutCallback.onTimeout();
-
+            if (mIsTimeout)
+                onAllGpsDone();
         }
 
         @Override
@@ -116,5 +133,65 @@ public class GPSUtils {
 
             return true;
         }
+    }
+
+    private final LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location _location) {
+            mLocation = _location;
+            mIsGpsDone = true;
+
+            if (mIsGnssCallbackDone)
+                onAllGpsDone();
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+            Log.i(TAG, "onStatusChanged: String) " + s + "/int) " + i + "/bundle) " + bundle.toString());
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+            Log.i(TAG, "onProviderEnabled: " + s);
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+            Log.i(TAG, "onProviderDisabled: " + s);
+        }
+    };
+
+    private final GnssStatus.Callback mSatelliteCallback = new GnssStatus.Callback() {
+        @Override
+        public void onSatelliteStatusChanged(GnssStatus gnssStatus) {
+            //super.onSatelliteStatusChanged(status);
+
+            mGnssStatus = gnssStatus;
+            mIsGnssCallbackDone = true;
+
+            if (mIsGpsDone)
+                onAllGpsDone();
+        }
+    };
+
+    private void onAllGpsDone() {
+        unregistRequest();
+        Gps gps;
+
+        if (mIsTimeout) {
+            gps = new Gps(GpsProvider.TIMEOUT);
+            mTimeoutCount++;
+        }
+        else {
+            Satellite sate = new Satellite(mGnssStatus);
+            gps = new Gps(new Position(mLocation.getLatitude(), mLocation.getLongitude()), GpsProvider.fromString(mLocation.getProvider()),
+                    mLocation.getAccuracy(), sate, System.currentTimeMillis() - this.requestTime, getPoisition(sate));
+            mGpsCount++;
+        }
+
+        mGpsCallback.onGpsChanged(gps);
+
+        if (mTimeoutCount + mGpsCount < mTotalIterate)
+            registRequest();
     }
 }

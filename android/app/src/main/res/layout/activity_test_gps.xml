@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".View.TestGPSActivity">
 
     <android.support.v7.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <android.support.v7.widget.Toolbar
@@ -22,4 +23,29 @@
 
     </android.support.v7.widget.LinearLayoutCompat>
 
-</android.support.constraint.ConstraintLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right">
+
+        <ImageButton
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:layout_marginRight="50dp"
+            android:scaleType="centerCrop"
+            android:id="@+id/current_location"
+            android:src="@drawable/my_location_icon"
+            android:text="@string/search" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/gps_result"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+    </LinearLayout>
+
+</LinearLayout>

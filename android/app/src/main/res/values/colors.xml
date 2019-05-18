@@ -10,5 +10,6 @@
     <color name="transparentYello">#66FFFF00</color>
     <color name="transparentRed">#66FF0000</color>
     <color name="transparentBlack">#66000000</color>
+    <color name="black">#000000</color>
     <color name="charYGridColor">#43000000</color>
 </resources>

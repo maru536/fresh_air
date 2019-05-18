@@ -31,11 +31,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.perfect.freshair.API.GPSServerInterface;
+import com.perfect.freshair.Callback.GpsCallback;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Callback.TimeoutCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.DustGPSDBHandler;
 import com.perfect.freshair.Model.DustGPS;
+import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.Model.GpsSetting;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.GPSUtils;
@@ -78,17 +80,7 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
         setContentView(R.layout.activity_dust);
 
         mServerInterface = new GPSServerInterface();
-        mGPSUtils = new GPSUtils((LocationManager) getSystemService(Context.LOCATION_SERVICE), mLocationListener, new GnssStatus.Callback() {
-            @Override
-            public void onSatelliteStatusChanged(GnssStatus status) {
-                super.onSatelliteStatusChanged(status);
-            }
-        }, new TimeoutCallback() {
-            @Override
-            public void onTimeout() {
-
-            }
-        });
+        mGPSUtils = new GPSUtils(getApplicationContext());
         mLocDB = new DustGPSDBHandler(this);
         appContext = this.getApplicationContext();
 
@@ -147,7 +139,12 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                 break;
 
             case R.id.btn_test:
-                mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, this.gpsSetting);
+                mGPSUtils.requestGPS(new GpsCallback() {
+                    @Override
+                    public void onGpsChanged(Gps gps) {
+
+                    }
+                });
                 break;
 
             case R.id.btn_db_init:
@@ -292,7 +289,12 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
                     mDust = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, 0);
                     mHandler.sendEmptyMessage(STATE_RECEIVED);
                     Log.i(TAG, "Received value: " + mDust);
-                    mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, gpsSetting);
+                    mGPSUtils.requestGPS(new GpsCallback() {
+                        @Override
+                        public void onGpsChanged(Gps gps) {
+
+                        }
+                    });
                 }
             };
 

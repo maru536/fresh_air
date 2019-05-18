@@ -23,11 +23,13 @@ import android.os.Message;
 import android.util.Log;
 
 import com.perfect.freshair.API.GPSServerInterface;
+import com.perfect.freshair.Callback.GpsCallback;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Callback.TimeoutCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.DustGPSDBHandler;
 import com.perfect.freshair.Model.DustGPS;
+import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.Model.GpsSetting;
 import com.perfect.freshair.Utils.GPSUtils;
 import com.perfect.freshair.Utils.PreferencesUtils;
@@ -61,17 +63,7 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context _context, Intent _intent) {
         this.appContext = _context;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        mGPSUtils = new GPSUtils((LocationManager) this.appContext.getSystemService(Context.LOCATION_SERVICE), mLocationListener, new GnssStatus.Callback() {
-            @Override
-            public void onSatelliteStatusChanged(GnssStatus status) {
-                super.onSatelliteStatusChanged(status);
-            }
-        }, new TimeoutCallback() {
-            @Override
-            public void onTimeout() {
-
-            }
-        });
+        mGPSUtils = new GPSUtils(_context);
         mAPIServer = new GPSServerInterface();
         mLocDB = new DustGPSDBHandler(this.appContext);
 
@@ -175,7 +167,12 @@ public class BootReceiver extends BroadcastReceiver {
                     handler.sendEmptyMessage(STATE_RECEIVED);
                     Log.i(TAG, "Received value: " + dustVaule);
                     //Toast.makeText(appContext, "Received value: ", Toast.LENGTH_LONG).show();
-                    mGPSUtils.requestGPS(MIN_LOCATION_UPDATE_TIME, MIN_LOCATION_UPDATE_DISTANCE, gpsSetting);
+                    mGPSUtils.requestGPS(new GpsCallback() {
+                        @Override
+                        public void onGpsChanged(Gps gps) {
+
+                        }
+                    });
                 }
             };
 

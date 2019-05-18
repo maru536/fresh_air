@@ -12,12 +12,12 @@ import java.util.List;
 
 public class StatusDBHandler extends SQLiteOpenHelper {
     public static final String TAG = "StatusDBHandler";
-    public static final int DB_VER = 1;
+    public static final int DB_VER = 2;
     private static final String DB_NAME = "StatusDB.db";
     public static final String TABLE_LOCATION = "status";
 
     public enum Column {
-        ID, TIMESTAMP, PM25, PM100, LAT, LNG, ACC,
+        ID, TIMESTAMP, PM25, PM100, LAT, LNG, PROVIDER, ACC,
         TOTAL_SATE, USE_SATE, ELAPSE_TIME, POSITION_STATUS;
     }
 
@@ -34,6 +34,7 @@ public class StatusDBHandler extends SQLiteOpenHelper {
                 +Column.PM100+ " INTEGER,"
                 +Column.LAT+ " REAL,"
                 +Column.LNG+ " REAL,"
+                +Column.PROVIDER+ " TEXT,"
                 +Column.ACC+ " REAL,"
                 +Column.TOTAL_SATE+ " INTEGER,"
                 +Column.USE_SATE+ " INTEGER,"
