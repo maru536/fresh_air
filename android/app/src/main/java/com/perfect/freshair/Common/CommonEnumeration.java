@@ -12,4 +12,8 @@ public class CommonEnumeration {
     public final static UUID UUID_RECEIVE = UUID.fromString("00002221-0000-1000-8000-00805f9b34fb");
     public final static UUID UUID_SEND = UUID.fromString("00002222-0000-1000-8000-00805f9b34fb");
     public final static UUID UUID_CLIENT_CONFIGURATION = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
+    public static int UPDATE_MAIN_DUST_VALUE = 1;
+    public static String dataUpdateAction = "com.perfect.freshair.action.DO_UPDATE";
+    public static String workerTag = "com.perfect.freshair.action.my_worker";
 }
