@@ -16,6 +16,7 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.perfect.freshair.Callback.GpsCallback;
+import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.StatusDBHandler;
 import com.perfect.freshair.Model.CurrentStatus;
 import com.perfect.freshair.Model.Dust;
@@ -88,8 +89,8 @@ public class DataUpdateWorker extends Worker {
                 filters.add(scanFilter);
                 ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
                 ScanSettings scanSettings = scanSettingsBuilder.build();
-            isDustReceive = false;
-            receivedDust = null;
+                isDustReceive = false;
+                receivedDust = null;
                 blueToothUtils.scanLeDevice(true, filters, scanSettings, scanCallback);
             } else {
                 Log.i(this.toString(), "bluetooth is not enabled or supported.");

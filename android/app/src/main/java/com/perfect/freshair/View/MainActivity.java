@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textDust;
     private TextView textNoValue;
     private TextView textNoDevice;
+    private TextView textCoach;
     private ListView mDrawerList;
     private NavArrayAdapter arrayAdapter;
     private StatusDBHandler statusDBHandler;
@@ -158,12 +159,14 @@ public class MainActivity extends AppCompatActivity {
         yAxisLeft.setTextColor(Color.BLACK); //Y축 텍스트 컬러 설정
         yAxisLeft.setLabelCount(5, true);
 
-        YAxis yAxisRight = lineChart.getAxisRight(); //Y축의 오른쪽면 설정
-        yAxisRight.setDrawLabels(false);
-        yAxisRight.setDrawAxisLine(false);
-        yAxisRight.setDrawGridLines(false);
 
-        updateChartData();
+        YAxis yAxisRight = lineChart.getAxisRight(); //Y축의 오른쪽면 설정
+        yAxisRight.setDrawAxisLine(false);
+        yAxisRight.setTextColor(Color.BLACK); //Y축 텍스트 컬러 설정
+        yAxisRight.setGridLineWidth((float) 1);
+
+
+
 
 
         OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(DataUpdateWorker.class).setBackoffCriteria(
@@ -180,12 +183,13 @@ public class MainActivity extends AppCompatActivity {
         textDust = (TextView) findViewById(R.id.ac_main_dust_value);
         textNoDevice = (TextView) findViewById(R.id.ac_main_dust_no_device);
         textNoValue = (TextView) findViewById(R.id.ac_main_dust_no_value);
+        textCoach = (TextView)findViewById(R.id.ac_main_dust_coach);
         checkDustDisplay();
-
+        updateChartData();
     }
 
-    private String getDustString(int value) {
-        return String.format("현재 미세먼지 농도는 %d㎍/㎥로 \"%s\"입니다.", value, MicroDustUtils.parseDustValue(value));
+    private String getDustString(int pm2dot5, int pm10) {
+        return String.format("현재 초미세먼지 농도는 %d㎍/㎥, 미세먼지 농도는 %d㎍/㎥로 \"%s\"입니다.", pm2dot5, pm10,  MicroDustUtils.parseDustValue(pm2dot5));
     }
 
     private void updateChartData()
@@ -196,22 +200,28 @@ public class MainActivity extends AppCompatActivity {
 
         if(data != null)
         {
-            List<Entry> entries = new ArrayList<Entry>();
+            List<Entry> pm2Dot5Entries = new ArrayList<Entry>();
+            List<Entry> pm10Entries = new ArrayList<Entry>();
             for (CurrentStatus mydata : data) {
                 // turn your data into Entry objects
                 long oldTime = mydata.getTimestamp();
                 float xValue = (float)((oldTime - currentTime)/60/1000);
                 Log.i("timestamp", mydata.toString());
                 Log.i("timestamp", oldTime-currentTime+"");
-
-                entries.add(new Entry(xValue, mydata.getDust().getPm25()));
+                pm10Entries.add(new Entry(xValue,mydata.getDust().getPm100()));
+                pm2Dot5Entries.add(new Entry(xValue, mydata.getDust().getPm25()));
             }
-            LineDataSet dataSet = new LineDataSet(entries, "Label");
-            LineData lineData = new LineData(dataSet);
+            LineDataSet dataSet1 = new LineDataSet(pm2Dot5Entries, "PM2.5");
+            dataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
+            LineDataSet dataSet2 = new LineDataSet(pm10Entries, "PM10");
+            dataSet2.setAxisDependency(YAxis.AxisDependency.RIGHT);
+            LineData lineData = new LineData(dataSet1);
+            lineData.addDataSet(dataSet2);
             lineData.setValueTextSize(10);
             lineData.setDrawValues(false);
             lineChart.setData(lineData);
             lineChart.invalidate(); // refresh
+            textCoach.setText(MicroDustUtils.getCoach(MicroDustUtils.getDustAverage(data)));
         }else
         {
             lineChart.setData(null);
@@ -228,18 +238,21 @@ public class MainActivity extends AppCompatActivity {
             textDust.setVisibility(View.INVISIBLE);
             textNoDevice.setVisibility(View.VISIBLE);
             textNoValue.setVisibility(View.INVISIBLE);
+            textCoach.setVisibility(View.INVISIBLE);
         } else {
             CurrentStatus currentStatus = statusDBHandler.latestRow();
             if (currentStatus != null) {
                 Log.i("dust",currentStatus.getDust().getPm25()+"");
-                textDust.setText(getDustString(currentStatus.getDust().getPm25()));
+                textDust.setText(getDustString(currentStatus.getDust().getPm25(), currentStatus.getDust().getPm100()));
                 textDust.setVisibility(View.VISIBLE);
+                textCoach.setVisibility(View.VISIBLE);
                 textNoDevice.setVisibility(View.INVISIBLE);
                 textNoValue.setVisibility(View.INVISIBLE);
             } else {
                 textDust.setVisibility(View.INVISIBLE);
                 textNoDevice.setVisibility(View.INVISIBLE);
                 textNoValue.setVisibility(View.VISIBLE);
+                textCoach.setVisibility(View.INVISIBLE);
             }
         }
     }

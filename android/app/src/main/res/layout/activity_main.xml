@@ -88,6 +88,21 @@
                 android:layout_marginTop="8dp"
                 android:background="#ffffffff" />
 
+            <TextView
+                android:layout_width="360dp"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/roboto_medium"
+                android:id="@+id/ac_main_dust_coach"
+                android:layout_below="@id/main_chart"
+                android:textSize="16sp"
+                android:layout_marginTop="20dp"
+                android:gravity="start|bottom"
+                android:textAlignment="center"
+                android:textColor="#FD000000"
+                android:text="좋은 상태입니다."
+                />
+
 
         </RelativeLayout>
 
