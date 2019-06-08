@@ -58,7 +58,7 @@ public class DeviceRegisterActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
-            final MyBLEDevice tempDevice = new MyBLEDevice(result.getDevice().getName(), result.getDevice().getAddress());
+            final MyBLEDevice tempDevice = new MyBLEDevice(result.getDevice().getName(), result.getDevice().getAddress(), MyBLEPacketUtilis.getUUID(result.getScanRecord().getBytes()));
             if (!items.contains(tempDevice)) {
                 runOnUiThread(new Runnable() {
                     @Override
@@ -121,12 +121,18 @@ public class DeviceRegisterActivity extends AppCompatActivity {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getString(R.string.my_preference_ble_file_key), Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(getString(R.string.my_preference_ble_addr_key), items.get(position).getAddr());
-                editor.commit();
-                Toast.makeText(getApplicationContext(), String.format("%s가 등록되었습니다.",items.get(position).getName()), Toast.LENGTH_SHORT).show();
-                finish();
+                if(MyBLEPacketUtilis.checkUUIDAvailability(items.get(position).getUuid())) {
+                    SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getString(R.string.my_preference_ble_file_key), Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(getString(R.string.my_preference_ble_addr_key), items.get(position).getAddr());
+                    editor.commit();
+                    Toast.makeText(getApplicationContext(), String.format("%s가 등록되었습니다.", items.get(position).getName()), Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(), "등록할 수 없는 디바이스입니다.",Toast.LENGTH_SHORT).show();
+                }
             }
         });
 

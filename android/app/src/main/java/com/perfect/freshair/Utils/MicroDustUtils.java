@@ -61,6 +61,15 @@ public class MicroDustUtils {
             sum += list.get(i).getDust().getPm25();
         }
 
-        return (sum/size);
+        int res = 0;
+
+        try{
+            res = (sum/size);
+        }catch (Exception e)
+        {
+            ;
+        }
+
+        return res;
     }
 }

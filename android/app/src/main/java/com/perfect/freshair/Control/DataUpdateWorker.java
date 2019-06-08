@@ -47,13 +47,20 @@ public class DataUpdateWorker extends Worker {
             super.onScanResult(callbackType, result);
             byte[] data = result.getScanRecord().getBytes();
             byte[] majorMinor = MyBLEPacketUtilis.getMajorMinor(data);
+            StringBuffer sb = new StringBuffer();
+            for(int i=0;i<data.length;i++)
+            {
+                sb.append(data[i]);
+                sb.append(" ");
+            }
+            Log.e("bytes", sb.toString());
 
             isDustReceive = true;
-            receivedDust = new Dust(MyBLEPacketUtilis.getMajor(majorMinor), MyBLEPacketUtilis.getMajor(majorMinor));
+            receivedDust = new Dust(MyBLEPacketUtilis.getMajor(majorMinor), MyBLEPacketUtilis.getMinor(majorMinor));
             gpsUtils.requestGPS(gpsCallback);
             blueToothUtils.scanLeDevice(false, scanCallback);
             Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor) + "");
-            Log.i("Minor", MyBLEPacketUtilis.getMajor(majorMinor) + "");
+            Log.i("Minor", MyBLEPacketUtilis.getMinor(majorMinor) + "");
 
             Intent intent = new Intent();
             intent.setAction(CommonEnumeration.dataUpdateAction);
