@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    #url: jdbc:mysql://freshairdb.cpp70edywx8e.ap-northeast-2.rds.amazonaws.com:3306/FreshAirDB?useUnicode=yes&characterEncoding=UTF-8
+    url: jdbc:mysql://freshair.cpp70edywx8e.ap-northeast-2.rds.amazonaws.com:3306/FreshAir?characterEncoding=UTF-8&useUnicode=yes&characterEncoding=UTF-8
+    username: maru536
+    password: Kimdc*4590
+  
+  http:
+    converters:
+      preferred-json-mapper: gson
+
+  jpa:
+    hibernate.ddl-auto: update
+    generate-ddl: true
+    show-sql: true
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          filter: debug
