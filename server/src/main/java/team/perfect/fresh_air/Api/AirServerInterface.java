@@ -19,6 +19,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import team.perfect.fresh_air.Contract.AddressLevelOneContract;
 import team.perfect.fresh_air.Contract.AirContract;
 import team.perfect.fresh_air.Contract.ApiContract;
 import team.perfect.fresh_air.DAO.Air;
@@ -40,10 +41,10 @@ public class AirServerInterface {
                 .build();
     }
 
-    public void getAirData(String city, AirRepository airRepository) {
+    public void getAirData(AddressLevelOneContract address, AirRepository airRepository) {
         AirApi airApi = retrofit.create(AirApi.class);
 
-        Call<JsonObject> request = airApi.getAirData(city);
+        Call<JsonObject> request = airApi.getAirData(address.getServerKey());
 
 
         request.enqueue(new Callback<JsonObject>() {
@@ -53,7 +54,7 @@ public class AirServerInterface {
                 JsonArray airDataList = _response.body().get(AirContract.LIST).getAsJsonArray();
 
                 for (JsonElement curElem : airDataList) {
-                    Air curAir = new Air(city, curElem.getAsJsonObject());
+                    Air curAir = new Air(address.getBixbyKey(), curElem.getAsJsonObject());
                     airRepository.save(curAir);
                 }
             }

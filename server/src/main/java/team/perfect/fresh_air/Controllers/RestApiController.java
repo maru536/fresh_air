@@ -22,12 +22,14 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import team.perfect.fresh_air.Api.AirServerInterface;
 import team.perfect.fresh_air.Contract.AddressLevelOneContract;
 import team.perfect.fresh_air.Contract.AirContract;
+import team.perfect.fresh_air.Contract.DustStandard;
 import team.perfect.fresh_air.DAO.AddressPK;
 import team.perfect.fresh_air.DAO.Air;
 import team.perfect.fresh_air.DAO.Dust;
 import team.perfect.fresh_air.DAO.User;
 import team.perfect.fresh_air.Model.Response;
 import team.perfect.fresh_air.Model.ResponseAir;
+import team.perfect.fresh_air.Model.ResponseCoaching;
 import team.perfect.fresh_air.Model.ResponseDust;
 import team.perfect.fresh_air.Repository.DustRepository;
 import team.perfect.fresh_air.Repository.UserRepository;
@@ -70,7 +72,7 @@ public class RestApiController {
     @GetMapping("1.0/signIn")
     public Response signIn(@RequestHeader String id, @RequestHeader String passwd) {
         Optional<User> user = this.userRepository.findById(id);
-
+        
         if (user.isPresent()) {
             if (user.get().getPasswd().equals(passwd))
                 return new Response(200, "SignIn Success");
@@ -103,25 +105,92 @@ public class RestApiController {
             return new Response(404, "There is no dust data");
     }
 
-    @PostMapping("1.0/air")
-    public Response air(@RequestBody JsonObject address) {
+    @PostMapping("1.0/coachingDust")
+    public Response air(@RequestHeader String userId, @RequestBody JsonObject address) {
         AddressPK id = new AddressPK(address.get("levelOne").getAsString(), address.get("levelTwo").getAsString());
+        //AddressPK id = new AddressPK(addressLevelOne, addressLevelTwo);
         Optional<Air> airData = this.airRepository.findById(id);
-
-        if (airData.isPresent())
-            return new ResponseAir(200, "Success", airData.get().getPm100(), airData.get().getPm25());
-        else
-            return new Response(404, "There is no air data");
+        Optional<Dust> latestDust = this.dustRepository.findFirstByUserIdOrderByTimeDesc(userId);
+        String coachingMessage = "";
+        
+        if (latestDust.isPresent()) {
+            if (airData.isPresent()) {
+                coachingMessage = makeDiffCoachingMessage(latestDust.get(), airData.get());
+                coachingMessage += makeLatestDustCoachingMessage(latestDust.get());
+                return new ResponseCoaching(200, "Success", coachingMessage, latestDust.get(), airData.get());
+            }
+            else {
+                coachingMessage = makeLatestDustCoachingMessage(latestDust.get());
+                return new ResponseCoaching(201, "Success, but there is no air data", 
+                    coachingMessage, latestDust.get(), new Air());
+            }
+        }
+        else {
+            if (airData.isPresent()) {
+                return new ResponseAir(202, "Only air data", airData.get().getPm100(), airData.get().getPm25());
+            }
+            else {
+                return new Response(404, "There is no data");
+            }
+        }
     }
 
-    /*
+    private static String makeLatestDustCoachingMessage(Dust dust) {
+        String message;
+
+        if (dust.getPm100() < DustStandard.goodPm100)
+            message = "미세먼지가 좋아요!\n";
+        else if (dust.getPm100() < DustStandard.normalPm100) 
+            message = "미세먼지가 보통이네요.\n";
+        else if (dust.getPm100() < DustStandard.badPm100) 
+            message = "미세먼지가 나빠요...\n";
+        else 
+            message = "미세먼지가 매우 나빠요. 마스크를 착용하세요!\n";
+
+        if (dust.getPm25() < DustStandard.goodPm25)
+            message += "초미세먼지가 좋아요!";
+        else if (dust.getPm25() < DustStandard.normalPm25) 
+            message += "초미세먼지가 보통이네요.";
+        else if (dust.getPm25() < DustStandard.badPm25) 
+            message += "초미세먼지가 나빠요...";
+        else 
+            message += "초미세먼지가 매우 나빠요. 마스크를 착용하세요!";
+        
+        return message;
+    }
+
+    private static String makeDiffCoachingMessage(Dust dust, Air air) {
+        String message = "";
+        int diffPm100 = dust.getPm100() - air.getPm100();
+        int diffPm25 = dust.getPm25() - air.getPm25();
+
+        if (air.getPm100() > 0 && Math.abs(diffPm100) > 50) {
+            if (diffPm100 > 0) {
+                message += "여기는 주변보다 미세먼지 농도가 높아요.\n";
+            }
+            else {
+                message += "여기는 주변보다 미세먼지 농도가 낮아요.\n";
+            }
+        }
+
+        if (air.getPm25() > 0 && Math.abs(diffPm25) > 50) {
+            if (diffPm25 > 0) {
+                message += "여기는 주변보다 초미세먼지 농도가 높아요.\n";
+            }
+            else {
+                message += "여기는 주변보다 초미세먼지 농도가 낮아요.\n";
+            }
+        }
+        
+        return message;
+    }
+
     @PostMapping("1.0/test")
     public void Test() {
         AirServerInterface airServer = new AirServerInterface();
 
         for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
-            airServer.getAirData(address.getKey(), this.airRepository);
+            airServer.getAirData(address, this.airRepository);
         }
     }
-    */
 }

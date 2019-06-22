@@ -1,6 +1,12 @@
 structure (publicDustConcept) {
   description (Public Dust data)
   
+  property (address) {
+    type (addressConcept)
+    min (Required)
+    max (One)
+  }
+  
   property (pm100) {
     type (PM100Concept)
     min (Required) 

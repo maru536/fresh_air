@@ -13,17 +13,18 @@ import team.perfect.fresh_air.Contract.AirContract;
 @IdClass(AddressPK.class)
 public class Air {
     @Id
-    private String addressLevelOne;
+    private String addressLevelOne = "";
     @Id
-    private String addressLevelTwo;
-    private float no2;
-    private float co;
-    private float o3;
-    private int pm100;
-    private int pm25;
-    private float so2;
+    private String addressLevelTwo = "";
+    private float no2 = -1.0f;
+    private float co = -1.0f;
+    private float o3 = -1.0f;
+    private int pm100 = -1;
+    private int pm25 = -1;
+    private float so2 = -1.0f;
     
-    public Air() {}
+    public Air() {
+    }
 
     public Air(String addressLevelOne, String addressLevelTwo, float no2, float co, float o3, int pm100, int pm25, float so2) {
         this.addressLevelOne = addressLevelOne;

@@ -4,5 +4,22 @@ dialog (Result) {
       from-output: ShowLatestDust
     }
   }
-  template("가장 최근에 측정된 미세먼지 농도입니다.")
+  
+  switch (latestDust.timeType) {
+    case (second) {
+      template ("#{value(latestDust.time)}초전 데이터입니다")
+    }
+              
+    case (minute) {
+      template ("#{value(latestDust.time)}분전 데이터입니다")
+    }
+              
+    case (hour) {
+      template ("#{value(latestDust.time)}시간전 데이터입니다")
+    }
+              
+    case (day) {
+      template ("#{value(latestDust.time)}일전 데이터입니다")
+    }
+  }
 }

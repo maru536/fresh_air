@@ -1,5 +1,11 @@
-structure (coachingDustResultConcept) {
+structure (coachingDustResponseConcept) {
   description (coaching data)
+  
+  property (code) {
+    type (codeConcept)
+    min (Required) 
+    max (One)
+  }
   
   property (latestDust) {
     type (latestDustConcept)
@@ -9,7 +15,7 @@ structure (coachingDustResultConcept) {
   
   property (publicDust) {
     type (publicDustConcept)
-    min (Optional)
+    min (Required)
     max (One)
   }
   

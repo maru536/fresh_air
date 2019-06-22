@@ -12,5 +12,9 @@ endpoints {
        accepted-inputs (id, passwd, $vivContext)
        local-endpoint ("SignIn.js")
      }
+    action-endpoint (CoachingDust) {
+       accepted-inputs (address, userId)
+       local-endpoint ("CoachingDust.js")
+     }
    }
 }

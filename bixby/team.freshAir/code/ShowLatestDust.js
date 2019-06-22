@@ -11,6 +11,7 @@ module.exports.function = function currentDustInfo (userId) {
       userId: userId
     }
   });
+  
   const oneSecond = 1000;
   const oneMinute = 60*oneSecond;
   const oneHour = 60*oneMinute;

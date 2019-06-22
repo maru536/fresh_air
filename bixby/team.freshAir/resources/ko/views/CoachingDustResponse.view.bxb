@@ -1,0 +1,116 @@
+result-view {
+  match {
+    coachingDustResponseConcept (coaching)
+  }
+
+  render {
+    layout {
+      section {
+        content {
+          if (coaching.code == 200 || coaching.code == 201) {
+            single-line {
+              text {
+                style (Title_M)
+                value ("미세먼지 코칭")
+              }
+            }
+            
+            paragraph {
+              style (Detail_M)
+              value ("#{value(coaching.coachingMessage)}")
+            }
+            
+            divider
+            single-line {
+              text {
+                style (Title_M)
+                value ("측정된 미세먼지")
+              }
+            }
+            
+            single-line {
+              text {
+                style (Detail_L)
+                value ("미세먼지: #{value(coaching.latestDust.pm100)}")
+              }
+            }
+            single-line {
+              text {
+                style (Detail_L)
+                value ("초미세먼지: #{value(coaching.latestDust.pm25)}")
+              }
+            }
+            single-line {
+              switch (coaching.latestDust.timeType) {
+                case (second) {
+                  text {
+                    style (Detail_M)
+                    value (" - #{value(coaching.latestDust.time)}초전 데이터입니다")
+                  }
+                }
+
+                case (minute) {
+                  text {
+                    style (Detail_M)
+                    value (" - #{value(coaching.latestDust.time)}분전 데이터입니다")
+                  }
+                }
+
+                case (hour) {
+                  text {
+                    style (Detail_M)
+                    value (" - #{value(coaching.latestDust.time)}시간전 데이터입니다")
+                  }
+                }
+
+                case (day) {
+                  text {
+                    style (Detail_M)
+                    value (" - #{value(coaching.latestDust.time)}일전 데이터입니다")
+                  }
+                }
+              }
+            }
+          }
+          
+          
+          if (coaching.code == 200 || coaching.code == 202) {
+            
+            divider
+            single-line {
+              text {
+                style (Title_L)
+                value ("주변 미세먼지")
+              }
+            }
+            
+            if (coaching.publicDust.pm100 >= 0) {
+              single-line {
+                text {
+                  style (Detail_L)
+                  value ("미세먼지: #{value(coaching.publicDust.pm100)}")
+                }
+              }
+            }
+            
+            if (coaching.publicDust.pm25 >= 0) {
+              single-line {
+                text {
+                  style (Detail_L)
+                  value ("초미세먼지: #{value(coaching.publicDust.pm25)}")
+                }
+              }
+            }
+            
+            single-line {
+              text {
+                style (Detail_M)
+                value (" - 위치: #{value(coaching.publicDust.address.levelOne)} #{value(coaching.publicDust.address.levelTwo)}")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
