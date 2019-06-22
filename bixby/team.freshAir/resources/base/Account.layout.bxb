@@ -1,0 +1,15 @@
+layout-macro-def(Account) {
+  content {
+    section {  // this macro returns a "section"
+      content {
+        
+        single-line {
+          text {
+            style (Detail_M)
+            value ("ID")
+          }
+        }
+      }
+    }
+  }
+}

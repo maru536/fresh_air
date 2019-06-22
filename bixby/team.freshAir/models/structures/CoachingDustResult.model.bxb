@@ -1,0 +1,21 @@
+structure (coachingDustResultConcept) {
+  description (coaching data)
+  
+  property (latestDust) {
+    type (latestDustConcept)
+    min (Required) 
+    max (One)
+  }
+  
+  property (publicDust) {
+    type (publicDustConcept)
+    min (Optional)
+    max (One)
+  }
+  
+  property (coachingMessage) {
+    type (coachingMessageConcept)
+    min (Required) 
+    max (One)
+  }
+}

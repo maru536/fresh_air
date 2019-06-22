@@ -1,0 +1,35 @@
+action (GetCurrentLocation) {
+  description (Get Current Location)
+  collect {
+    input (address) {
+      type (geo.GeocodedAddress)
+      min (Required) max (One)
+      default-init {
+        // Note: To enable current location access, in your capsule.bxb,
+        // add 'user-profile-access' to capsule.permissions
+        intent {
+          goal: geo.GeocodedAddress
+          route: geo.CurrentLocation
+        }
+      }
+    }
+  }
+  
+  output (addressConcept) {
+    evaluate {
+      if (exists(address.subLocalityOne) && exists(address.locality)) {
+        addressConcept {
+          levelOne: $expr(address.locality)
+          levelTwo: $expr(address.subLocalityOne)
+        }
+      }
+      else-if (exists(address.locality) && exists(address.levelOne.name)) {
+        addressConcept {
+          levelOne: $expr(address.levelOne.name)
+          levelTwo: $expr(address.locality)
+        }
+      }
+    }
+  }
+  type (Calculation)
+}

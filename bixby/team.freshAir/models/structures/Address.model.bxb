@@ -1,0 +1,15 @@
+structure (addressConcept) {
+  description (location)
+  
+  property (levelOne) {
+    type (addressLevelOneConcept)
+    min (Required) 
+    max (One)
+  }
+  
+  property (levelTwo) {
+    type (addressLevelTwoConcept)
+    min (Required) 
+    max (One)
+  }
+}

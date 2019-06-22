@@ -1,0 +1,5 @@
+train (t-fs2q8ec5718vbah9wpzwbxxd1) {
+  utterance ([g:addressConcept] 지금 위치 알려줘)
+  plan (Y2BkkC9ILUpLTC7RSytKLc5wzCzSS0xJATKLnfPzklMLShhAgBFEAAA=)
+  last-modified (1561193641289)
+}

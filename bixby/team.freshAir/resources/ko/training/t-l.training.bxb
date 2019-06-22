@@ -1,0 +1,5 @@
+train (t-lzsxykopku6rh8fhg4ax1qxu2) {
+  utterance ([g:latestDustConcept] 지금 미세먼지 알려줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561125445408)
+}

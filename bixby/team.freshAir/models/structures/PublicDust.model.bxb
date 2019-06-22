@@ -1,0 +1,15 @@
+structure (publicDustConcept) {
+  description (Public Dust data)
+  
+  property (pm100) {
+    type (PM100Concept)
+    min (Required) 
+    max (One)
+  }
+  
+  property (pm25) {
+    type (PM25Concept)
+    min (Required) 
+    max (One)
+  }
+}

@@ -1,0 +1,15 @@
+action (SignIn) {
+  description (__DESCRIPTION__)
+  collect {
+    input (id) {
+      type (idConcept)
+      min (Required) max (One)
+    }
+    input (passwd) {
+      type (passwdConcept)
+      min (Required) max (One)
+    }
+  }
+  output (signInResponseConcept)
+  type (Search)
+}

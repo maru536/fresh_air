@@ -1,0 +1,7 @@
+enum (timeTypeConcept) {
+  description (time type)
+  symbol (second)
+  symbol (minute)
+  symbol (hour)
+  symbol (day)
+}

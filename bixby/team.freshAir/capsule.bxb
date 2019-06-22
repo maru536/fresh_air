@@ -1,0 +1,23 @@
+capsule {
+  id (perfact.freshAir)
+  version (0.1.0)
+  format (3)
+  targets {
+    target (bixby-mobile-ko-KR)
+  }
+  permissions {
+    user-profile-access
+  }
+  runtime-flags {
+    concepts-inherit-super-type-features
+    modern-prompt-rejection
+    support-halt-effect-in-computed-inputs
+  }
+  
+  capsule-imports {
+    import (viv.geo) {
+      as (geo)
+      version(9.17.18)
+    }
+  }
+}

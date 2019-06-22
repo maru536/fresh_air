@@ -1,0 +1,8 @@
+structure (TodayPM100Concept) {
+  description (today PM100 list)
+  property (PM100) {
+    type (PM100Concept)
+    min (Required) 
+    max (Many)
+  }
+}

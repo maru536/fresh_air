@@ -1,0 +1,3 @@
+integer (timeConcept) {
+  description (Dust measurement time)
+}

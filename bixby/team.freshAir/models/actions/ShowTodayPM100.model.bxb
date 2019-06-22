@@ -1,0 +1,8 @@
+action (ShowTodayPM100) {
+  description (Show Today PM100)
+  collect {
+  }
+  
+  output (TodayPM100Concept)
+  type (Calculation)
+}

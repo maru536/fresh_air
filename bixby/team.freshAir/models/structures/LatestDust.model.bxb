@@ -1,0 +1,26 @@
+structure (latestDustConcept) {
+  description (information about dust)
+  property (pm100) {
+    type (PM100Concept)
+    min (Required) 
+    max (One)
+  }
+  
+  property (pm25) {
+    type (PM25Concept)
+    min (Required) 
+    max (One)
+  }
+  
+  property (time) {
+    type (timeConcept)
+    min (Required)
+    max (One)
+  }
+  
+  property (timeType) {
+    type (timeTypeConcept)
+    min (Required)
+    max (One)
+  }
+}

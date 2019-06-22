@@ -44,7 +44,7 @@ public class SignInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in);
 
         if (!PreferencesUtils.getUser(this).isEmpty()) {
-            startActivity(new Intent(SignInActivity.this.getApplicationContext(), DustActivity.class));
+            startActivity(new Intent(SignInActivity.this.getApplicationContext(), MainActivity.class));
         }
         // Set up the login form.
         mIdView = findViewById(R.id.id);
@@ -126,7 +126,7 @@ public class SignInActivity extends AppCompatActivity {
                 public void responseCallback(int _resultCode) {
                     if (_resultCode == 200) {
                         PreferencesUtils.saveUser(SignInActivity.this.getApplicationContext(), mId);
-                        startActivity(new Intent(SignInActivity.this.getApplicationContext(), DustActivity.class));
+                        startActivity(new Intent(SignInActivity.this.getApplicationContext(), MainActivity.class));
                     } else
                         mFailText.setVisibility(TextView.VISIBLE);
 

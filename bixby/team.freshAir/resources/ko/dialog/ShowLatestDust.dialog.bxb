@@ -1,0 +1,8 @@
+dialog (Result) {
+  match {
+    latestDustConcept (latestDust) {
+      from-output: ShowLatestDust
+    }
+  }
+  template("가장 최근에 측정된 미세먼지 농도입니다.")
+}

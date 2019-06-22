@@ -1,0 +1,38 @@
+input-view {
+  match {
+    idConcept (id) {
+      to-input: SignIn
+    }
+  }
+  
+  message ("계정명을 입력해주세요.")
+  
+  render {
+    form {
+      elements {
+        text-input {
+          id (id)
+          label (계정명)
+          type (idConcept)
+          max-length (20)
+          pattern {
+            regex ("^[a-z0-9]{5,20}$") {
+              on-error ("5자 이상, 20자 이하, 알파벳,숫자 허용")
+            }
+          }
+          value ("#{raw(id)}")
+        }
+      }
+      on-submit {
+        goal: idConcept
+        value: viv.core.FormElement(id)
+      }
+    }
+  }
+  
+  conversation-drivers {
+    conversation-driver {
+      template ("가입하기")
+    }
+  }
+}

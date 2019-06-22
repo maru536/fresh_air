@@ -1,0 +1,13 @@
+structure (responseBaseConcept) {
+  description (Response code and message)
+  
+  property (code) {
+    type (codeConcept)
+    min (Required) max (One)
+  }
+  
+  property (message) {
+    type (messageConcept)
+    min (Optional) max (One)
+  }
+}

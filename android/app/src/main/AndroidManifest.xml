@@ -37,11 +37,6 @@
         <activity android:name=".View.AppInfoActivity" />
         <activity android:name=".View.DeviceRegisterActivity" />
         <activity android:name=".View.MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -72,6 +67,11 @@
         <activity
             android:name=".View.SignInActivity"
             android:label="@string/title_activity_login">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity android:name=".View.SignUpActivity" />
     </application>

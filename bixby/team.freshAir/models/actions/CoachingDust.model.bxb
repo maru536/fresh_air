@@ -1,0 +1,15 @@
+action (coachingDustConcept) {
+  description (__DESCRIPTION__)
+  collect {
+    input (address) {
+      type (addressConcept)
+      min (Required) max (One)
+    }
+    input (userId) {
+      type (userIdConcept)
+      min (Required) max (One)
+    }
+  }
+  output (coachingDustResultConcept)
+  type (Search)
+}

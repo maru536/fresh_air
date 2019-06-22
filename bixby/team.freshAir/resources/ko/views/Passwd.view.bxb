@@ -1,0 +1,32 @@
+input-view {
+  match {
+    passwdConcept (passwd) {
+      to-input: SignIn
+    }
+  }
+  
+  message ("비밀번호를 입력해주세요.")
+  
+  render {
+    form {
+      elements {
+        text-input {
+          id (passwd)
+          label (비밀번호)
+          type (passwdConcept)
+          max-length (20)
+          pattern {
+            regex ("^[a-z0-9!@#$%^&*()-_+=|\\`~,./-]{6,20}$") {
+              on-error ("6자 이상, 20자 이하, 알파벳,숫자,일부 특수문자 허용")
+            }
+          }
+          value ("#{raw(passwd)}")
+        }
+      }
+      on-submit {
+        goal: passwdConcept
+        value: viv.core.FormElement(passwd)
+      }
+    }
+  }
+}

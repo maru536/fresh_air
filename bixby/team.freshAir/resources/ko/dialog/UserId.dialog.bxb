@@ -1,0 +1,7 @@
+dialog (Result) {
+  match {
+    userIdConcept (userId)
+  }
+  
+  template ("'${value(userId)}' 로그인되었습니다.")
+}
