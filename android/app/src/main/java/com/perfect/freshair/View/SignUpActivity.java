@@ -111,9 +111,9 @@ public class SignUpActivity extends AppCompatActivity {
             mServerInterface.signUp(mId, mPasswd, new ResponseCallback() {
                 @Override
                 public void responseCallback(int _resultCode) {
-                    if (_resultCode == 200) {
+                    if (_resultCode == 201) {
                         PreferencesUtils.saveUser(SignUpActivity.this.getApplicationContext(), mId);
-                        startActivity(new Intent(SignUpActivity.this.getApplicationContext(), DustActivity.class));
+                        startActivity(new Intent(SignUpActivity.this.getApplicationContext(), MainActivity.class));
                     }
                     else
                         mFailText.setVisibility(TextView.VISIBLE);

@@ -29,7 +29,7 @@ public class PreferencesUtils {
 
     public static String getDeviceAddress(Context _appContext) {
         SharedPreferences device = _appContext.getSharedPreferences(PREFERENCES_DEVICE, Context.MODE_PRIVATE);
-        return device.getString(ADDRESS, null);
+        return device.getString(ADDRESS, "");
     }
 
     public static boolean saveUser(Context _appContext, String _userId) {
@@ -41,7 +41,7 @@ public class PreferencesUtils {
 
     public static String getUser(Context _appContext) {
         SharedPreferences user = _appContext.getSharedPreferences(PREFERENCES_USER, Context.MODE_PRIVATE);
-        return user.getString(ID, null);
+        return user.getString(ID, "");
     }
 
     public static boolean saveGpsRequest(Context _appContext, boolean _gpsRequest) {
