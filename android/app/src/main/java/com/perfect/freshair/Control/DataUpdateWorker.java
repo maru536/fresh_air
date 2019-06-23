@@ -68,6 +68,7 @@ public class DataUpdateWorker extends Worker {
             if (serverInterface == null)
                 serverInterface = new GPSServerInterface();
 
+            statusDBHandler.add(new CurrentStatus(System.currentTimeMillis(), receivedDust, new Gps(new Position(0.0, 0.0), GpsProvider.UNKNOWN, 0.0f, new Satellite(0,0), 0, PositionStatus.UNKNOWN)));
             serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), latestDust, responseCallback);
 
             //gpsUtils.requestGPS(gpsCallback);
