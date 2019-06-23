@@ -15,13 +15,16 @@ import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Callback.GpsCallback;
+import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.StatusDBHandler;
 import com.perfect.freshair.Model.CurrentStatus;
 import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.Model.GpsProvider;
+import com.perfect.freshair.Model.LatestDust;
 import com.perfect.freshair.Model.Position;
 import com.perfect.freshair.Model.PositionStatus;
 import com.perfect.freshair.Model.Satellite;
@@ -29,17 +32,21 @@ import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
 import com.perfect.freshair.Utils.GpsUtils;
 import com.perfect.freshair.Utils.MyBLEPacketUtilis;
+import com.perfect.freshair.Utils.PreferencesUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataUpdateWorker extends Worker {
+    private static final String TAG = "DataUpdateWorker";
 
     private BlueToothUtils blueToothUtils;
     private boolean isDustReceive;
+    private LatestDust latestDust;
     private Dust receivedDust;
     private StatusDBHandler statusDBHandler;
     private GpsUtils gpsUtils;
+    private GPSServerInterface serverInterface = null;
 
     private ScanCallback scanCallback = new ScanCallback() {
         @Override
@@ -57,19 +64,36 @@ public class DataUpdateWorker extends Worker {
 
             isDustReceive = true;
             receivedDust = new Dust(MyBLEPacketUtilis.getMajor(majorMinor), MyBLEPacketUtilis.getMinor(majorMinor));
-            gpsUtils.requestGPS(gpsCallback);
+            latestDust = new LatestDust(System.currentTimeMillis(), receivedDust);
+            if (serverInterface == null)
+                serverInterface = new GPSServerInterface();
+
+            serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), latestDust, responseCallback);
+
+            //gpsUtils.requestGPS(gpsCallback);
             blueToothUtils.scanLeDevice(false, scanCallback);
-            Log.i("Major", MyBLEPacketUtilis.getMajor(majorMinor) + "");
-            Log.i("Minor", MyBLEPacketUtilis.getMinor(majorMinor) + "");
+            Log.i("Major", latestDust.getPm25() + "");
+            Log.i("Minor", latestDust.getPm100() + "");
 
             Intent intent = new Intent();
             intent.setAction(CommonEnumeration.dataUpdateAction);
+            intent.putExtra("pm100", receivedDust.getPm100());
+            intent.putExtra("pm25", receivedDust.getPm25());
             getApplicationContext().sendBroadcast(intent);
         }
 
         @Override
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
+        }
+    };
+
+
+
+    private final ResponseCallback responseCallback = new ResponseCallback() {
+        @Override
+        public void responseCallback(int _resultCode) {
+            Log.i(TAG, ""+ _resultCode);
         }
     };
 
@@ -98,6 +122,7 @@ public class DataUpdateWorker extends Worker {
                 ScanSettings scanSettings = scanSettingsBuilder.build();
                 isDustReceive = false;
                 receivedDust = null;
+                latestDust = null;
                 blueToothUtils.scanLeDevice(true, filters, scanSettings, scanCallback);
             } else {
                 Log.i(this.toString(), "bluetooth is not enabled or supported.");

@@ -36,6 +36,7 @@ import com.perfect.freshair.DB.DustGPSDBHandler;
 import com.perfect.freshair.Model.DustGPS;
 import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.Model.GpsSetting;
+import com.perfect.freshair.Model.LatestDust;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.GpsUtils;
 import com.perfect.freshair.Utils.PreferencesUtils;
@@ -329,7 +330,8 @@ public class DustActivity extends NavActivity implements View.OnClickListener {
         @Override
         public void onLocationChanged(Location _location) {
             DustGPS newLoc = new DustGPS(mDust, _location);
-            mServerInterface.postDustGPS(PreferencesUtils.getUser(appContext), newLoc, mPostDustGPSCallback);
+            LatestDust latestDust = new LatestDust(System.currentTimeMillis(), mDust, mDust);
+            mServerInterface.postDust(PreferencesUtils.getUser(appContext), latestDust, mPostDustGPSCallback);
             Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
             mLocDB.add(newLoc);
             mGpsUtils.stopGPS();

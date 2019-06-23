@@ -35,7 +35,7 @@
     <string name="MY_BLE_SCANNING">중단</string>
     <string name="APP_BACKGROUND_WORKER_TAG">com.perfect.freshair.my_background_work</string>
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
+    <string name="prompt_id">ID</string>
     <string name="prompt_password">Password (optional)</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_up">Sign up</string>

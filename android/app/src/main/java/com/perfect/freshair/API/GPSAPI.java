@@ -9,13 +9,14 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 
 public interface GPSAPI {
-    @POST("dust")
-    Call<JsonObject> postDustWithGPS(@Body JsonObject body);
+    @POST("1.0/dust")
+    Call<JsonObject> postDust(@Header("userId") String userId,
+                                @Body JsonObject body);
 
-    @POST("user")
-    Call<JsonObject> userRegist(@Body JsonObject body);
+    @POST("1.0/signUp")
+    Call<JsonObject> signUp(@Body JsonObject body);
 
-    @GET("user")
-    Call<JsonObject> attemptSignIn(@Header("userId") String userId,
-                                   @Header("passwd") String passwd);
+    @GET("1.0/signIn")
+    Call<JsonObject> signIn(@Header("id") String userId,
+                            @Header("passwd") String passwd);
 }

@@ -44,6 +44,7 @@ import com.perfect.freshair.Control.DrawerItemClickListener;
 import com.perfect.freshair.Control.NavArrayAdapter;
 import com.perfect.freshair.DB.StatusDBHandler;
 import com.perfect.freshair.Model.CurrentStatus;
+import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.Model.TempData;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
@@ -70,15 +71,17 @@ public class MainActivity extends AppCompatActivity {
     OneTimeWorkRequest oneTimeWorkRequest;
     LineChart lineChart;
     TempData[] dataList;
+    Dust receivedDust;
     private BlueToothUtils blueToothUtils;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(MainActivity.this.toString(), "onReceive");
+            receivedDust = new Dust(intent.getIntExtra("pm25", -1), intent.getIntExtra("pm100", -1));
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    checkDustDisplay();
+                    checkDustDisplay(receivedDust);
                     updateChartData();
                 }
             });
@@ -229,6 +232,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void checkDustDisplay(Dust dust) {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getApplicationContext().getString(R.string.my_preference_ble_file_key), Context.MODE_PRIVATE);
+        String defaultValue = "none";
+        String deviceAddr = sharedPreferences.getString(getApplicationContext().getString(R.string.my_preference_ble_addr_key), defaultValue);
+
+        if (!blueToothUtils.getBLEEnabled() || deviceAddr.equals(defaultValue) ) {
+            textDust.setVisibility(View.INVISIBLE);
+            textNoDevice.setVisibility(View.VISIBLE);
+            textNoValue.setVisibility(View.INVISIBLE);
+            textCoach.setVisibility(View.INVISIBLE);
+        } else {
+            textDust.setText(getDustString(dust.getPm25(), dust.getPm100()));
+            textDust.setVisibility(View.VISIBLE);
+            textCoach.setVisibility(View.VISIBLE);
+            textNoDevice.setVisibility(View.INVISIBLE);
+            textNoValue.setVisibility(View.INVISIBLE);
+        }
+    }
+
     private void checkDustDisplay() {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getApplicationContext().getString(R.string.my_preference_ble_file_key), Context.MODE_PRIVATE);
         String defaultValue = "none";
@@ -242,7 +264,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             CurrentStatus currentStatus = statusDBHandler.latestRow();
             if (currentStatus != null) {
-                Log.i("dust",currentStatus.getDust().getPm25()+"");
                 textDust.setText(getDustString(currentStatus.getDust().getPm25(), currentStatus.getDust().getPm100()));
                 textDust.setVisibility(View.VISIBLE);
                 textCoach.setVisibility(View.VISIBLE);

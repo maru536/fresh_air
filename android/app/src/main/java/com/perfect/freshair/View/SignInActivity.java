@@ -121,7 +121,7 @@ public class SignInActivity extends AppCompatActivity {
                 mServerInterface = new GPSServerInterface();
 
             //request Id
-            mServerInterface.attemptSignIn(mId, mPasswd, new ResponseCallback() {
+            mServerInterface.signIn(mId, mPasswd, new ResponseCallback() {
                 @Override
                 public void responseCallback(int _resultCode) {
                     if (_resultCode == 200) {

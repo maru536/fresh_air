@@ -1,5 +1,5 @@
 package com.perfect.freshair.API;
 
 public class ServerProperty {
-    public static final String GPS_SERVER_ADDR = "https://l7vg07zv4e.execute-api.us-west-2.amazonaws.com/prd/";
+    public static final String GPS_SERVER_ADDR = "http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/";
 }

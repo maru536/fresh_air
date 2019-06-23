@@ -136,8 +136,14 @@ public class MyBLEPacketUtilis {
         int ret = 0;
         if(data == null)
             return ret;
-        ret |= (0xff & data[1]);
-        ret |= ((0xff & data[0])<<8);
+
+        ret += (0x0f & data[1]) * pow10(0);
+        ret += ((0xf0 & data[1]) >> 4) * pow10(1);
+        ret += ((0x0f & data[0])) * pow10(2);
+        ret += ((0xf0 & data[0]) >> 4) * pow10(3);
+
+        //ret |= (0xff & data[1]);
+        //ret |= ((0xff & data[0])<<8);
         return ret;
     }
 
@@ -146,8 +152,23 @@ public class MyBLEPacketUtilis {
         int ret = 0;
         if(data == null)
             return ret;
-        ret |= (0xff & data[3]);
-        ret |= ((0xff & data[2])<<8);
+
+        ret += (0x0f & data[3]) * pow10(0);
+        ret += ((0xf0 & data[3]) >> 4) * pow10(1);
+        ret += ((0x0f & data[2])) * pow10(2);
+        ret += ((0xf0 & data[2]) >> 4) * pow10(3);
+
+        //ret |= (0xff & data[3]);
+        //ret |= ((0xff & data[2])<<8);
         return ret;
+    }
+
+    private static int pow10(int up) {
+        int result = 1;
+
+        while (up-- > 0)
+            result *= 10;
+
+        return result;
     }
 }

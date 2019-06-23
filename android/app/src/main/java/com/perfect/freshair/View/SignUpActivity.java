@@ -108,7 +108,7 @@ public class SignUpActivity extends AppCompatActivity {
             if (mServerInterface == null)
                 mServerInterface = new GPSServerInterface();
 
-            mServerInterface.userRegist(mId, mPasswd, new ResponseCallback() {
+            mServerInterface.signUp(mId, mPasswd, new ResponseCallback() {
                 @Override
                 public void responseCallback(int _resultCode) {
                     if (_resultCode == 200) {

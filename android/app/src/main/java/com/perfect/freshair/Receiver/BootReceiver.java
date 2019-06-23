@@ -28,6 +28,7 @@ import com.perfect.freshair.DB.DustGPSDBHandler;
 import com.perfect.freshair.Model.DustGPS;
 import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.Model.GpsSetting;
+import com.perfect.freshair.Model.LatestDust;
 import com.perfect.freshair.Utils.GpsUtils;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
@@ -196,7 +197,8 @@ public class BootReceiver extends BroadcastReceiver {
         @Override
         public void onLocationChanged(Location _location) {
             DustGPS newLoc = new DustGPS(dustVaule, _location);
-            mAPIServer.postDustGPS(PreferencesUtils.getUser(appContext), newLoc, mResponseCallback);
+            LatestDust latestDust = new LatestDust(System.currentTimeMillis(), dustVaule, dustVaule);
+            mAPIServer.postDust(PreferencesUtils.getUser(appContext), latestDust, mResponseCallback);
             Log.i(TAG, "Provider: " +_location.getProvider()+ "Loc: " +newLoc.toString());
             mLocDB.add(newLoc);
             mGpsUtils.stopGPS();

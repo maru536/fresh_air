@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.gson.JsonObject;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Model.DustGPS;
+import com.perfect.freshair.Model.LatestDust;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -33,14 +34,12 @@ public class GPSServerInterface {
                 .build();
     }
 
-    public void postDustGPS(String _userId, DustGPS _dustGPS, final ResponseCallback _callback) {
+    public void postDust(String _userId, LatestDust latestDust, final ResponseCallback _callback) {
         GPSAPI gpsApi = mRetrofit.create(GPSAPI.class);
 
-        JsonObject requestBody = _dustGPS.toJsonObject();
-        requestBody.addProperty("userId", _userId);
-        requestBody.addProperty("timestamp", System.currentTimeMillis());
+        JsonObject requestBody = latestDust.toJsonObject();
 
-        Call<JsonObject> request = gpsApi.postDustWithGPS(requestBody);
+        Call<JsonObject> request = gpsApi.postDust(_userId, requestBody);
         request.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
@@ -54,14 +53,14 @@ public class GPSServerInterface {
         });
     }
 
-    public void userRegist(String _userId, String _passwd, final ResponseCallback _callback) {
+    public void signUp(String _userId, String _passwd, final ResponseCallback _callback) {
         GPSAPI gpsApi = mRetrofit.create(GPSAPI.class);
 
         JsonObject userInfo = new JsonObject();
-        userInfo.addProperty("userId", _userId);
+        userInfo.addProperty("id", _userId);
         userInfo.addProperty("passwd", _passwd);
 
-        Call<JsonObject> request = gpsApi.userRegist(userInfo);
+        Call<JsonObject> request = gpsApi.signUp(userInfo);
         request.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
@@ -75,10 +74,10 @@ public class GPSServerInterface {
         });
     }
 
-    public void attemptSignIn(String _userId, String _passwd, final ResponseCallback _callback) {
+    public void signIn(String _userId, String _passwd, final ResponseCallback _callback) {
         GPSAPI gpsApi = mRetrofit.create(GPSAPI.class);
 
-        Call<JsonObject> request = gpsApi.attemptSignIn(_userId, _passwd);
+        Call<JsonObject> request = gpsApi.signIn(_userId, _passwd);
         request.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
@@ -94,7 +93,7 @@ public class GPSServerInterface {
 
     private void responseHandler(JsonObject _response, final ResponseCallback _callback) {
         try {
-            _callback.responseCallback(_response.get("resultCode").getAsInt());
+            _callback.responseCallback(_response.get("code").getAsInt());
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(TAG, RESPONSE_FAIL_MESSAGE);
