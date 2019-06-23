@@ -1,6 +1,8 @@
 dialog (Result) {
   match {
-    userIdConcept (userId)
+    userIdConcept (userId) {
+      from-output: SaveUserId
+    }
   }
   
   template ("'${value(userId)}' 로그인되었습니다.")

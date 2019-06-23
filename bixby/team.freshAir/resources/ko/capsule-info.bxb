@@ -1,0 +1,20 @@
+capsule-info {
+  display-name (미세코치)
+  developer-name (Team Perfact, Inc.)
+  icon-asset (images/icons/dust.png)
+  description (Dust Coaching for human.)
+  search-keywords {
+    keyword (dust)
+    keyword (coaching)
+    keyword (미세먼지)
+    keyword (미세코치)
+    keyword (코치)
+    keyword (코칭)
+  }
+  dispatch-name (미세코치)
+  dispatch-aliases {
+    alias (미세코칭)
+  }
+  action-bg-color (#BF2519)
+  action-fg-color (#FFFFFF)
+}

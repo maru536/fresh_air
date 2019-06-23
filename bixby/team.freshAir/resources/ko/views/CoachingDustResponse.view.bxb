@@ -7,7 +7,7 @@ result-view {
     layout {
       section {
         content {
-          if (coaching.code == 200 || coaching.code == 201) {
+          if (exists(coaching.coachingMessage)) {
             single-line {
               text {
                 style (Title_M)
@@ -19,7 +19,9 @@ result-view {
               style (Detail_M)
               value ("#{value(coaching.coachingMessage)}")
             }
-            
+          }
+
+          if (exists(coaching.latestDust)) {
             divider
             single-line {
               text {
@@ -73,9 +75,7 @@ result-view {
             }
           }
           
-          
-          if (coaching.code == 200 || coaching.code == 202) {
-            
+         if (exists(coaching.publicDust)) {
             divider
             single-line {
               text {
@@ -83,7 +83,7 @@ result-view {
                 value ("주변 미세먼지")
               }
             }
-            
+              
             if (coaching.publicDust.pm100 >= 0) {
               single-line {
                 text {

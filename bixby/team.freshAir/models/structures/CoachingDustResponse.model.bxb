@@ -3,25 +3,25 @@ structure (coachingDustResponseConcept) {
   
   property (code) {
     type (codeConcept)
-    min (Required) 
+    min (Optional) 
     max (One)
   }
   
   property (latestDust) {
     type (latestDustConcept)
-    min (Required) 
+    min (Optional) 
     max (One)
   }
   
   property (publicDust) {
     type (publicDustConcept)
-    min (Required)
+    min (Optional)
     max (One)
   }
   
   property (coachingMessage) {
     type (coachingMessageConcept)
-    min (Required) 
+    min (Optional) 
     max (One)
   }
 }

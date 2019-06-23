@@ -1,0 +1,12 @@
+action (SignOut) {
+  description (__DESCRIPTION__)
+  collect {
+  }
+  
+  type (Constructor)
+  output (userIdConcept) {
+    evaluate {
+      $expr ('')
+    }
+  }
+}

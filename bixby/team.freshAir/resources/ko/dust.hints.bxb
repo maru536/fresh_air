@@ -1,0 +1,8 @@
+hints {
+  uncategorized {
+    utterance (지금 미세먼지 알려줘)
+    utterance (코치 해줘)
+    utterance (로그인 해줘)
+    utterance (로그아웃 해줘)
+  }
+}

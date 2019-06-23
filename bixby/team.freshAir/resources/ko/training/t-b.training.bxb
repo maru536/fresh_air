@@ -1,0 +1,5 @@
+train (t-bojds95b59cuain8ivcd0e1or) {
+  utterance ([g:SignOut] 로그아웃 해줘)
+  plan (Y2BikCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGGQwJAPzkzP8y8tYWAEQgYoBpIA)
+  last-modified (1561297066068)
+}

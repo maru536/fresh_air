@@ -1,0 +1,6 @@
+vocab (timeTypeConcept) {
+  "second" {"초"}
+  "minute" {"분"}
+  "hour" {"시"}
+  "day" {"일"}
+}

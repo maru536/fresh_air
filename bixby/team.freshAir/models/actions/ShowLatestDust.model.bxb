@@ -9,9 +9,43 @@ action (ShowLatestDust) {
           goal: SaveUserId
         }
       }
+      
+      validate {
+        if (userId == '') {
+          replan {
+            intent {
+              subplan {
+                goal: SignIn
+              }
+              goal: SaveUserId
+            }
+          }
+        }
+      }
     }
   }
   
-  output (latestDustConcept)
+  output (latestDustConcept) {
+    throws {
+      error (FailApiCall) {
+        on-catch {
+          halt {
+            dialog {
+              template ("미세먼지 정보에 접근할 수 없어요.")
+            }
+          }
+        }
+      }
+      error (NoLatestDust) {
+        on-catch {
+          halt {
+            dialog {
+              template ("측정된 미세먼지 정보가 없어요.")
+            }
+          }
+        }
+      }
+    }
+  }
   type (Calculation)
 }

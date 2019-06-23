@@ -3,29 +3,18 @@ package team.perfect.fresh_air.Model;
 import team.perfect.fresh_air.DAO.Air;
 
 public class ResponseAir extends Response {
-    private int pm100;
-    private int pm25;
+    private Air airData;
 
-    public ResponseAir(int code, String message, int pm100, int pm25) {
+    public ResponseAir(int code, String message, Air airData) {
         super(code, message);
-        this.pm100 = pm100;
-        this.pm25 = pm25;
+        this.airData = airData;
     }
 
-    public int getPm100() {
-        return this.pm100;
+    public Air getAirData() {
+        return this.airData;
     }
 
-    public void setPm100(int pm100) {
-        this.pm100 = pm100;
+    public void setAirData(Air airData) {
+        this.airData = airData;
     }
-
-    public int getPm25() {
-        return this.pm25;
-    }
-
-    public void setPm25(int pm25) {
-        this.pm25 = pm25;
-    }
-
 }

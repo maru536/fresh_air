@@ -127,7 +127,7 @@ public class RestApiController {
         }
         else {
             if (airData.isPresent()) {
-                return new ResponseAir(202, "Only air data", airData.get().getPm100(), airData.get().getPm25());
+                return new ResponseAir(202, "Only air data", airData.get());
             }
             else {
                 return new Response(404, "There is no data");

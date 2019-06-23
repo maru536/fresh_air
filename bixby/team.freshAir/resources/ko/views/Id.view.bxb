@@ -29,10 +29,4 @@ input-view {
       }
     }
   }
-  
-  conversation-drivers {
-    conversation-driver {
-      template ("가입하기")
-    }
-  }
 }

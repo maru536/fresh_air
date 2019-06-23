@@ -18,6 +18,20 @@ action (CoachingDust) {
           goal: SaveUserId
         }
       }
+      
+      
+      validate {
+        if (userId == '') {
+          replan {
+            intent {
+              subplan {
+                goal: SignIn
+              }
+              goal: SaveUserId
+            }
+          }
+        }
+      }
     }
   }
   output (coachingDustResponseConcept)

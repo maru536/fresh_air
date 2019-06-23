@@ -26,40 +26,108 @@ module.exports.function = function coachingDust (address, userId) {
   const oneHour = 60*oneMinute;
   const oneDay = 24*oneHour;
   
-  var diffTime = dates.ZonedDateTime.now().getMillisFromEpoch() - response.latestDust.time;
-  var type;
-  var time;
-  
-  if (diffTime < oneMinute) {
-    type = "second";
-    time = Math.round(diffTime/oneSecond);
-  }
-  else if (diffTime < oneHour) {
-    type = "minute";
-    time = Math.round(diffTime/oneMinute);
-  }
-  else if (diffTime < oneDay) {
-    type = "hour";
-    time = Math.round(diffTime/oneHour);
+  if (response != null) {
+    console.log("response is not null");
+    if (response.coachingMessage != null) {
+      console.log("coachingMessage is not null");
+      if (response.latestDust != null) {
+        console.log("latestDust is not null");
+        var diffTime = dates.ZonedDateTime.now().getMillisFromEpoch() - response.latestDust.time;
+        var type;
+        var time;
+
+        if (diffTime < oneMinute) {
+          type = "second";
+          time = Math.round(diffTime/oneSecond);
+        }
+        else if (diffTime < oneHour) {
+          type = "minute";
+          time = Math.round(diffTime/oneMinute);
+        }
+        else if (diffTime < oneDay) {
+          type = "hour";
+          time = Math.round(diffTime/oneHour);
+        }
+        else {
+          type = "day"
+          time = Math.round(diffTime/oneDay);
+        }
+        
+        if (response.airData != null) {
+          console.log("airData is not null");
+          return {
+            coachingMessage: response.coachingMessage,
+            latestDust: {
+              timeType: type,
+              time: time, 
+              pm100: response.latestDust.pm100,
+              pm25: response.latestDust.pm25
+            },
+            publicDust: {
+              pm100: response.airData.pm100,
+              pm25: response.airData.pm25,
+              address: address
+            }
+          }
+        }
+        else {
+          console.log("airData is null");
+          return {
+            coachingMessage: response.coachingMessage,
+            latestDust: {
+              timeType: type,
+              time: time, 
+              pm100: response.latestDust.pm100,
+              pm25: response.latestDust.pm25
+            }
+          }
+        }
+      }
+      else {
+        console.log("latestDust is null");
+        if (response.airData != null) {
+          console.log("airData is not null");
+          return {
+            coachingMessage: response.coachingMessage,
+            publicDust: {
+              pm100: response.airData.pm100,
+              pm25: response.airData.pm25,
+              address: address
+            }
+          }
+        }
+        else {
+          console.log("airData is null");
+          return {
+            coachingMessage: response.coachingMessage
+          }
+        }
+      }
+    }
+    else {
+      console.log("coachingMessage is null");
+      if (response.airData != null) {
+        console.log("airData is not null");
+        return {
+          publicDust: {
+            pm100: response.airData.pm100,
+            pm25: response.airData.pm25,
+            address: address
+          }
+        }
+      }
+      else {
+        console.log("airData is null");
+        return {
+          code: 500
+        }
+      }
+    }
   }
   else {
-    type = "day"
-    time = Math.round(diffTime/oneDay);
-  }
-  
-  return {
-    code: response.code,
-    coachingMessage: response.coachingMessage,
-    latestDust: {
-      timeType: type,
-      time: time, 
-      pm100: response.latestDust.pm100,
-      pm25: response.latestDust.pm25
-    },
-    publicDust: {
-      pm100: response.airData.pm100,
-      pm25: response.airData.pm25,
-      address: address
+    console.log("response is null");
+    return {
+      code: 500
     }
   }
 }

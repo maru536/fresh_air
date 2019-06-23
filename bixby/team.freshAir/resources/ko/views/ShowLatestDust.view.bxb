@@ -23,4 +23,10 @@ result-view {
       }
     }
   }
+  
+  conversation-drivers {
+    conversation-driver {
+      template ("코치 해줘")
+    }
+  }
 }

@@ -1,0 +1,5 @@
+train (t-8lpm5l97ym726p5hjk658cpc0) {
+  utterance ([g:latestDustConcept] 최신 미세먼지 보여줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561308803762)
+}

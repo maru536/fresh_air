@@ -1,6 +1,6 @@
 capsule {
   id (perfact.freshAir)
-  version (0.1.0)
+  version (1.0.2)
   format (3)
   targets {
     target (bixby-mobile-ko-KR)
@@ -12,6 +12,45 @@ capsule {
     concepts-inherit-super-type-features
     modern-prompt-rejection
     support-halt-effect-in-computed-inputs
+  }
+  
+  marketplace-constraints {
+    country-constraints {
+      allowed-list {
+        allow (KR)
+      }
+    }
+  }
+  
+  store-sections {
+    section (HealthAndFitness) {
+      visibility-constraints {
+        country-constraints {
+          allowed-list {
+            allow (KR)
+          }
+        }
+        language-constraints {
+          allowed-list {
+            allow (ko-KR)
+          }
+        }
+      }
+    }
+    section (Weather) {
+      visibility-constraints {
+        country-constraints {
+          allowed-list {
+            allow (KR)
+          }
+        }
+        language-constraints {
+          allowed-list {
+            allow (ko-KR)
+          }
+        }
+      }
+    }
   }
   
   capsule-imports {

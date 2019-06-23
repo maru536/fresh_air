@@ -1,0 +1,9 @@
+dialog (Result) {
+  match {
+    userIdConcept (userId) {
+      from-output: SignOut
+    }
+  }
+  
+  template ("로그아웃 되었습니다.")
+}
