@@ -1,13 +1,7 @@
 structure (latestDustConcept) {
   description (information about dust)
-  property (pm100) {
-    type (PM100Concept)
-    min (Required) 
-    max (One)
-  }
-  
-  property (pm25) {
-    type (PM25Concept)
+  property (dust) {
+    type (dustConcept)
     min (Required) 
     max (One)
   }

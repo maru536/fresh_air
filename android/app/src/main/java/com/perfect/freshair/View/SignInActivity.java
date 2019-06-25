@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.signin.SignIn;
 import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Common.PermissionEnumeration;
@@ -39,6 +40,7 @@ public class SignInActivity extends AppCompatActivity {
     private TextView mFailText;
     Button mIdSignInButton;
     Button mIdSignUpButton;
+    public static SignInActivity activity = null;
 
     private String mId;
     private String mPasswd;
@@ -49,20 +51,10 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
-
-        //permission
-        /*
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PermissionEnumeration.MY_ACCESS_FINE_LOCATION);
-        }
-        */
+        activity = this;
 
         if (!PreferencesUtils.getUser(this).isEmpty()) {
-            startActivity(new Intent(SignInActivity.this.getApplicationContext(), MainActivity.class));
+            startMainActivity();
         }
         // Set up the login form.
         mIdView = findViewById(R.id.id);
@@ -144,7 +136,7 @@ public class SignInActivity extends AppCompatActivity {
                 public void responseCallback(int _resultCode) {
                     if (_resultCode == 200) {
                         PreferencesUtils.saveUser(SignInActivity.this.getApplicationContext(), mId);
-                        startActivity(new Intent(SignInActivity.this.getApplicationContext(), MainActivity.class));
+                        startMainActivity();
                     } else
                         mFailText.setVisibility(TextView.VISIBLE);
 
@@ -200,37 +192,9 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PermissionEnumeration.MY_ACCESS_COARSE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                } else {
-                    Toast.makeText(this, "sorry, this app requires bluetooth feature.", Toast.LENGTH_SHORT).show();
-                    finish();
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-            case PermissionEnumeration.MY_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                } else {
-                    Toast.makeText(this, "sorry, this app requires bluetooth feature.", Toast.LENGTH_SHORT).show();
-                    finish();
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-        }
+    private void startMainActivity() {
+        startActivity(new Intent(SignInActivity.this.getApplicationContext(), MainActivity.class));
+        this.finish();
     }
 }
 

@@ -43,8 +43,10 @@ module.exports.function = function currentDustInfo (userId) {
     return {
       time: time,
       timeType: type,
-      pm100: response.dust.pm100,
-      pm25: response.dust.pm25
+      dust: {
+        pm100: response.dust.pm100,
+        pm25: response.dust.pm25
+      }
     }
   }
   else if (response != null && response.code != null && response.code == 404) {

@@ -1,0 +1,109 @@
+layout-macro-def(publicDustResult) {
+  params {
+    param (publicDust) {
+      type (publicDustConcept)
+      min (Required)
+      max (One)
+    }
+  }
+
+  content {
+    section {  // this macro returns a "section"
+      title {
+        template ("주변 미세먼지")
+      }
+      
+      content {
+        single-line {
+          text {
+            style (Detail_L)
+            value ("미세먼지")
+          }
+          spacer
+          if (publicDust.dust.pm100 < 30) {
+            image {
+              background-color (Transparent)
+              shape (Square)
+              url ("/images/icons/good.png")
+            }
+          }
+          else-if (publicDust.dust.pm100 < 80) {
+            image {
+              background-color (Transparent)
+              shape (Square)
+              url ("/images/icons/normal.png")
+            }
+          }
+          else-if (publicDust.dust.pm100 < 150) {
+            image {
+              background-color (Transparent)
+              shape (Square)
+              url ("/images/icons/bad.png")
+            }
+          }
+          else {
+            image {
+              background-color (Transparent)
+              shape (Square)
+              url ("/images/icons/very_bad.png")
+            }
+          }
+          
+          text {
+            style (Detail_L)
+            value ("#{value(publicDust.dust.pm100)}㎍/㎥")
+          }
+        }
+        
+        
+        single-line {
+          text {
+            style (Detail_L)
+            value ("초미세먼지")
+          }
+          spacer
+          if (publicDust.dust.pm25 < 15) {
+            image {
+              background-color (Transparent)
+              shape (Square)
+              url ("/images/icons/good.png")
+            }
+          }
+          else-if (publicDust.dust.pm25 < 35) {
+            image {
+              background-color (Transparent)
+              shape (Square)
+              url ("/images/icons/normal.png")
+            }
+          }
+          else-if (publicDust.dust.pm25 < 75) {
+            image {
+              background-color (Transparent)
+              shape (Square)
+              url ("/images/icons/bad.png")
+            }
+          }
+          else {
+            image {
+              background-color (Transparent)
+              shape (Square)
+              url ("/images/icons/very_bad.png")
+            }
+          }
+          
+          text {
+            style (Detail_L)
+            value ("#{value(publicDust.dust.pm25)}㎍/㎥")
+          }
+        }
+        
+        single-line {
+          text {
+            style (Detail_M)
+            value (" - 위치: #{value(publicDust.address.levelOne)} #{value(publicDust.address.levelTwo)}")
+          }
+        }
+      }
+    }
+  }
+}

@@ -94,19 +94,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
+        }
+
         //appcompat toolbar initialization
         Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.round_menu_24);
-
-        //permission
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PermissionEnumeration.MY_ACCESS_FINE_LOCATION);
-        }
 
         intentFilter = new IntentFilter();
         intentFilter.addAction(CommonEnumeration.dataUpdateAction);
@@ -174,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
 
         OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(DataUpdateWorker.class).setBackoffCriteria(
                 BackoffPolicy.LINEAR,
-                OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
+                20000L,
                 TimeUnit.MILLISECONDS).addTag("mywork").build();
         Log.i(toString(), "enqueue");
         WorkManager.getInstance().cancelAllWorkByTag("mywork");
@@ -192,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getDustString(int pm2dot5, int pm10) {
-        return String.format("현재 초미세먼지 농도는 %d㎍/㎥, 미세먼지 농도는 %d㎍/㎥로 \"%s\"입니다.", pm2dot5, pm10,  MicroDustUtils.parseDustValue(pm2dot5));
+        return String.format("현재 미세먼지 농도는 %d㎍/㎥, 초미세먼지 농도는 %d㎍/㎥로 \"%s\"입니다.", pm10, pm2dot5,  MicroDustUtils.parseDustValue(pm10));
     }
 
     private void updateChartData()
@@ -310,9 +306,10 @@ public class MainActivity extends AppCompatActivity {
         //worker
         WorkManager.getInstance().cancelAllWorkByTag("mywork");
         saveRequest =
-                new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 20, TimeUnit.MINUTES, 5, TimeUnit.MINUTES).build();
+                new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 10, TimeUnit.SECONDS, 10, TimeUnit.SECONDS).build();
         WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.KEEP, saveRequest);
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -324,20 +321,6 @@ public class MainActivity extends AppCompatActivity {
                     // contacts-related task you need to do.
                 } else {
                     Toast.makeText(this, "sorry, this app requires bluetooth feature.", Toast.LENGTH_SHORT).show();
-                    finish();
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-            case PermissionEnumeration.MY_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                } else {
-                    Toast.makeText(this, "sorry, this app requires bluetooth feature.", Toast.LENGTH_SHORT).show();
-                    finish();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }

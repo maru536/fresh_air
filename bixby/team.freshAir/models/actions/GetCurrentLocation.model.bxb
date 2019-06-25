@@ -17,7 +17,13 @@ action (GetCurrentLocation) {
   
   output (addressConcept) {
     evaluate {
-      if (exists(address.subLocalityOne) && exists(address.locality)) {
+      if (exists(address.levelOne.name) && address.levelOne.name == '경기도' && exists(address.locality)) {
+        addressConcept {
+          levelOne: $expr(address.levelOne.name)
+          levelTwo: $expr(address.locality)
+        }
+      }
+      else-if (exists(address.subLocalityOne) && exists(address.locality)) {
         addressConcept {
           levelOne: $expr(address.locality)
           levelTwo: $expr(address.subLocalityOne)

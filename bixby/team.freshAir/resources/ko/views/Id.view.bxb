@@ -1,8 +1,6 @@
 input-view {
   match {
-    idConcept (id) {
-      to-input: SignIn
-    }
+    idConcept (id)
   }
   
   message ("계정명을 입력해주세요.")
@@ -27,6 +25,12 @@ input-view {
         goal: idConcept
         value: viv.core.FormElement(id)
       }
+    }
+  }
+  
+  conversation-drivers {
+    conversation-driver {
+      template ("가입해줘")
     }
   }
 }

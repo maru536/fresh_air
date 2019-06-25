@@ -1,8 +1,6 @@
 input-view {
   match {
-    passwdConcept (passwd) {
-      to-input: SignIn
-    }
+    passwdConcept (passwd)
   }
   
   message ("비밀번호를 입력해주세요.")

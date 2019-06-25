@@ -1,6 +1,6 @@
 capsule {
   id (perfact.freshAir)
-  version (1.0.2)
+  version (1.0.7)
   format (3)
   targets {
     target (bixby-mobile-ko-KR)

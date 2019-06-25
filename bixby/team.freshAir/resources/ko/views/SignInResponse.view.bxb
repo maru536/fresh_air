@@ -1,5 +1,0 @@
-result-view {
-  match {
-    signInResponseConcept (response)
-  }
-}

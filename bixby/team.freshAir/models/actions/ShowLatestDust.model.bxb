@@ -6,7 +6,7 @@ action (ShowLatestDust) {
       min (Required) max (One)
       default-init {
         intent {
-          goal: SaveUserId
+          goal: SignIn
         }
       }
       
@@ -14,10 +14,7 @@ action (ShowLatestDust) {
         if (userId == '') {
           replan {
             intent {
-              subplan {
-                goal: SignIn
-              }
-              goal: SaveUserId
+              goal: SignIn
             }
           }
         }

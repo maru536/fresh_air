@@ -114,6 +114,10 @@ public class SignUpActivity extends AppCompatActivity {
                     if (_resultCode == 201) {
                         PreferencesUtils.saveUser(SignUpActivity.this.getApplicationContext(), mId);
                         startActivity(new Intent(SignUpActivity.this.getApplicationContext(), MainActivity.class));
+                        if (SignInActivity.activity != null) {
+                            SignInActivity.activity.finish();
+                        }
+                        finish();
                     }
                     else
                         mFailText.setVisibility(TextView.VISIBLE);

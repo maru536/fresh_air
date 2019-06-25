@@ -39,6 +39,13 @@ public class PreferencesUtils {
         return editor.commit();
     }
 
+    public static boolean clearUser(Context _appContext) {
+        SharedPreferences user = _appContext.getSharedPreferences(PREFERENCES_USER, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = user.edit();
+        editor.clear();
+        return editor.commit();
+    }
+
     public static String getUser(Context _appContext) {
         SharedPreferences user = _appContext.getSharedPreferences(PREFERENCES_USER, Context.MODE_PRIVATE);
         return user.getString(ID, "");

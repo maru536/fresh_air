@@ -15,7 +15,7 @@ action (CoachingDust) {
       min (Required) max (One)
       default-init {
         intent {
-          goal: SaveUserId
+          goal: SignIn
         }
       }
       
@@ -24,10 +24,7 @@ action (CoachingDust) {
         if (userId == '') {
           replan {
             intent {
-              subplan {
-                goal: SignIn
-              }
-              goal: SaveUserId
+              goal: SignIn
             }
           }
         }

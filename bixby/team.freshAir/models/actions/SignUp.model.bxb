@@ -1,5 +1,5 @@
-action (SignIn) {
-  description (User Sign In)
+action (SignUp) {
+  description (User Sign Up)
   collect {
     input (id) {
       type (idConcept)
@@ -12,20 +12,20 @@ action (SignIn) {
   }
   output (userIdConcept) {
     throws {
-      error (FailSignIn) {
+      error (AlreadyRegistedUser) {
         on-catch {
           halt {
             dialog {
-              template ("계정명/비밀번호를 확인하세요.")
+              template ("이미 가입된 사용자명이에요.")
             }
           }
         }
       }
-      error (FailApiCall) {
+      error (FailSignUp) {
         on-catch {
           halt {
             dialog {
-              template ("로그인에 실패했습니다.")
+              template ("가입에 실패했습니다.")
             }
           }
         }

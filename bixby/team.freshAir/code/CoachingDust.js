@@ -27,11 +27,8 @@ module.exports.function = function coachingDust (address, userId) {
   const oneDay = 24*oneHour;
   
   if (response != null) {
-    console.log("response is not null");
     if (response.coachingMessage != null) {
-      console.log("coachingMessage is not null");
       if (response.latestDust != null) {
-        console.log("latestDust is not null");
         var diffTime = dates.ZonedDateTime.now().getMillisFromEpoch() - response.latestDust.time;
         var type;
         var time;
@@ -60,12 +57,16 @@ module.exports.function = function coachingDust (address, userId) {
             latestDust: {
               timeType: type,
               time: time, 
-              pm100: response.latestDust.pm100,
-              pm25: response.latestDust.pm25
+              dust: {
+                pm100: response.latestDust.pm100,
+                pm25: response.latestDust.pm25
+              }
             },
             publicDust: {
-              pm100: response.airData.pm100,
-              pm25: response.airData.pm25,
+              dust: {
+                pm100: response.airData.pm100,
+                pm25: response.airData.pm25
+              },
               address: address
             }
           }
@@ -77,8 +78,10 @@ module.exports.function = function coachingDust (address, userId) {
             latestDust: {
               timeType: type,
               time: time, 
-              pm100: response.latestDust.pm100,
-              pm25: response.latestDust.pm25
+              dust: {
+                pm100: response.latestDust.pm100,
+                pm25: response.latestDust.pm25
+              }
             }
           }
         }
@@ -90,8 +93,10 @@ module.exports.function = function coachingDust (address, userId) {
           return {
             coachingMessage: response.coachingMessage,
             publicDust: {
-              pm100: response.airData.pm100,
-              pm25: response.airData.pm25,
+              dust: {
+                pm100: response.airData.pm100,
+                pm25: response.airData.pm25
+              },
               address: address
             }
           }
@@ -110,8 +115,10 @@ module.exports.function = function coachingDust (address, userId) {
         console.log("airData is not null");
         return {
           publicDust: {
-            pm100: response.airData.pm100,
-            pm25: response.airData.pm25,
+              dust: {
+                pm100: response.airData.pm100,
+                pm25: response.airData.pm25
+              },
             address: address
           }
         }

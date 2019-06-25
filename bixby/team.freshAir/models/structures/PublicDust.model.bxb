@@ -7,14 +7,8 @@ structure (publicDustConcept) {
     max (One)
   }
   
-  property (pm100) {
-    type (PM100Concept)
-    min (Required) 
-    max (One)
-  }
-  
-  property (pm25) {
-    type (PM25Concept)
+  property (dust) {
+    type (dustConcept)
     min (Required) 
     max (One)
   }

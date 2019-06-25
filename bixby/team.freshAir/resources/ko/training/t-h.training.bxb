@@ -1,5 +1,5 @@
 train (t-hemexzpbtrmfknnsnofzdsuhe) {
-  utterance ([g:SaveUserId] 로그인 해줘)
-  plan (Y2BmkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGGQxpAPTixLDQWrYVDDkCzOTM/zzAtKLS7IzytOhRnCxMAIxAxAkpGBAUYDAA==)
-  last-modified (1561307535075)
+  utterance ([g:SignIn] 로그인 해줘)
+  plan (Y2BhkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzP88xjkMKQyIRrwjS0ILG4uBwuz8zAyMAEJBmANAhCAJgFAA==)
+  last-modified (1561369321075)
 }

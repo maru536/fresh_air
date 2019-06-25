@@ -5,20 +5,9 @@ result-view {
 
   render {
     layout {
-      section {
-        content {
-          single-line {
-            text {
-              style (Detail_L)
-              value ("미세먼지: #{value(latestDust.pm100)}")
-            }
-          }
-          single-line {
-            text {
-              style (Detail_L)
-              value ("초미세먼지: #{value(latestDust.pm25)}")
-            }
-          }
+      layout-macro (latestDustResult) {
+        param (latestDust) {
+          expression (latestDust)
         }
       }
     }
