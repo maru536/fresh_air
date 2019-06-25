@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getDustString(int pm2dot5, int pm10) {
-        return String.format("현재 미세먼지 농도는 %d㎍/㎥" + "<br />" +"초미세먼지 농도는 %d㎍/㎥"+"<br />"+" \"%s\"입니다.", pm10, pm2dot5,  MicroDustUtils.parseDustValue(pm10));
+        return String.format("현재 미세먼지 농도는 %d㎍/㎥" + "\r\n" +"초미세먼지 농도는 %d㎍/㎥"+"\r\n"+" \"%s\"입니다.", pm10, pm2dot5,  MicroDustUtils.parseDustValue(pm10));
     }
 
     private void updateChartData()
