@@ -23,7 +23,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.work.BackoffPolicy;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
@@ -68,7 +67,9 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mNavigationMenu;
     PeriodicWorkRequest saveRequest;
-    OneTimeWorkRequest oneTimeWorkRequest;
+    Thread updateThread;
+    final String myUniqueWorkName = "com.perfect.freshair.ViewoneTimeRequest";
+    private boolean tRunning = false;
     LineChart lineChart;
     TempData[] dataList;
     Dust receivedDust;
@@ -97,6 +98,8 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
         }
+
+
 
         //appcompat toolbar initialization
         Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
@@ -165,17 +168,26 @@ public class MainActivity extends AppCompatActivity {
         yAxisRight.setGridLineWidth((float) 1);
 
 
+        updateThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                tRunning = true;
+                while(tRunning)
+                {
+                    try{
+                        Log.i(toString(), "thread is running");
+                        Thread.sleep(5000);
+                        OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(DataUpdateWorker.class).build();
+                        WorkManager.getInstance().enqueueUniqueWork(myUniqueWorkName, ExistingWorkPolicy.KEEP, oneTimeWorkRequest);
+                    }catch (Exception e)
+                    {
+                        Log.e(toString(),e.toString());
+                    }
+                }
+            }
+        });
 
-
-
-        OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(DataUpdateWorker.class).setBackoffCriteria(
-                BackoffPolicy.LINEAR,
-                20000L,
-                TimeUnit.MILLISECONDS).addTag("mywork").build();
-        Log.i(toString(), "enqueue");
-        WorkManager.getInstance().cancelAllWorkByTag("mywork");
-        WorkManager.getInstance().enqueue(oneTimeWorkRequest);
-
+        updateThread.start();
 
         //dust information
         int tempMajor = 30; // have to get the value from local database
@@ -188,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getDustString(int pm2dot5, int pm10) {
-        return String.format("현재 미세먼지 농도는 %d㎍/㎥, 초미세먼지 농도는 %d㎍/㎥로 \"%s\"입니다.", pm10, pm2dot5,  MicroDustUtils.parseDustValue(pm10));
+        return String.format("현재 미세먼지 농도는 %d㎍/㎥" + "\r\n" +"초미세먼지 농도는 %d㎍/㎥"+"\r\n"+" \"%s\"입니다.", pm10, pm2dot5,  MicroDustUtils.parseDustValue(pm10));
     }
 
     private void updateChartData()
@@ -304,7 +316,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         //worker
-        WorkManager.getInstance().cancelAllWorkByTag("mywork");
+        WorkManager.getInstance().cancelUniqueWork(myUniqueWorkName);
+        tRunning = false;
         saveRequest =
                 new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 10, TimeUnit.SECONDS, 10, TimeUnit.SECONDS).build();
         WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.KEEP, saveRequest);
