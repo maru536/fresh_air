@@ -101,7 +101,7 @@ public class DataUpdateWorker extends Worker {
     public DataUpdateWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
         statusDBHandler = new StatusDBHandler(getApplicationContext());
-        gpsUtils = new GpsUtils(getApplicationContext());
+        //gpsUtils = new GpsUtils(getApplicationContext());
     }
 
     @NonNull
@@ -129,7 +129,7 @@ public class DataUpdateWorker extends Worker {
                 Log.i(this.toString(), "bluetooth is not enabled or supported.");
             }
         }
-        return Result.retry();
+        return Result.success();
     }
 
     private GpsCallback gpsCallback = new GpsCallback() {
