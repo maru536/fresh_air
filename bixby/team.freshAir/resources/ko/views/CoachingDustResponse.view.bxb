@@ -33,7 +33,11 @@ result-view {
             expression (coaching.publicDust)
           }
         }
-      }      
+      }
+      
+      if (exists(coaching.latestDust) || exists(coaching.publicDust)) {
+        layout-macro (dustStandardLayout) 
+      }
     }
   }
 }

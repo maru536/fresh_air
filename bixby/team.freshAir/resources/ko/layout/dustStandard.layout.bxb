@@ -1,0 +1,40 @@
+layout-macro-def(dustStandardLayout) {
+
+  content {
+    section {  // this macro returns a "section"
+      content {
+        title-area {
+          slot1 {
+            text {
+              style (Detail_M)
+              value ("미세먼지 기준")
+            }
+          }
+          slot2 {
+            single-line {
+              image {
+                url ("/images/pm100Standard6.png")
+              }
+            }
+          }
+        }
+        
+        title-area {
+          slot1 {
+            text {
+              style (Detail_M)
+              value ("초미세먼지 기준")
+            }
+          }
+          slot2 {
+            single-line {
+              image {
+                url ("/images/pm25Standard6.png")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
