@@ -93,7 +93,6 @@ public class RestApiController {
         else 
             return new Response(500, "Save dust fail");
     }
-
     
     @GetMapping("1.0/lastestDust")
     public Response latestDust(@RequestHeader String userId) {
@@ -139,22 +138,22 @@ public class RestApiController {
         String message;
 
         if (dust.getPm100() < DustStandard.goodPm100)
-            message = "미세먼지가 좋아요!\n";
+            message = "미세먼지가 좋아요! 산책하시는건 어떤가요?\n";
         else if (dust.getPm100() < DustStandard.normalPm100) 
-            message = "미세먼지가 보통이네요.\n";
+            message = "미세먼지가 보통이네요. 일상을 즐겨주세요.\n";
         else if (dust.getPm100() < DustStandard.badPm100) 
-            message = "미세먼지가 나빠요...\n";
+            message = "미세먼지가 나빠요... 마스크를 착용하세요.\n";
         else 
-            message = "미세먼지가 매우 나빠요. 마스크를 착용하세요!\n";
+            message = "미세먼지가 매우 나빠요. 외출을 자제해주세요!\n";
 
         if (dust.getPm25() < DustStandard.goodPm25)
-            message += "초미세먼지가 좋아요!";
+            message += "초미세먼지가 좋아요! 산책하시는건 어떤가요?";
         else if (dust.getPm25() < DustStandard.normalPm25) 
-            message += "초미세먼지가 보통이네요.";
+            message += "초미세먼지가 보통이네요. 일상을 즐겨주세요.";
         else if (dust.getPm25() < DustStandard.badPm25) 
-            message += "초미세먼지가 나빠요...";
+            message += "초미세먼지가 나빠요... 마스크를 착용하세요.";
         else 
-            message += "초미세먼지가 매우 나빠요. 마스크를 착용하세요!";
+            message += "초미세먼지가 매우 나빠요. 외출을 자제해주세요!";
         
         return message;
     }

@@ -1,5 +1,7 @@
 package team.perfect.fresh_air.Api;
 
+import java.util.concurrent.TimeUnit;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -32,7 +34,10 @@ public class AirServerInterface {
         
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(100, TimeUnit.SECONDS)
+            .readTimeout(100, TimeUnit.SECONDS)    
+            .addInterceptor(interceptor).build();
 
         this.retrofit = new Retrofit.Builder()
                 .baseUrl(ApiContract.AIR_SERVER_ADDRESS)
@@ -46,7 +51,6 @@ public class AirServerInterface {
 
         Call<JsonObject> request = airApi.getAirData(address.getServerKey());
 
-
         request.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
@@ -55,6 +59,7 @@ public class AirServerInterface {
 
                 for (JsonElement curElem : airDataList) {
                     Air curAir = new Air(address.getBixbyKey(), curElem.getAsJsonObject());
+                    airRepository.delete(curAir); 
                     airRepository.save(curAir);
                 }
             }

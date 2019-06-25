@@ -16,6 +16,7 @@ public class Air {
     private String addressLevelOne = "";
     @Id
     private String addressLevelTwo = "";
+    private String dateTime = "";
     private float no2 = -1.0f;
     private float co = -1.0f;
     private float o3 = -1.0f;
@@ -40,6 +41,12 @@ public class Air {
     public Air(String addressLevelOne, JsonObject airData) {
         this.addressLevelOne = addressLevelOne;
         this.addressLevelTwo = airData.get(AirContract.CITY_NAME).getAsString();
+
+        try {
+            this.dateTime = airData.get(AirContract.DATA_TIME).getAsString();
+        } catch (NumberFormatException e) {
+            this.dateTime = "";
+        }
 
         try {
             this.no2 = airData.get(AirContract.NO2).getAsFloat();

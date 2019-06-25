@@ -8,6 +8,6 @@ public class AirContract {
     public static final String PM25 = "pm25Value";
     public static final String SO2 = "so2Value";
     public static final String CITY_NAME = "cityName";
-    public static final String DATE_TIME = "dateTime";
+    public static final String DATA_TIME = "dataTime";
     public static final String LIST = "list";
 }
