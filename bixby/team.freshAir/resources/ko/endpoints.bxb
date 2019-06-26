@@ -4,10 +4,6 @@ endpoints {
        accepted-inputs (userId)
        local-endpoint ("ShowLatestDust.js")
      }
-     action-endpoint (ShowTodayPM100) {
-       accepted-inputs ()
-       local-endpoint ("ShowTodayPM100.js")
-     }
      action-endpoint (SignIn) {
        accepted-inputs (id, passwd, $vivContext)
        local-endpoint ("SignIn.js")

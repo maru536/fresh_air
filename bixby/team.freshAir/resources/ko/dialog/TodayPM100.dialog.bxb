@@ -1,9 +1,0 @@
-dialog (Result) {
-  match {
-    TodayPM100Concept (todayPM100) {
-      from-output: ShowTodayPM100 (todayPM100Output)
-    }
-  }
-  template("미세먼지: ${value(todayPM100.PM100)}㎍/㎥")
-  //template("초미세먼지: ${value(dust.PM25)}㎍/㎥")
-}

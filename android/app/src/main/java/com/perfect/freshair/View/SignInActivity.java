@@ -6,12 +6,14 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -50,6 +52,18 @@ public class SignInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+
+        String userId;
+        try {
+            userId = getIntent().getData().getQueryParameter("userId");
+        } catch (NullPointerException npe) {
+            userId = "";
+        }
+
+        if (userId.length() > 0) {
+            PreferencesUtils.saveUser(this, userId);
+            startMainActivity();
+        }
 
         activity = this;
 

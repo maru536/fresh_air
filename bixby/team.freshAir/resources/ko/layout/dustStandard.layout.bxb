@@ -13,7 +13,7 @@ layout-macro-def(dustStandardLayout) {
           slot2 {
             single-line {
               image {
-                url ("/images/pm100Standard6.png")
+                url ("/images/pm100Standard.png")
               }
             }
           }
@@ -29,7 +29,7 @@ layout-macro-def(dustStandardLayout) {
           slot2 {
             single-line {
               image {
-                url ("/images/pm25Standard6.png")
+                url ("/images/pm25Standard.png")
               }
             }
           }

@@ -18,8 +18,9 @@ module.exports.function = function signUp (id, passwd) {
   
   var response = http.postUrl('http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/1.0/signUp', body, options);
   
+  console.log(response)
   
-  if (response != null && response.code != null && response.code == 200) {
+  if (response != null && response.code != null && response.code == 201) {
     return id;
   }
   else if (response.message != null && response.code == 302) {

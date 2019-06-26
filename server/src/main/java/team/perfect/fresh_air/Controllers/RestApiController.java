@@ -1,6 +1,9 @@
 package team.perfect.fresh_air.Controllers;
 
 
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 import com.google.gson.JsonArray;
@@ -22,6 +25,8 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import team.perfect.fresh_air.Api.AirServerInterface;
 import team.perfect.fresh_air.Contract.AddressLevelOneContract;
 import team.perfect.fresh_air.Contract.AirContract;
+import team.perfect.fresh_air.Contract.ApiContract;
+import team.perfect.fresh_air.Contract.CityContract;
 import team.perfect.fresh_air.Contract.DustStandard;
 import team.perfect.fresh_air.DAO.AddressPK;
 import team.perfect.fresh_air.DAO.Air;
@@ -185,11 +190,17 @@ public class RestApiController {
     }
 
     @PostMapping("1.0/test")
-    public void Test() {
+    public void Test(@RequestHeader String address) {
         AirServerInterface airServer = new AirServerInterface();
 
-        for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
-            airServer.getAirData(address, this.airRepository);
+        AddressLevelOneContract addressLevelOne;
+
+        try {
+            addressLevelOne = AddressLevelOneContract.valueOf(address);
+            airServer.getAirData(AddressLevelOneContract.valueOf(address), this.airRepository);
+        }
+        catch (IllegalArgumentException iae) {
+            System.out.println("Invaild address: "+address);
         }
     }
 }

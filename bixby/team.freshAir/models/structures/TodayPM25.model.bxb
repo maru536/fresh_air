@@ -1,8 +1,0 @@
-structure (TodayPM25Concept) {
-  description (today PM25 list)
-  property (PM25) {
-    type (PM25Concept)
-    min (Required) 
-    max (Many)
-  }
-}

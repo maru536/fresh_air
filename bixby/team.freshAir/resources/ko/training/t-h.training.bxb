@@ -1,3 +1,8 @@
+train (t-ha6c8echywzz5k1mq469yhepy) {
+  utterance ([g:AppLaunch] 앱 실행해줘)
+  plan (Y2BikCtILUpLTC7RSytKLc5wzCzSSywoCC3Kcc7PS04tKGGQwpB3LCjwSSzNS85gYARCBigGkgA=)
+  last-modified (1561544564483)
+}
 train (t-hemexzpbtrmfknnsnofzdsuhe) {
   utterance ([g:SignIn] 로그인 해줘)
   plan (Y2BhkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzP88xjkMKQyIRrwjS0ILG4uBwuz8zAyMAEJBmANAhCAJgFAA==)

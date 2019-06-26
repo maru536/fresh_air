@@ -1,0 +1,21 @@
+action (AppLaunch) {
+  description (__DESCRIPTION__)
+  collect {
+    input (userId) {
+      type (userIdConcept)
+      min (Optional) max (One)
+    }
+  }
+  output (appUrlConcept) {
+    evaluate {
+      if (exists(userId) && userId != '') {
+        $expr ('dust_coach://deeplink?userId='+userId)
+      }
+      else {
+        $expr ('dust_coach://deeplink')
+      }
+    }
+  }
+  
+  type (Constructor)
+}

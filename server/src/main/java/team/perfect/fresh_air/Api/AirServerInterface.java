@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -47,27 +48,29 @@ public class AirServerInterface {
     }
 
     public void getAirData(AddressLevelOneContract address, AirRepository airRepository) {
-        AirApi airApi = retrofit.create(AirApi.class);
+        if (address != null) {
+            AirApi airApi = retrofit.create(AirApi.class);
 
-        Call<JsonObject> request = airApi.getAirData(address.getServerKey());
+            Call<JsonObject> request = airApi.getAirData(address.getServerKey());
 
-        request.enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
-                System.out.println(_response.body().toString());
-                JsonArray airDataList = _response.body().get(AirContract.LIST).getAsJsonArray();
+            request.enqueue(new Callback<JsonObject>() {
+                @Override
+                public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
+                    System.out.println(_response.body().toString());
+                    JsonArray airDataList = _response.body().get(AirContract.LIST).getAsJsonArray();
 
-                for (JsonElement curElem : airDataList) {
-                    Air curAir = new Air(address.getBixbyKey(), curElem.getAsJsonObject());
-                    airRepository.delete(curAir); 
-                    airRepository.save(curAir);
+                    for (JsonElement curElem : airDataList) {
+                        Air curAir = new Air(address.getBixbyKey(), curElem.getAsJsonObject());
+                        airRepository.delete(curAir); 
+                        airRepository.save(curAir);
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<JsonObject> _call, Throwable _t) {
+                @Override
+                public void onFailure(Call<JsonObject> _call, Throwable _t) {
 
-            }
-        });
+                }
+            });
+        }
     }
 }

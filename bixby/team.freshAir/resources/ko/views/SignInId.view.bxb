@@ -1,6 +1,6 @@
 input-view {
-  match {
-    idConcept (id)
+  match: idConcept(id) {
+    to-input: SignIn
   }
   
   message ("계정명을 입력해주세요.")
