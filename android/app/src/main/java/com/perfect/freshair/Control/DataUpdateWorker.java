@@ -36,6 +36,7 @@ import com.perfect.freshair.Utils.PreferencesUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class DataUpdateWorker extends Worker {
     private static final String TAG = "DataUpdateWorker";
@@ -111,6 +112,7 @@ public class DataUpdateWorker extends Worker {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getApplicationContext().getString(R.string.my_preference_ble_file_key), Context.MODE_PRIVATE);
         String defaultValue = "none";
         String deviceAddr = sharedPreferences.getString(getApplicationContext().getString(R.string.my_preference_ble_addr_key), defaultValue);
+
         if (!deviceAddr.equals(defaultValue)) {
             Log.i(this.toString(), deviceAddr);
             blueToothUtils = new BlueToothUtils(getApplicationContext());

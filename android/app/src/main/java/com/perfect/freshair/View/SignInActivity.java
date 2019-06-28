@@ -60,7 +60,7 @@ public class SignInActivity extends AppCompatActivity {
             userId = "";
         }
 
-        if (userId.length() > 0) {
+        if (userId != null && userId.length() > 0) {
             PreferencesUtils.saveUser(this, userId);
             startMainActivity();
         }

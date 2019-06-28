@@ -14,86 +14,89 @@ layout-macro-def(publicDustResult) {
       }
       
       content {
-        single-line {
-          text {
-            style (Detail_L)
-            value ("미세먼지")
-          }
-          spacer
-          if (publicDust.dust.pm100 < 30) {
-            image {
-              background-color (Transparent)
-              shape (Square)
-              url ("/images/icons/good.png")
+        if (publicDust.dust.pm100 > 0) {
+          single-line {
+            text {
+              style (Detail_L)
+              value ("미세먼지")
             }
-          }
-          else-if (publicDust.dust.pm100 < 80) {
-            image {
-              background-color (Transparent)
-              shape (Square)
-              url ("/images/icons/normal.png")
+            spacer
+            if (publicDust.dust.pm100 < 30) {
+              image {
+                background-color (Transparent)
+                shape (Square)
+                url ("/images/icons/good.png")
+              }
             }
-          }
-          else-if (publicDust.dust.pm100 < 150) {
-            image {
-              background-color (Transparent)
-              shape (Square)
-              url ("/images/icons/bad.png")
+            else-if (publicDust.dust.pm100 < 80) {
+              image {
+                background-color (Transparent)
+                shape (Square)
+                url ("/images/icons/normal.png")
+              }
             }
-          }
-          else {
-            image {
-              background-color (Transparent)
-              shape (Square)
-              url ("/images/icons/very_bad.png")
+            else-if (publicDust.dust.pm100 < 150) {
+              image {
+                background-color (Transparent)
+                shape (Square)
+                url ("/images/icons/bad.png")
+              }
             }
-          }
-          
-          text {
-            style (Detail_L)
-            value ("#{value(publicDust.dust.pm100)}㎍/㎥")
+            else {
+              image {
+                background-color (Transparent)
+                shape (Square)
+                url ("/images/icons/very_bad.png")
+              }
+            }
+
+            text {
+              style (Detail_L)
+              value ("#{value(publicDust.dust.pm100)}㎍/㎥")
+            }
           }
         }
         
-        
-        single-line {
-          text {
-            style (Detail_L)
-            value ("초미세먼지")
-          }
-          spacer
-          if (publicDust.dust.pm25 < 15) {
-            image {
-              background-color (Transparent)
-              shape (Square)
-              url ("/images/icons/good.png")
+        if (publicDust.dust.pm25 > 0) {
+          single-line {
+            text {
+              style (Detail_L)
+              value ("초미세먼지")
             }
-          }
-          else-if (publicDust.dust.pm25 < 35) {
-            image {
-              background-color (Transparent)
-              shape (Square)
-              url ("/images/icons/normal.png")
+            spacer
+            if (publicDust.dust.pm25 < 15) {
+              image {
+                background-color (Transparent)
+                shape (Square)
+                url ("/images/icons/good.png")
+              }
             }
-          }
-          else-if (publicDust.dust.pm25 < 75) {
-            image {
-              background-color (Transparent)
-              shape (Square)
-              url ("/images/icons/bad.png")
+            else-if (publicDust.dust.pm25 < 35) {
+              image {
+                background-color (Transparent)
+                shape (Square)
+                url ("/images/icons/normal.png")
+              }
             }
-          }
-          else {
-            image {
-              background-color (Transparent)
-              shape (Square)
-              url ("/images/icons/very_bad.png")
+            else-if (publicDust.dust.pm25 < 75) {
+              image {
+                background-color (Transparent)
+                shape (Square)
+                url ("/images/icons/bad.png")
+              }
             }
-          }
-          
-          text {
-            style (Detail_L)
-            value ("#{value(publicDust.dust.pm25)}㎍/㎥")
+            else {
+              image {
+                background-color (Transparent)
+                shape (Square)
+                url ("/images/icons/very_bad.png")
+              }
+            }
+
+            text {
+              style (Detail_L)
+              value ("#{value(publicDust.dust.pm25)}㎍/㎥")
+            }
           }
         }
         

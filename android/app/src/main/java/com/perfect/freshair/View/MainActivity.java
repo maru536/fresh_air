@@ -31,11 +31,13 @@ import androidx.work.WorkManager;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.Common.PermissionEnumeration;
 import com.perfect.freshair.Control.DataUpdateWorker;
@@ -141,32 +143,37 @@ public class MainActivity extends AppCompatActivity {
 
         //chart view
         lineChart = (LineChart) findViewById(R.id.main_chart);
-        lineChart.getLegend().setEnabled(false);
+        lineChart.getLegend().setEnabled(true);
         Description description = new Description();
         description.setText("");
         lineChart.setDescription(description);
         lineChart.setDrawGridBackground(false);
         lineChart.setNoDataText("기록이 없습니다.");
         lineChart.setAutoScaleMinMaxEnabled(true);
+
         XAxis xAxis = lineChart.getXAxis(); // x 축 설정
         xAxis.setDrawGridLines(false);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM); //x 축 표시에 대한 위치 설정
         xAxis.setTextColor(Color.BLACK); // X축 텍스트컬러설정
-        xAxis.setGridColor(ContextCompat.getColor(this, R.color.colorPrimaryDark)); // X축 줄의 컬러 설정
+        //xAxis.setGridColor(ContextCompat.getColor(this, R.color.colorPrimaryDark)); // X축 줄의 컬러 설정
 
         YAxis yAxisLeft = lineChart.getAxisLeft(); //Y축의 왼쪽면 설정
         yAxisLeft.setGridLineWidth((float) 1);
         yAxisLeft.setGridColor(getColor(R.color.charYGridColor));
         yAxisLeft.setDrawAxisLine(false);
-        yAxisLeft.setTextColor(Color.BLACK); //Y축 텍스트 컬러 설정
+        yAxisLeft.setTextColor(Color.RED); //Y축 텍스트 컬러 설정
         yAxisLeft.setLabelCount(5, true);
 
 
         YAxis yAxisRight = lineChart.getAxisRight(); //Y축의 오른쪽면 설정
         yAxisRight.setDrawAxisLine(false);
-        yAxisRight.setTextColor(Color.BLACK); //Y축 텍스트 컬러 설정
+        yAxisRight.setTextColor(Color.BLUE); //Y축 텍스트 컬러 설정
         yAxisRight.setGridLineWidth((float) 1);
 
+        Legend l = lineChart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
 
         updateThread = new Thread(new Runnable() {
             @Override
@@ -213,19 +220,26 @@ public class MainActivity extends AppCompatActivity {
         {
             List<Entry> pm2Dot5Entries = new ArrayList<Entry>();
             List<Entry> pm10Entries = new ArrayList<Entry>();
-            for (CurrentStatus mydata : data) {
-                // turn your data into Entry objects
+            int limitCount = 30;
+
+            for (int i = data.size() - 1; i >= 0 && limitCount-- >= 0; i--) {
+                CurrentStatus mydata = data.get(i);
                 long oldTime = mydata.getTimestamp();
-                float xValue = (float)((oldTime - currentTime)/60/1000);
-                Log.i("timestamp", mydata.toString());
-                Log.i("timestamp", oldTime-currentTime+"");
+                float xValue = (float)((currentTime - oldTime) / 1000);
                 pm10Entries.add(new Entry(xValue,mydata.getDust().getPm100()));
                 pm2Dot5Entries.add(new Entry(xValue, mydata.getDust().getPm25()));
             }
-            LineDataSet dataSet1 = new LineDataSet(pm2Dot5Entries, "PM2.5");
+
+            LineDataSet dataSet1 = new LineDataSet(pm2Dot5Entries, "초미세먼지");
             dataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
-            LineDataSet dataSet2 = new LineDataSet(pm10Entries, "PM10");
+            dataSet1.setColor(Color.RED);
+            dataSet1.setCircleColor(Color.RED);
+            dataSet1.setValueTextColor(Color.RED);
+            LineDataSet dataSet2 = new LineDataSet(pm10Entries, "미세먼지");
             dataSet2.setAxisDependency(YAxis.AxisDependency.RIGHT);
+            dataSet2.setColor(Color.BLUE);
+            dataSet2.setCircleColor(Color.BLUE);
+            dataSet2.setValueTextColor(Color.BLUE);
             LineData lineData = new LineData(dataSet1);
             lineData.addDataSet(dataSet2);
             lineData.setValueTextSize(10);

@@ -27,7 +27,7 @@ result-view {
         }
       }   
       
-      if (exists(coaching.publicDust)) {
+      if (exists(coaching.publicDust) && (coaching.publicDust.dust.pm100 > 0 || coaching.publicDust.dust.pm25 > 0)) {
         layout-macro (publicDustResult) {
           param (publicDust) {
             expression (coaching.publicDust)
