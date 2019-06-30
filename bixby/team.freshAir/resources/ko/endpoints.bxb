@@ -5,6 +5,16 @@ endpoints {
       local-endpoint ("ShowLatestDust.js")
     }
     
+    action-endpoint (ShowTodayDust) {
+      accepted-inputs (userId)
+      local-endpoint ("ShowTodayDust.js")
+    }
+    
+    action-endpoint (ShowYesterdayDust) {
+      accepted-inputs (userId)
+      local-endpoint ("ShowYesterdayDust.js")
+    }
+    
     action-endpoint (SignIn) {
       accepted-inputs (id, passwd, $vivContext)
       local-endpoint ("SignIn.js")

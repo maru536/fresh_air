@@ -1,0 +1,5 @@
+train (t-c6gymlhe730cbojbn1udmbnbf) {
+  utterance ([g:ShowYesterdayDust] 어제 미세먼지 보여줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
+  last-modified (1561897559890)
+}

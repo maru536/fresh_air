@@ -1,0 +1,9 @@
+dialog (Result) {
+  match {
+    userDustConcept (userDust) {
+      from-output: ShowYesterdayDust
+    }
+  }
+  
+  template("#{value(userDust.userId)}님의 어제 미세먼지 리포트입니다.")
+}

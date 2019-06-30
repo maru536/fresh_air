@@ -1,8 +1,13 @@
 package team.perfect.fresh_air.Controllers;
 
+import java.awt.Color;
+import java.io.IOException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.JsonArray;
@@ -14,12 +19,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
+import org.knowm.xchart.BitmapEncoder;
+import org.knowm.xchart.XYChart;
+import org.knowm.xchart.XYSeries;
+import org.knowm.xchart.BitmapEncoder.BitmapFormat;
+import org.knowm.xchart.style.lines.SeriesLines;
+import org.knowm.xchart.style.markers.SeriesMarkers;
 
 import team.perfect.fresh_air.Api.AirServerInterface;
 import team.perfect.fresh_air.Contract.AddressLevelOneContract;
@@ -207,5 +222,256 @@ public class RestApiController {
         } catch (IllegalArgumentException iae) {
             System.out.println("Invaild address: " + address);
         }
+    }
+
+    @GetMapping("1.0/todayDust")
+    public Response todayDust(@RequestHeader String userId) {
+        long curTime = System.currentTimeMillis();
+        Date curDate = new Date(curTime);
+        Date endDate = new Date(curTime);
+        Date startDate = new Date(curTime);
+
+        startDate.setHours(0);
+        startDate.setMinutes(0);
+        startDate.setSeconds(0);
+        long startTime = startDate.getTime();
+
+        List<LatestDust> dustList = this.dustRepository.findByUserIdAndTimeBetween(userId, startTime, curTime);
+
+        if (dustList != null && dustList.size() > 0) {
+            int sumPm100 = 0;
+            int countPm100 = 0;
+            int sumPm25 = 0;
+            int countPm25 = 0;
+
+            for (LatestDust dust : dustList) {
+                if (dust.getPm100() >= 0) {
+                    sumPm100 += dust.getPm100();
+                    countPm100++;
+                }
+
+                if (dust.getPm25() >= 0) {
+                    sumPm25 += dust.getPm25();
+                    countPm25++;
+                }
+            }
+
+            return new ResponseLatestDust(200, "Success",
+                    new LatestDust(userId, 0L, sumPm25 / countPm25, sumPm100 / countPm100));
+        } else
+            return new Response(404, "There is no dust data");
+    }
+
+    @GetMapping("1.0/yesterdayDust")
+    public Response yesterdayDust(@RequestHeader String userId) {
+        long curTime = System.currentTimeMillis();
+        Date curDate = new Date(curTime);
+        int date, month, year;
+        Calendar calendar = Calendar.getInstance();
+
+        if (curDate.getDate() == 1) {
+            if (curDate.getMonth() == 0) {
+                year = curDate.getYear() - 1;
+                month = 11;
+            } else {
+                month = curDate.getMonth() - 1;
+                year = curDate.getYear();
+            }
+            calendar.set(year + 1900, month, 1);
+            date = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        } else {
+            month = curDate.getMonth();
+            year = curDate.getYear();
+            date = curDate.getDate() - 1;
+        }
+
+        long startTime = new Date(year, month, date, 0, 0, 0).getTime();
+        long endTime = new Date(year, month, date, 23, 59, 59).getTime();
+
+        List<LatestDust> dustList = this.dustRepository.findByUserIdAndTimeBetween(userId, startTime, endTime);
+
+        if (dustList != null && dustList.size() > 0) {
+            int sumPm100 = 0;
+            int countPm100 = 0;
+            int sumPm25 = 0;
+            int countPm25 = 0;
+
+            for (LatestDust dust : dustList) {
+                if (dust.getPm100() >= 0) {
+                    sumPm100 += dust.getPm100();
+                    countPm100++;
+                }
+
+                if (dust.getPm25() >= 0) {
+                    sumPm25 += dust.getPm25();
+                    countPm25++;
+                }
+            }
+
+            return new ResponseLatestDust(200, "Success",
+                    new LatestDust(userId, 0L, sumPm25 / countPm25, sumPm100 / countPm100));
+        } else
+            return new Response(404, "There is no dust data");
+    }
+
+    @GetMapping(path = "1.0/todayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
+    public byte[] showTodayDustChart(@PathVariable String userId) {
+        long curTime = System.currentTimeMillis();
+        Date curDate = new Date(curTime);
+        Date endDate = new Date(curTime);
+        Date startDate = new Date(curTime);
+
+        startDate.setHours(0);
+        startDate.setMinutes(0);
+        startDate.setSeconds(0);
+        long startTime = startDate.getTime();
+
+        List<LatestDust> dustList = this.dustRepository.findByUserIdAndTimeBetween(userId, startTime, curTime);
+
+        List<Integer> pm100List = new ArrayList<>();
+        List<Integer> pm25List = new ArrayList<>();
+        List<Integer> hourXAxis = new ArrayList<>();
+
+        int curHour = 0;
+        int sumPm100 = 0;
+        int sumPm25 = 0;
+        int count = 0;
+        startDate.setHours(curHour + 1);
+        long explTime = startDate.getTime();
+
+        for (LatestDust dust : dustList) {
+            if (dust.getTime() < explTime) {
+                sumPm100 += dust.getPm100();
+                sumPm25 += dust.getPm25();
+                count++;
+            } else {
+                do {
+                    if (count > 0) {
+                        hourXAxis.add(curHour);
+                        pm100List.add(sumPm100 / count);
+                        pm25List.add(sumPm25 / count);
+                        sumPm100 = 0;
+                        sumPm25 = 0;
+                        count = 0;
+                    } else {
+                        hourXAxis.add(curHour);
+                        pm100List.add(0);
+                        pm25List.add(0);
+                    }
+                    curHour++;
+                    startDate.setHours(curHour + 1);
+                    explTime = startDate.getTime();
+                } while (dust.getTime() > explTime && curHour < 25);
+
+                sumPm100 += dust.getPm100();
+                sumPm25 += dust.getPm25();
+                count++;
+            }
+        }
+
+        hourXAxis.add(curHour++);
+        if (count > 0 && curHour <= endDate.getHours()) {
+            pm100List.add(sumPm100 / count);
+            pm25List.add(sumPm25 / count);
+        } else {
+            pm100List.add(0);
+            pm25List.add(0);
+        }
+
+        for (; curHour <= endDate.getHours(); curHour++) {
+            hourXAxis.add(curHour);
+            pm100List.add(0);
+            pm25List.add(0);
+        }
+
+        return ChartUtils.lineChart(pm100List, pm25List, hourXAxis);
+    }
+
+    @GetMapping(path = "1.0/yesterdayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
+    public byte[] showyesterdayChart(@PathVariable String userId) {
+        long curTime = System.currentTimeMillis();
+        Date curDate = new Date(curTime);
+        int date, month, year;
+        Calendar calendar = Calendar.getInstance();
+
+        if (curDate.getDate() == 1) {
+            if (curDate.getMonth() == 0) {
+                year = curDate.getYear() - 1;
+                month = 11;
+            } else {
+                month = curDate.getMonth() - 1;
+                year = curDate.getYear();
+            }
+            calendar.set(year + 1900, month, 1);
+            date = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        } else {
+            month = curDate.getMonth();
+            year = curDate.getYear();
+            date = curDate.getDate() - 1;
+        }
+
+        long startTime = new Date(year, month, date, 0, 0, 0).getTime();
+        long endTime = new Date(year, month, date, 23, 59, 59).getTime();
+
+        List<LatestDust> dustList = this.dustRepository.findByUserIdAndTimeBetween(userId, startTime, endTime);
+
+        List<Integer> pm100List = new ArrayList<>();
+        List<Integer> pm25List = new ArrayList<>();
+        List<Integer> hourXAxis = new ArrayList<>();
+
+        int curHour = 0;
+        int sumPm100 = 0;
+        int sumPm25 = 0;
+        int count = 0;
+        Date startDate = new Date(startTime);
+        Date endDate = new Date(endTime);
+        startDate.setHours(curHour + 1);
+        long explTime = startDate.getTime();
+
+        for (LatestDust dust : dustList) {
+            if (dust.getTime() < explTime) {
+                sumPm100 += dust.getPm100();
+                sumPm25 += dust.getPm25();
+                count++;
+            } else {
+                do {
+                    hourXAxis.add(curHour);
+                    if (count > 0) {
+                        pm100List.add(sumPm100 / count);
+                        pm25List.add(sumPm25 / count);
+                        sumPm100 = 0;
+                        sumPm25 = 0;
+                        count = 0;
+                    } else {
+                        pm100List.add(0);
+                        pm25List.add(0);
+                    }
+                    curHour++;
+                    startDate.setHours(curHour + 1);
+                    explTime = startDate.getTime();
+                } while (dust.getTime() > explTime && curHour < 25);
+
+                sumPm100 += dust.getPm100();
+                sumPm25 += dust.getPm25();
+                count++;
+            }
+        }
+
+        hourXAxis.add(curHour++);
+        if (count > 0 && curHour <= endDate.getHours()) {
+            pm100List.add(sumPm100 / count);
+            pm25List.add(sumPm25 / count);
+        } else {
+            pm100List.add(0);
+            pm25List.add(0);
+        }
+
+        for (; curHour <= endDate.getHours(); curHour++) {
+            hourXAxis.add(curHour);
+            pm100List.add(0);
+            pm25List.add(0);
+        }
+
+        return ChartUtils.lineChart(pm100List, pm25List, hourXAxis);
     }
 }
