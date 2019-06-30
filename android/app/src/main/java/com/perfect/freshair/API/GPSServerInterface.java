@@ -1,6 +1,7 @@
 package com.perfect.freshair.API;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 import com.perfect.freshair.Callback.ResponseCallback;
@@ -125,6 +126,7 @@ public class GPSServerInterface {
 
     private void responseDustHandler(JsonObject response, final ResponseDustCallback callback) {
         Dust dust = null;
+        int code = 404;
         if (response != null && response.get("dust") != null && response.get("dust").isJsonObject()) {
             JsonObject dustObject = response.get("dust").getAsJsonObject();
 
@@ -137,7 +139,16 @@ public class GPSServerInterface {
             }
         }
 
-        callback.responseDustCallback(dust);
+        if(response!= null && response.get("code") != null)
+        {
+            code = response.get("code").getAsInt();
+            if(code == 404)
+            {
+                Log.e("code", "404");
+            }
+        }
+
+        callback.responseDustCallback(code, dust);
     }
 
     private void apiFailHandler(Throwable _t, final ResponseCallback _callback) {

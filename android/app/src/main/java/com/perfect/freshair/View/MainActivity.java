@@ -8,6 +8,9 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -19,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,7 +42,14 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.perfect.freshair.API.GPSServerInterface;
+import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Callback.ResponseDustCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.Common.PermissionEnumeration;
@@ -50,6 +61,7 @@ import com.perfect.freshair.Model.CurrentStatus;
 import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.Model.GpsProvider;
+import com.perfect.freshair.Model.LatestDust;
 import com.perfect.freshair.Model.Position;
 import com.perfect.freshair.Model.PositionStatus;
 import com.perfect.freshair.Model.Satellite;
@@ -57,10 +69,13 @@ import com.perfect.freshair.Model.TempData;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
 import com.perfect.freshair.Utils.MicroDustUtils;
+import com.perfect.freshair.Utils.MyBLEPacketUtilis;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -71,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView textNoValue;
     private TextView textNoDevice;
     private TextView textCoach;
+    private TextView textPublicValue;
+    private Button btnRefresh;
+    private String strPublicDustValue = "none";
+
     private ListView mDrawerList;
     private NavArrayAdapter arrayAdapter;
     private StatusDBHandler statusDBHandler;
@@ -89,17 +108,18 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(MainActivity.this.toString(), "onReceive");
-            receivedDust = new Dust(intent.getIntExtra("pm25", -1), intent.getIntExtra("pm100", -1));
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    checkDustDisplay(receivedDust);
+                    checkDustDisplay();
                     updateChartData();
                 }
             });
         }
     };
     private IntentFilter intentFilter;
+
+    private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,15 +130,7 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
         }
 
-        if (serverInterface == null)
-            serverInterface = new GPSServerInterface();
 
-        serverInterface.publicDust("서울특별시", "관악구", new ResponseDustCallback() {
-            @Override
-            public void responseDustCallback(Dust dust) {
-                Log.i("publicDustApi", "PM10: " +dust.getPm100()+ " / PM2.5: " +dust.getPm25());
-            }
-        });
 
         //appcompat toolbar initialization
         Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
@@ -219,12 +231,181 @@ public class MainActivity extends AppCompatActivity {
         textNoDevice = (TextView) findViewById(R.id.ac_main_dust_no_device);
         textNoValue = (TextView) findViewById(R.id.ac_main_dust_no_value);
         textCoach = (TextView)findViewById(R.id.ac_main_dust_coach);
+        textPublicValue = (TextView)findViewById(R.id.ac_main_dust_public_value);
+        btnRefresh = (Button)findViewById(R.id.ac_main_dust_refresh);
+        btnRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refreshData();
+            }
+        });
+
+        getPublicData();
         checkDustDisplay();
         updateChartData();
     }
 
+    LocationCallback locationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            if (locationResult == null) {
+                return;
+            }
+
+            if(fusedLocationClient == null)
+            {
+                fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+            }
+
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+
+            for (Location location : locationResult.getLocations()) {
+                // Update UI with location data
+                // ...
+                if (location != null) {
+                    // Logic to handle location object
+                    String res = "latitude : " + location.getLatitude() + " attitude : " + location.getLongitude();
+                    final List<Address> list = getCurrentAddress(location.getLatitude(), location.getLongitude());
+                    if(list != null && list.size() > 0)
+                    {
+                        Log.i(getApplicationContext().toString(), list.get(0).getAdminArea()+" ,"+ list.get(0).getLocality() + " ," + list.get(0).getAddressLine(0).toString());
+                        if (serverInterface == null)
+                            serverInterface = new GPSServerInterface();
+
+                        final ArrayList<String> sidogun = new ArrayList<String>();
+
+                        if(list.get(0).getAdminArea() != null)
+                        {
+                            sidogun.add(list.get(0).getAdminArea());
+                        }else
+                        {
+                            sidogun.add(list.get(0).getSubAdminArea());
+                        }
+
+                        if(list.get(0).getLocality() != null)
+                        {
+                            sidogun.add(list.get(0).getLocality());
+                        }else
+                        {
+                            sidogun.add(list.get(0).getSubLocality());
+                        }
+
+                        serverInterface.publicDust(sidogun.get(0), sidogun.get(1), new ResponseDustCallback() {
+                            @Override
+                            public void responseDustCallback(int code, Dust dust) {
+                                String addr = sidogun.get(0) + " " +sidogun.get(1);
+                                if(code == 404)
+                                {
+                                    Toast.makeText(getApplicationContext(),code + " 서버에서 "+addr+" 미세먼지 값을 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
+                                }
+                                if(dust != null)
+                                {
+
+                                    Log.i("publicDustApi", "PM10: " +dust.getPm100()+ " / PM2.5: " +dust.getPm25());
+                                    strPublicDustValue = getPublicDustString(addr, dust.getPm100(), dust.getPm25());
+                                    checkDustDisplay();
+                                }
+
+                            }
+                        });
+                    }
+                }else
+                {
+                    Log.e(toString(), "loaction is null");
+                }
+            }
+        };
+    };
+
+    public void getPublicData()
+    {
+        Log.i(toString(), "refresh");
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PermissionEnumeration.MY_ACCESS_FINE_LOCATION);
+        }
+
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(1000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        if(fusedLocationClient == null)
+        {
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+        }
+
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+
+        /*fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            // Logic to handle location object
+                            String res = "latitude : " + location.getLatitude() + " attitude : " + location.getLongitude();
+                            final List<Address> list = getCurrentAddress(location.getLatitude(), location.getLongitude());
+                            if(list != null && list.size() > 0)
+                            {
+                                Log.i(getApplicationContext().toString(), list.get(0).getAdminArea()+" ,"+ list.get(0).getLocality() + " ," + list.get(0).getAddressLine(0).toString());
+                                if (serverInterface == null)
+                                    serverInterface = new GPSServerInterface();
+
+                                final ArrayList<String> sidogun = new ArrayList<String>();
+
+                                if(list.get(0).getAdminArea() != null)
+                                {
+                                    sidogun.add(list.get(0).getAdminArea());
+                                }else
+                                {
+                                    sidogun.add(list.get(0).getSubAdminArea());
+                                }
+
+                                if(list.get(0).getLocality() != null)
+                                {
+                                    sidogun.add(list.get(0).getLocality());
+                                }else
+                                {
+                                    sidogun.add(list.get(0).getSubLocality());
+                                }
+
+                                serverInterface.publicDust(sidogun.get(0), sidogun.get(1), new ResponseDustCallback() {
+                                    @Override
+                                    public void responseDustCallback(int code, Dust dust) {
+                                        String addr = sidogun.get(0) + " " +sidogun.get(1);
+                                        if(code == 404)
+                                        {
+                                            Toast.makeText(getApplicationContext(),code + " 서버에서 "+addr+" 미세먼지 값을 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
+                                        }
+                                        if(dust != null)
+                                        {
+
+                                            Log.i("publicDustApi", "PM10: " +dust.getPm100()+ " / PM2.5: " +dust.getPm25());
+                                            strPublicDustValue = getPublicDustString(addr, dust.getPm100(), dust.getPm25());
+                                            checkDustDisplay();
+                                        }
+
+                                    }
+                                });
+                            }
+                        }else
+                        {
+                            Log.e(toString(), "loaction is null");
+                        }
+                    }
+                });*/
+    }
+
     private String getDustString(int pm2dot5, int pm10) {
         return String.format("현재 미세먼지 농도는 %d㎍/㎥" + "\r\n" +"초미세먼지 농도는 %d㎍/㎥"+"\r\n"+" \"%s\"입니다.", pm10, pm2dot5,  MicroDustUtils.parseDustValue(pm10));
+    }
+
+    private String getPublicDustString(String addr, int pm2dot5, int pm10) {
+        return String.format("현재 %s\r\n미세먼지 농도는 %d㎍/㎥" + "\r\n" +"초미세먼지 농도는 %d㎍/㎥"+"\r\n"+" \"%s\"입니다.", addr, pm10, pm2dot5,  MicroDustUtils.parseDustValue(pm10));
     }
 
     private void updateChartData()
@@ -271,22 +452,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void checkDustDisplay(Dust dust) {
+    private void refreshData()
+    {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getApplicationContext().getString(R.string.my_preference_ble_file_key), Context.MODE_PRIVATE);
         String defaultValue = "none";
         String deviceAddr = sharedPreferences.getString(getApplicationContext().getString(R.string.my_preference_ble_addr_key), defaultValue);
 
-        if (!blueToothUtils.getBLEEnabled() || deviceAddr.equals(defaultValue) ) {
-            textDust.setVisibility(View.INVISIBLE);
-            textNoDevice.setVisibility(View.VISIBLE);
-            textNoValue.setVisibility(View.INVISIBLE);
-            textCoach.setVisibility(View.INVISIBLE);
-        } else {
-            textDust.setText(getDustString(dust.getPm25(), dust.getPm100()));
-            textDust.setVisibility(View.VISIBLE);
-            textCoach.setVisibility(View.VISIBLE);
-            textNoDevice.setVisibility(View.INVISIBLE);
-            textNoValue.setVisibility(View.INVISIBLE);
+        if(blueToothUtils.getBLEEnabled() && !deviceAddr.equals(defaultValue))
+        {
+            OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(DataUpdateWorker.class).build();
+            WorkManager.getInstance().enqueueUniqueWork(myUniqueWorkName, ExistingWorkPolicy.KEEP, oneTimeWorkRequest);
+        }else
+        {
+            getPublicData();
         }
     }
 
@@ -295,11 +473,12 @@ public class MainActivity extends AppCompatActivity {
         String defaultValue = "none";
         String deviceAddr = sharedPreferences.getString(getApplicationContext().getString(R.string.my_preference_ble_addr_key), defaultValue);
 
-        if (!blueToothUtils.getBLEEnabled() || deviceAddr.equals(defaultValue) ) {
+        if (!blueToothUtils.getBLEEnabled() || deviceAddr.equals(defaultValue) && strPublicDustValue.equals("none")) {
             textDust.setVisibility(View.INVISIBLE);
             textNoDevice.setVisibility(View.VISIBLE);
             textNoValue.setVisibility(View.INVISIBLE);
             textCoach.setVisibility(View.INVISIBLE);
+            textPublicValue.setVisibility(View.INVISIBLE);
         } else {
             CurrentStatus currentStatus = statusDBHandler.latestRow();
             if (currentStatus != null) {
@@ -308,11 +487,21 @@ public class MainActivity extends AppCompatActivity {
                 textCoach.setVisibility(View.VISIBLE);
                 textNoDevice.setVisibility(View.INVISIBLE);
                 textNoValue.setVisibility(View.INVISIBLE);
-            } else {
+                textPublicValue.setVisibility(View.INVISIBLE);
+            } else if(!strPublicDustValue.equals("none")){
+                textDust.setVisibility(View.INVISIBLE);
+                textNoDevice.setVisibility(View.INVISIBLE);
+                textNoValue.setVisibility(View.INVISIBLE);
+                textCoach.setVisibility(View.INVISIBLE);
+                textPublicValue.setVisibility(View.VISIBLE);
+                textPublicValue.setText(strPublicDustValue);
+            }else
+            {
                 textDust.setVisibility(View.INVISIBLE);
                 textNoDevice.setVisibility(View.INVISIBLE);
                 textNoValue.setVisibility(View.VISIBLE);
                 textCoach.setVisibility(View.INVISIBLE);
+                textPublicValue.setVisibility(View.INVISIBLE);
             }
         }
     }
@@ -369,6 +558,41 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return;
             }
+            case PermissionEnumeration.MY_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    Toast.makeText(this, "sorry, this app requires bluetooth feature.", Toast.LENGTH_SHORT).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
         }
+    }
+
+    public List<Address> getCurrentAddress( double latitude, double longitude) {
+
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        List<Address> addresses;
+        boolean res = true;
+        try {
+            addresses = geocoder.getFromLocation(
+                    latitude,
+                    longitude,
+                    7);
+        } catch (IOException ioException) {
+            return null;
+        } catch (IllegalArgumentException illegalArgumentException) {
+            return null;
+        }
+
+        if (addresses == null || addresses.size() == 0) {
+            return null;
+        }
+
+        return addresses;
     }
 }
