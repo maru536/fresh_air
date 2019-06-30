@@ -23,7 +23,7 @@ module.exports.function = function showTodayDust (userId) {
     }
   }
   else if (response != null && response.code != null && response.code == 404) {
-    throw fail.checkedError('There is no latest Dust', 'NoLatestDust', {})
+    throw fail.checkedError('There is no Dust data', 'NoDustData', {})
   }
   else {
     throw fail.checkedError('Api call fail', 'FailApiCall', {})

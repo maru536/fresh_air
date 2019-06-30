@@ -1,3 +1,8 @@
+train (t-w24ns9k5xdbqr7vssmls74eu7) {
+  utterance ([g:latestDustConcept] 지금 공기 측정값 보여줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561907245864)
+}
 train (t-wfzhzeo31okfj96olsmlb28ji) {
   utterance ([g:coachingDustResponseConcept] 코칭해줘)
   plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)

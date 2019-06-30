@@ -1,0 +1,5 @@
+train (t-7zp1reu1v6ekiljasywbb2l1b) {
+  utterance ([g:latestDustConcept] 최근 초미세먼지 농도 리포트 해줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561904887765)
+}

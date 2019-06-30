@@ -1,0 +1,5 @@
+train (t-q2qmmjgwgf9n8nnwbpy1aqqwv) {
+  utterance ([g:publicDustConcept] 주변의 공기 측정값 보여줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561907226068)
+}

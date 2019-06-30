@@ -3,8 +3,18 @@ train (t-s1zqoadxiqkobte1w2aa84b2k) {
   plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
   last-modified (1561863951008)
 }
+train (t-s4ayzwjslsrri7tvpcq85whgq) {
+  utterance ([g:ShowTodayDust] 오늘의 미세먼지를 리포트해)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYZDDUBGckV8ekp+SWAlShkUeZIJnCkw/EwMjEDMASUYGBhgNAA==)
+  last-modified (1561903877970)
+}
 train (t-s7tfjkh2x25z44t6lum5oryz5) {
   utterance ([g:latestDustConcept] 지금 미세먼지 알려줘)
   plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
   last-modified (1561863487673)
+}
+train (t-sggj9z7m99kjxm327300xevkt) {
+  utterance ([g:ShowTodayDust] 오늘 미세먼지 알려줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYZDDUBGckV8ekp+SWAlShkUeZIJnCkw/EwMjEDMASUYGBhgNAA==)
+  last-modified (1561903820335)
 }

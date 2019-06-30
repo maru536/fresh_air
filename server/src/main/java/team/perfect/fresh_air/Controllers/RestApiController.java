@@ -370,7 +370,7 @@ public class RestApiController {
         }
 
         hourXAxis.add(curHour++);
-        if (count > 0 && curHour <= endDate.getHours()) {
+        if (count > 0 && curHour <= endDate.getHours() + 1) {
             pm100List.add(sumPm100 / count);
             pm25List.add(sumPm25 / count);
         } else {
@@ -458,7 +458,7 @@ public class RestApiController {
         }
 
         hourXAxis.add(curHour++);
-        if (count > 0 && curHour <= endDate.getHours()) {
+        if (count > 0 && curHour <= endDate.getHours() + 1) {
             pm100List.add(sumPm100 / count);
             pm25List.add(sumPm25 / count);
         } else {

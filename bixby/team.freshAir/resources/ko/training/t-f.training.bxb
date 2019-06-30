@@ -1,5 +1,25 @@
+train (t-f6alwbqsn50h7ayf8r6p7v7v4) {
+  utterance ([g:latestDustConcept] 현재 미세먼지 보여줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561903762323)
+}
+train (t-f6zgo4191h2mrp28ccftform7) {
+  utterance ([g:ShowYesterdayDust] 어제 미세먼지 알려줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
+  last-modified (1561903890332)
+}
+train (t-flqhddv906aebw2b6t007a2fg) {
+  utterance ([g:ShowTodayDust] 오늘의 초미세먼지 알려줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYZDDUBGckV8ekp+SWAlShkUeZIJnCkw/EwMjEDMASUYGBhgNAA==)
+  last-modified (1561903862646)
+}
 train (t-fpt27nmxmc0mtwy0f7b3brabd) {
   utterance ([g:coachingDustResponseConcept] 초미세먼지 코치 해줘)
   plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
   last-modified (1561864054973)
+}
+train (t-fygpj2r4hnxlecdwtgmgbtu8w) {
+  utterance ([g:publicDustConcept] 근처의 공기를 알려줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561906916220)
 }

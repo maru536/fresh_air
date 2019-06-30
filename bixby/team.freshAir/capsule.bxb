@@ -1,9 +1,10 @@
 capsule {
   id (perfact.freshAir)
-  version (2.0.1)
+  version (2.1.1)
   format (3)
   targets {
     target (bixby-mobile-ko-KR)
+    target (bixby-mobile-ko)
   }
   permissions {
     user-profile-access

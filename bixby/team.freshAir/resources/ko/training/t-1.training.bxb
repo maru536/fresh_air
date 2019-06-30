@@ -1,3 +1,8 @@
+train (t-1cclcb419ifhcb8054rnju6no) {
+  utterance ([g:latestDustConcept] 지금 미세먼지 보여줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561903740109)
+}
 train (t-1d4zi7zfbc90mkr32ocihcsu8) {
   utterance ([g:coachingDustResponseConcept] 분석해줘)
   plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
@@ -7,4 +12,9 @@ train (t-1y8xol0pvbrrlhns2337tbmzk) {
   utterance ([g:publicDustConcept] 최신 주변 미세먼지 알려줘)
   plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
   last-modified (1561863905665)
+}
+train (t-1zo2gyacr4ml9bntqitlmbd5i) {
+  utterance ([g:ShowYesterdayDust] 어제 초미세먼지 보여줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
+  last-modified (1561903930822)
 }

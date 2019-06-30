@@ -3,3 +3,13 @@ train (t-yfsvviuo4o6c7i5ztkckemrw7) {
   plan (Y2BkkCtILUpLTC7RSytKLc5wzCzSSywoCC3Kcc7PS04tKGEAAUYQAQA=)
   last-modified (1561864132075)
 }
+train (t-yg72k16783cwe85ha9ax5oz70) {
+  utterance ([g:coachingDustResponseConcept] 초미세먼지 농도 분석해줘)
+  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
+  last-modified (1561906265642)
+}
+train (t-yzrzbb7e7mj6tz84uuicqbgo3) {
+  utterance ([g:coachingDustResponseConcept] 미세 수치 코치 해줘)
+  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
+  last-modified (1561906770757)
+}

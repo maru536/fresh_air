@@ -23,5 +23,26 @@ action (ShowYesterdayDust) {
   }
   
   type (Constructor)
-  output (userDustConcept)
+  output (userDustConcept) {
+    throws {
+      error (FailApiCall) {
+        on-catch {
+          halt {
+            dialog {
+              template ("미세먼지 정보에 접근할 수 없어요.")
+            }
+          }
+        }
+      }
+      error (NoDustData) {
+        on-catch {
+          halt {
+            dialog {
+              template ("어제 측정된 미세먼지 정보가 없어요.")
+            }
+          }
+        }
+      }
+    }
+  }
 }

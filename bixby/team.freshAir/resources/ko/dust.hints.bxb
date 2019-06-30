@@ -1,10 +1,13 @@
 hints {
   uncategorized {
+    utterance (미세먼지 코치 해줘)
+    utterance (오늘 미세먼지 보여줘)
+    utterance (어제의 미세먼지 알려줘)
     utterance (지금 미세먼지 알려줘)
-    utterance (코치 해줘)
+    utterance (주변 미세먼지 알려줘)
+    utterance (앱 실행해)
     utterance (로그인 해줘)
     utterance (가입 해줘)
     utterance (로그아웃 해줘)
-    utterance (앱 실행)
   }
 }

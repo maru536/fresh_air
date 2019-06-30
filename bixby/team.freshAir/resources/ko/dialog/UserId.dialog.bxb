@@ -5,5 +5,7 @@ dialog (Result) {
     }
   }
   
-  template ("'${value(userId)}' 로그인되었습니다.")
+  template ("'${value(userId)}' 로그인되었습니다.") {
+    speech ("로그인 되었습니다.")
+  }
 }

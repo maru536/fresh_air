@@ -5,5 +5,7 @@ dialog (Result) {
     }
   }
   
-  template("#{value(userDust.userId)}님의 오늘 하루 미세먼지 리포트입니다.")
+  template("#{value(userDust.userId)}님의 오늘 미세먼지 리포트입니다.") {
+    speech ("오늘의 미세먼지 리포트입니다.")
+  }
 }

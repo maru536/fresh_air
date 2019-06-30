@@ -1,3 +1,13 @@
+train (t-j1nvawz0vxzfgiqren2c6faa5) {
+  utterance ([g:ShowYesterdayDust] 어제 미세먼지 리포트해줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
+  last-modified (1561903944696)
+}
+train (t-j9wpzpm40a6wcx6l8en9td1eg) {
+  utterance ([g:ShowYesterdayDust] 어제 공기 측정값 보여줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
+  last-modified (1561907186683)
+}
 train (t-jalvgvbg3mdsd8y60eytlwca5) {
   utterance ([g:latestDustConcept] 최근 미세먼지 알려줘)
   plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)

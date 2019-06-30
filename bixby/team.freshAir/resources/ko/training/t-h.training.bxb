@@ -13,6 +13,11 @@ train (t-hemexzpbtrmfknnsnofzdsuhe) {
   plan (Y2BhkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzP88xjkMKQyIRrwjS0ILG4uBwuz8zAyMAEJBmANAhCAJgFAA==)
   last-modified (1561369321075)
 }
+train (t-hlmx0j92peu0z2iu8w8p2tg1f) {
+  utterance ([g:ShowYesterdayDust] 어제의 미세먼지 리포트해줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
+  last-modified (1561903964499)
+}
 train (t-hz1rnbxliou004634vey1xnfy) {
   utterance ([g:coachingDustResponseConcept] 미세먼지 비교해줘)
   plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)

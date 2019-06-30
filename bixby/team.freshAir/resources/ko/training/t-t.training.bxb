@@ -8,3 +8,8 @@ train (t-tehpcpaxtmhj4ipxljdo7yu2l) {
   plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
   last-modified (1561863760881)
 }
+train (t-ttybhgk1t9cx96a1b1th7ejfe) {
+  utterance ([g:latestDustConcept] 최근 미세먼지 수치 보여줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561906969390)
+}

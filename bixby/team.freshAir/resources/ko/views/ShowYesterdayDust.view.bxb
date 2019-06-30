@@ -28,4 +28,10 @@ result-view {
       }
     }
   }
+  
+  conversation-drivers {
+    conversation-driver {
+      template ("오늘 미세먼지 보여줘")
+    }
+  }
 }

@@ -3,3 +3,23 @@ train (t-v4s9j0c10qdgnw2czpw6g2w6e) {
   plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
   last-modified (1561863999177)
 }
+train (t-v7c23y12stxozcm1uc16ggfh4) {
+  utterance ([g:ShowTodayDust] 오늘 미세먼지 수치 확인해줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYZDDUBGckV8ekp+SWAlShkUeZIJnCkw/EwMjEDMASUYGBhgNAA==)
+  last-modified (1561907086359)
+}
+train (t-vldmsu6ze2phz8fmrb6on1hkb) {
+  utterance ([g:ShowYesterdayDust] 어제의 미세먼지 수치 보여줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
+  last-modified (1561907144187)
+}
+train (t-vsvqp8qvlozkg1le4k5evwdn4) {
+  utterance ([g:ShowYesterdayDust] 어제의 초미세먼지 리포트 보여줘)
+  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
+  last-modified (1561903954864)
+}
+train (t-vvlxslxtwrwocyxgqbja9cczf) {
+  utterance ([g:coachingDustResponseConcept] 초미세먼지 농도 코치해줘)
+  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
+  last-modified (1561906247073)
+}
