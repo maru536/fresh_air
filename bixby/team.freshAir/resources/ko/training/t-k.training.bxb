@@ -1,0 +1,10 @@
+train (t-k189cyiy9y9wjqlssn9ij09az) {
+  utterance ([g:SignUp] 조인해줘)
+  plan (Y2BhkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzPCy1gkMKQyIRrwjS0ILG4uBwuz8zAyMAEJBmANAhCAJgFAA==)
+  last-modified (1561863001942)
+}
+train (t-kxbzy63nj3rc4ms6csqp551mp) {
+  utterance ([g:publicDustConcept] 지금 주변 미세먼지 알려줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561863879824)
+}

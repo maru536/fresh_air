@@ -1,0 +1,10 @@
+train (t-wfzhzeo31okfj96olsmlb28ji) {
+  utterance ([g:coachingDustResponseConcept] 코칭해줘)
+  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
+  last-modified (1561863937303)
+}
+train (t-wvcn6560mant7995r8yey9db9) {
+  utterance ([g:publicDustConcept] 주변 초미세먼지 알려줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561863865207)
+}

@@ -1,14 +1,14 @@
 result-view {
   match {
-    latestDustConcept (latestDust)
+    publicDustConcept (publicDust)
   }
 
   render {
     layout {
-      if (exists(latestDust)) {
-        layout-macro (latestDustResult) {
-          param (latestDust) {
-            expression (latestDust)
+      if (exists(publicDust)) {
+        layout-macro (publicDustResult) {
+          param (publicDust) {
+            expression (publicDust)
           }
         }
         layout-macro (dustStandardLayout) 
@@ -19,6 +19,7 @@ result-view {
   conversation-drivers {
     conversation-driver {
       template ("코치 해줘")
+      template ("지금 미세먼지 알려줘")
     }
   }
 }

@@ -1,5 +1,5 @@
-train (t-9qmpax31au6m79kjd9uqtbxqx) {
-  utterance ([g:coachingDustResponseConcept] 코치 해줘)
-  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
-  last-modified (1561307668138)
+train (t-90s1lbzxr6zp24mtji7dgsatt) {
+  utterance ([g:latestDustConcept] 최신 미세먼지 알려줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561863718683)
 }

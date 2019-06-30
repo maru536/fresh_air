@@ -1,0 +1,5 @@
+train (t-49b0jltmqsavcz3pp0611kv90) {
+  utterance ([g:appUrlConcept] 미세코치 앱 실행해줘)
+  plan (Y2BkkCtILUpLTC7RSytKLc5wzCzSSywoCC3Kcc7PS04tKGEAAUYQAQA=)
+  last-modified (1561864171382)
+}

@@ -1,0 +1,10 @@
+train (t-z1gkguk972ytprq3hh8v85u93) {
+  utterance ([g:latestDustConcept] 지금 초미세먼지 알려줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561863502718)
+}
+train (t-zw1jwv1ld9tfpo1d95zedi3b2) {
+  utterance ([g:appUrlConcept] 미세미세)
+  plan (Y2BkkCtILUpLTC7RSytKLc5wzCzSSywoCC3Kcc7PS04tKGEAAUYQAQA=)
+  last-modified (1561864210692)
+}

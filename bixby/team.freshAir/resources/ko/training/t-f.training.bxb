@@ -1,10 +1,5 @@
-train (t-fiin1fn3prnhvpdh9r0dxlaez) {
-  utterance ([g:latestDustConcept] 지금 초미세먼지 알려줘)
-  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
-  last-modified (1561307570711)
-}
-train (t-fs2q8ec5718vbah9wpzwbxxd1) {
-  utterance ([g:addressConcept] 지금 위치 알려줘)
-  plan (Y2BkkC9ILUpLTC7RSytKLc5wzCzSS0xJATKLnfPzklMLShhAgBFEAAA=)
-  last-modified (1561193641289)
+train (t-fpt27nmxmc0mtwy0f7b3brabd) {
+  utterance ([g:coachingDustResponseConcept] 초미세먼지 코치 해줘)
+  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
+  last-modified (1561864054973)
 }

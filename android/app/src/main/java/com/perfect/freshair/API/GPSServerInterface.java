@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.google.gson.JsonObject;
 import com.perfect.freshair.Callback.ResponseCallback;
+import com.perfect.freshair.Callback.ResponseDustCallback;
+import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.Model.DustGPS;
 import com.perfect.freshair.Model.LatestDust;
 
@@ -91,6 +93,26 @@ public class GPSServerInterface {
         });
     }
 
+    public void publicDust(String addressLevelOne, String addressLevelTwo, final ResponseDustCallback _callback) {
+        GPSAPI gpsApi = mRetrofit.create(GPSAPI.class);
+
+        JsonObject address = new JsonObject();
+        address.addProperty("levelOne", addressLevelOne);
+        address.addProperty("levelTwo", addressLevelTwo);
+
+        Call<JsonObject> request = gpsApi.publicDust(address);
+        request.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
+                responseDustHandler(_response.body(), _callback);
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> _call, Throwable _t) {
+            }
+        });
+    }
+
     private void responseHandler(JsonObject _response, final ResponseCallback _callback) {
         try {
             _callback.responseCallback(_response.get("code").getAsInt());
@@ -99,6 +121,23 @@ public class GPSServerInterface {
             Log.e(TAG, RESPONSE_FAIL_MESSAGE);
             _callback.responseCallback(FAIL_CODE);
         }
+    }
+
+    private void responseDustHandler(JsonObject response, final ResponseDustCallback callback) {
+        Dust dust = null;
+        if (response != null && response.get("dust") != null && response.get("dust").isJsonObject()) {
+            JsonObject dustObject = response.get("dust").getAsJsonObject();
+
+            if (dustObject.get("pm100") != null && dustObject.get("pm100").isJsonPrimitive() && dustObject.get("pm25") != null && dustObject.get("pm25").isJsonPrimitive()) {
+                try {
+                    dust = new Dust(dustObject.get("pm100").getAsInt(), dustObject.get("pm25").getAsInt());
+                } catch (IllegalStateException ise) {
+
+                }
+            }
+        }
+
+        callback.responseDustCallback(dust);
     }
 
     private void apiFailHandler(Throwable _t, final ResponseCallback _callback) {

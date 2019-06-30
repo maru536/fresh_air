@@ -1,11 +1,12 @@
 capsule-info {
   display-name (미세코치)
-  developer-name (Team Perfact, Inc.)
+  developer-name (Team Perfact)
   icon-asset (images/icons/dust.png)
-  description (Dust Coaching for human.)
+  description (당신의 삶에서 미세먼지를 코치해줍니다.)
   search-keywords {
     keyword (dust)
     keyword (coaching)
+    keyword (coach)
     keyword (미세먼지)
     keyword (미세코치)
     keyword (코치)

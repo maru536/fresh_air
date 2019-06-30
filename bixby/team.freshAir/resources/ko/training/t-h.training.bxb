@@ -1,10 +1,20 @@
-train (t-ha6c8echywzz5k1mq469yhepy) {
-  utterance ([g:AppLaunch] 앱 실행해줘)
-  plan (Y2BikCtILUpLTC7RSytKLc5wzCzSSywoCC3Kcc7PS04tKGGQwpB3LCjwSSzNS85gYARCBigGkgA=)
-  last-modified (1561544564483)
+train (t-h0heiwitp0uogm4b38zzzqqb0) {
+  utterance ([g:appUrlConcept] 앱 실행)
+  plan (Y2BkkCtILUpLTC7RSytKLc5wzCzSSywoCC3Kcc7PS04tKGEAAUYQAQA=)
+  last-modified (1561863787019)
+}
+train (t-h4oalyzgjn2vo49zxjomwy92q) {
+  utterance ([g:appUrlConcept] 앱 실행해줘)
+  plan (Y2BkkCtILUpLTC7RSytKLc5wzCzSSywoCC3Kcc7PS04tKGEAAUYQAQA=)
+  last-modified (1561864103954)
 }
 train (t-hemexzpbtrmfknnsnofzdsuhe) {
   utterance ([g:SignIn] 로그인 해줘)
   plan (Y2BhkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzP88xjkMKQyIRrwjS0ILG4uBwuz8zAyMAEJBmANAhCAJgFAA==)
   last-modified (1561369321075)
+}
+train (t-hz1rnbxliou004634vey1xnfy) {
+  utterance ([g:coachingDustResponseConcept] 미세먼지 비교해줘)
+  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
+  last-modified (1561864086773)
 }

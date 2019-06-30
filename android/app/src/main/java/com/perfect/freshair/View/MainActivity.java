@@ -38,6 +38,8 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.perfect.freshair.API.GPSServerInterface;
+import com.perfect.freshair.Callback.ResponseDustCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.Common.PermissionEnumeration;
 import com.perfect.freshair.Control.DataUpdateWorker;
@@ -46,10 +48,16 @@ import com.perfect.freshair.Control.NavArrayAdapter;
 import com.perfect.freshair.DB.StatusDBHandler;
 import com.perfect.freshair.Model.CurrentStatus;
 import com.perfect.freshair.Model.Dust;
+import com.perfect.freshair.Model.Gps;
+import com.perfect.freshair.Model.GpsProvider;
+import com.perfect.freshair.Model.Position;
+import com.perfect.freshair.Model.PositionStatus;
+import com.perfect.freshair.Model.Satellite;
 import com.perfect.freshair.Model.TempData;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
 import com.perfect.freshair.Utils.MicroDustUtils;
+import com.perfect.freshair.Utils.PreferencesUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private StatusDBHandler statusDBHandler;
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mNavigationMenu;
+    private GPSServerInterface serverInterface;
     PeriodicWorkRequest saveRequest;
     Thread updateThread;
     final String myUniqueWorkName = "com.perfect.freshair.ViewoneTimeRequest";
@@ -101,7 +110,15 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
         }
 
+        if (serverInterface == null)
+            serverInterface = new GPSServerInterface();
 
+        serverInterface.publicDust("서울특별시", "관악구", new ResponseDustCallback() {
+            @Override
+            public void responseDustCallback(Dust dust) {
+                Log.i("publicDustApi", "PM10: " +dust.getPm100()+ " / PM2.5: " +dust.getPm25());
+            }
+        });
 
         //appcompat toolbar initialization
         Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
@@ -336,7 +353,6 @@ public class MainActivity extends AppCompatActivity {
                 new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 10, TimeUnit.SECONDS, 10, TimeUnit.SECONDS).build();
         WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.KEEP, saveRequest);
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {

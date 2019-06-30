@@ -1,0 +1,10 @@
+train (t-tdccg7vwrplqncghfju0tvzq6) {
+  utterance ([g:publicDustConcept] 최근 주변 미세먼지 알려줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561863892460)
+}
+train (t-tehpcpaxtmhj4ipxljdo7yu2l) {
+  utterance ([g:publicDustConcept] 주변 미세먼지 알려줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561863760881)
+}

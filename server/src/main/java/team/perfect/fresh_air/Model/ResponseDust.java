@@ -1,6 +1,7 @@
 package team.perfect.fresh_air.Model;
 
 import team.perfect.fresh_air.DAO.Dust;
+import team.perfect.fresh_air.DAO.LatestDust;
 
 public class ResponseDust extends Response {
     private Dust dust;

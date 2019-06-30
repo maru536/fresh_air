@@ -19,4 +19,8 @@ public interface GPSAPI {
     @GET("1.0/signIn")
     Call<JsonObject> signIn(@Header("id") String userId,
                             @Header("passwd") String passwd);
+
+
+    @POST("1.0/publicDust")
+    Call<JsonObject> publicDust(@Body JsonObject address);
 }

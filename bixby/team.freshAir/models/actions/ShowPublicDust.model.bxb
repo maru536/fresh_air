@@ -1,0 +1,47 @@
+action (ShowPublicDust) {
+  description (Show public dust data)
+  collect {
+    input (address) {
+      type (addressConcept)
+      min (Optional) max (One)
+      default-init {
+        intent {
+          goal: GetCurrentLocation
+        }
+      }
+    }
+  }
+  
+  output (publicDustConcept) {
+    throws {
+      error (malformResponse) {
+        on-catch {
+          halt {
+            dialog {
+              template ("잘못된 응답입니다.")
+            }
+          }
+        }
+      }
+      error (notSupportedArea) {
+        on-catch {
+          halt {
+            dialog {
+              template ("지원하지 않는 지역이에요.")
+            }
+          }
+        }
+      }
+      error (responseFail) {
+        on-catch {
+          halt {
+            dialog {
+              template ("응답을 받지 못했습니다.")
+            }
+          }
+        }
+      }
+    }
+  }
+  type (Search)
+}

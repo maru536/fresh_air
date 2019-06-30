@@ -1,15 +1,14 @@
 package team.perfect.fresh_air.Model;
 
 import team.perfect.fresh_air.DAO.Air;
-import team.perfect.fresh_air.DAO.Dust;
+import team.perfect.fresh_air.DAO.LatestDust;
 
 public class ResponseCoaching extends Response {
     private String coachingMessage;
-    private Dust latestDust;
+    private LatestDust latestDust;
     private Air airData;
 
-
-    public ResponseCoaching(int code, String message, String coachingMessage, Dust latestDust, Air airData) {
+    public ResponseCoaching(int code, String message, String coachingMessage, LatestDust latestDust, Air airData) {
         super(code, message);
         this.coachingMessage = coachingMessage;
         this.latestDust = latestDust;
@@ -24,11 +23,11 @@ public class ResponseCoaching extends Response {
         this.coachingMessage = coachingMessage;
     }
 
-    public Dust getLatestDust() {
+    public LatestDust getLatestDust() {
         return this.latestDust;
     }
 
-    public void setLatestDust(Dust latestDust) {
+    public void setLatestDust(LatestDust latestDust) {
         this.latestDust = latestDust;
     }
 
@@ -38,5 +37,5 @@ public class ResponseCoaching extends Response {
 
     public void setAirData(Air airData) {
         this.airData = airData;
-    }    
+    }
 }

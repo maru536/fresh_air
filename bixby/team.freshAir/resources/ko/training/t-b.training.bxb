@@ -3,8 +3,3 @@ train (t-bojds95b59cuain8ivcd0e1or) {
   plan (Y2BikCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGGQwJAPzkzP8y8tYWAEQgYoBpIA)
   last-modified (1561297066068)
 }
-train (t-byw2ezn28mol9wcg5lf4rr6k2) {
-  utterance ([g:AppLaunch] 앱 실행해)
-  plan (Y2BikCtILUpLTC7RSytKLc5wzCzSSywoCC3Kcc7PS04tKGGQwpB3LCjwSSzNS85gYARCBigGkgA=)
-  last-modified (1561560771595)
-}

@@ -1,5 +1,5 @@
-train (t-8lpm5l97ym726p5hjk658cpc0) {
-  utterance ([g:latestDustConcept] 최신 미세먼지 보여줘)
-  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)
-  last-modified (1561308803762)
+train (t-8ksxnk1k35cax7nabol7dji21) {
+  utterance ([g:SignUp] 싸인 업해줘)
+  plan (Y2BhkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzPCy1gkMKQyIRrwjS0ILG4uBwuz8zAyMAEJBmANAhCAJgFAA==)
+  last-modified (1561862920879)
 }

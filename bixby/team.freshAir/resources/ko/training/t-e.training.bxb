@@ -1,5 +1,10 @@
-train (t-eweuyfjn1x29eaaptcq7zxywb) {
-  utterance ([g:coachingDustResponseConcept] 코칭해줘)
+train (t-ec3vdz6gh7x65c8j4dkgc0p3d) {
+  utterance ([g:coachingDustResponseConcept] 미세먼지 코치 해줘)
   plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
-  last-modified (1561225860804)
+  last-modified (1561864032116)
+}
+train (t-ecdo4zjreqyyhpvlxxhrex4uk) {
+  utterance ([g:coachingDustResponseConcept] 코치 해줘)
+  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
+  last-modified (1561863774539)
 }

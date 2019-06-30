@@ -3,3 +3,8 @@ train (t-02m0wzh6m2g1z5mnu0fp9a8ib) {
   plan (Y2BhkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzPCy1gkMKQyIRrwjS0ILG4uBwuz8zAyMAEJBmANAhCAJgFAA==)
   last-modified (1561544591813)
 }
+train (t-0hx3uh4hy6iaqlhemb8pev0w8) {
+  utterance ([g:publicDustConcept] 여기 미세먼지 알려줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561863921694)
+}

@@ -1,5 +1,10 @@
-train (t-pvyeuizzv5vjrtpuke23p0ity) {
-  utterance ([g:coachingDustResponseConcept] 초미세먼지 코치 해줘)
-  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
-  last-modified (1561307743290)
+train (t-pnlwrow3x9vpecamb4487yhgq) {
+  utterance ([g:appUrlConcept] 미세 코치 어플 실행)
+  plan (Y2BkkCtILUpLTC7RSytKLc5wzCzSSywoCC3Kcc7PS04tKGEAAUYQAQA=)
+  last-modified (1561864155994)
+}
+train (t-poqxmhazvie4kw8ny9jdrwm96) {
+  utterance ([g:SignOut] 나가줘)
+  plan (Y2BikCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGGQwJAPzkzP8y8tYWAEQgYoBpIA)
+  last-modified (1561863055879)
 }

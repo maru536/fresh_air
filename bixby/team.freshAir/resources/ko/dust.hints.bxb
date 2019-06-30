@@ -3,6 +3,8 @@ hints {
     utterance (지금 미세먼지 알려줘)
     utterance (코치 해줘)
     utterance (로그인 해줘)
+    utterance (가입 해줘)
     utterance (로그아웃 해줘)
+    utterance (앱 실행)
   }
 }

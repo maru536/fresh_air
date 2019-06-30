@@ -9,5 +9,6 @@ import team.perfect.fresh_air.DAO.User;
 
 public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findById(String id);
+
     Optional<User> findByIdAndPasswd(String id, String passwd);
 }

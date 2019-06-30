@@ -3,7 +3,7 @@ action (CoachingDust) {
   collect {
     input (address) {
       type (addressConcept)
-      min (Required) max (One)
+      min (Optional) max (One)
       default-init {
         intent {
           goal: GetCurrentLocation
@@ -31,6 +31,27 @@ action (CoachingDust) {
       }
     }
   }
-  output (coachingDustResponseConcept)
+  output (coachingDustResponseConcept) {
+    throws {
+      error (noResponseFail) {
+        on-catch {
+          halt {
+            dialog {
+              template ("측정된 미세먼지 및 주변 미세먼지 정보가 없어요.")
+            }
+          }
+        }
+      }
+      error (getAddressFail) {
+        on-catch {
+          halt {
+            dialog {
+              template ("지원하지 않는 지역이에요.")
+            }
+          }
+        }
+      }
+    }
+  }
   type (Search)
 }
