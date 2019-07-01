@@ -16,6 +16,10 @@ public class ChartUtils {
     public static byte[] lineChart(List<Integer> pm100Data, List<Integer> pm25Data, List<Integer> hourXAxis) {
         // Create Chart
         XYChart chart = new XYChart(50 * 16, 50 * 9);
+
+        chart.setXAxisTitle("시간");
+        chart.setYAxisTitle("㎍/㎥");
+
         chart.getStyler().setChartBackgroundColor(new Color(255, 255, 255, 255));
         chart.getStyler().setChartTitleVisible(true);
         chart.getStyler().setChartTitleBoxVisible(false);

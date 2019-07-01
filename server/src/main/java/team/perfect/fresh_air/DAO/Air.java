@@ -23,11 +23,12 @@ public class Air {
     private int pm100 = -1;
     private int pm25 = -1;
     private float so2 = -1.0f;
-    
+
     public Air() {
     }
 
-    public Air(String addressLevelOne, String addressLevelTwo, float no2, float co, float o3, int pm100, int pm25, float so2) {
+    public Air(String addressLevelOne, String addressLevelTwo, float no2, float co, float o3, int pm100, int pm25,
+            float so2) {
         this.addressLevelOne = addressLevelOne;
         this.addressLevelTwo = addressLevelTwo;
         this.no2 = no2;
@@ -36,6 +37,12 @@ public class Air {
         this.pm100 = pm100;
         this.pm25 = pm25;
         this.so2 = so2;
+    }
+
+    public Air(String addressLevelOne, String addressLevelTwo, String dataTime) {
+        this.addressLevelOne = addressLevelOne;
+        this.addressLevelTwo = addressLevelTwo;
+        this.dateTime = dataTime;
     }
 
     public Air(String addressLevelOne, JsonObject airData) {
@@ -53,7 +60,7 @@ public class Air {
         } catch (NumberFormatException e) {
             this.no2 = -1.0f;
         }
-        
+
         try {
             this.co = airData.get(AirContract.CO).getAsFloat();
         } catch (NumberFormatException e) {
@@ -81,6 +88,52 @@ public class Air {
         try {
             this.so2 = airData.get(AirContract.SO2).getAsFloat();
         } catch (NumberFormatException e) {
+            this.so2 = -1.0f;
+        }
+    }
+
+    public Air(JsonObject airData) {
+        this.addressLevelOne = airData.get(AirContract.CITY_NAME).getAsString();
+
+        try {
+            this.dateTime = airData.get(AirContract.DATA_TIME).getAsString();
+        } catch (ClassCastException | IllegalStateException e) {
+            this.dateTime = "";
+        }
+
+        try {
+            this.no2 = airData.get(AirContract.NO2).getAsFloat();
+        } catch (ClassCastException | IllegalStateException e) {
+            this.no2 = -1.0f;
+        }
+
+        try {
+            this.co = airData.get(AirContract.CO).getAsFloat();
+        } catch (ClassCastException | IllegalStateException e) {
+            this.co = -1.0f;
+        }
+
+        try {
+            this.o3 = airData.get(AirContract.O3).getAsFloat();
+        } catch (ClassCastException | IllegalStateException e) {
+            this.o3 = -1.0f;
+        }
+
+        try {
+            this.pm100 = airData.get(AirContract.PM100).getAsInt();
+        } catch (ClassCastException | IllegalStateException e) {
+            this.pm100 = -1;
+        }
+
+        try {
+            this.pm25 = airData.get(AirContract.PM25).getAsInt();
+        } catch (ClassCastException | IllegalStateException e) {
+            this.pm25 = -1;
+        }
+
+        try {
+            this.so2 = airData.get(AirContract.SO2).getAsFloat();
+        } catch (ClassCastException | IllegalStateException e) {
             this.so2 = -1.0f;
         }
     }
@@ -147,5 +200,5 @@ public class Air {
 
     public void setSo2(float so2) {
         this.so2 = so2;
-    }    
+    }
 }

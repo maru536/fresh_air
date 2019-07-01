@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -114,6 +115,17 @@ public class RestApiController {
             return new Response(500, "Save dust fail");
     }
 
+    @PostMapping("1.0/testDust")
+    public Response postTestDust(@RequestHeader String userId) {
+        Random random = new Random();
+        LatestDust dust = new LatestDust(userId, System.currentTimeMillis(), random.nextInt(100), random.nextInt(150));
+
+        if (this.dustRepository.save(dust) != null)
+            return new Response(200, "Save dust Success");
+        else
+            return new Response(500, "Save dust fail");
+    }
+
     @GetMapping("1.0/lastestDust")
     public Response latestDust(@RequestHeader String userId) {
         Optional<LatestDust> latestDust = this.dustRepository.findFirstByUserIdOrderByTimeDesc(userId);
@@ -126,36 +138,49 @@ public class RestApiController {
 
     @PostMapping("1.0/publicDust")
     public Response publicDust(@RequestBody JsonObject address) {
-        AddressPK id = new AddressPK(address.get("levelOne").getAsString(), address.get("levelTwo").getAsString());
-        Optional<Air> publicAir = this.airRepository.findById(id);
+        Air publicAir = queryAirByAddress(new AddressPK(address));
 
-        if (publicAir.isPresent())
-            return new ResponseDust(200, "Success", new Dust(publicAir.get().getPm100(), publicAir.get().getPm25()));
+        if (publicAir != null)
+            return new ResponseDust(200, "Success", new Dust(publicAir.getPm100(), publicAir.getPm25()));
         else
             return new Response(404, "There is no public dust data");
     }
 
+    private Air queryAirByAddress(AddressPK address) {
+        Optional<Air> publicAir = this.airRepository.findById(address);
+
+        if (publicAir.isPresent())
+            return publicAir.get();
+        else {
+            address.setAddressLevelTwo("");
+            publicAir = this.airRepository.findById(address);
+
+            if (publicAir.isPresent())
+                return publicAir.get();
+            else
+                return null;
+        }
+    }
+
     @PostMapping("1.0/coachingDust")
     public Response air(@RequestHeader String userId, @RequestBody JsonObject address) {
-        AddressPK id = new AddressPK(address.get("levelOne").getAsString(), address.get("levelTwo").getAsString());
-        // AddressPK id = new AddressPK(addressLevelOne, addressLevelTwo);
-        Optional<Air> airData = this.airRepository.findById(id);
+        Air publicAir = queryAirByAddress(new AddressPK(address));
         Optional<LatestDust> latestDust = this.dustRepository.findFirstByUserIdOrderByTimeDesc(userId);
         String coachingMessage = "";
 
         if (latestDust.isPresent()) {
-            if (airData.isPresent()) {
-                coachingMessage = makeDiffCoachingMessage(latestDust.get(), airData.get());
+            if (publicAir != null) {
+                coachingMessage = makeDiffCoachingMessage(latestDust.get(), publicAir);
                 coachingMessage += makeLatestDustCoachingMessage(latestDust.get());
-                return new ResponseCoaching(200, "Success", coachingMessage, latestDust.get(), airData.get());
+                return new ResponseCoaching(200, "Success", coachingMessage, latestDust.get(), publicAir);
             } else {
                 coachingMessage = makeLatestDustCoachingMessage(latestDust.get());
                 return new ResponseCoaching(201, "Success, but there is no air data", coachingMessage, latestDust.get(),
                         new Air());
             }
         } else {
-            if (airData.isPresent()) {
-                return new ResponseAir(202, "Only air data", airData.get());
+            if (publicAir != null) {
+                return new ResponseAir(202, "Only air data", publicAir);
             } else {
                 return new Response(404, "There is no data");
             }
@@ -218,10 +243,17 @@ public class RestApiController {
 
         try {
             addressLevelOne = AddressLevelOneContract.valueOf(address);
-            airServer.getAirData(AddressLevelOneContract.valueOf(address), this.airRepository);
+            airServer.getLevelTwoAirData(AddressLevelOneContract.valueOf(address), this.airRepository);
         } catch (IllegalArgumentException iae) {
             System.out.println("Invaild address: " + address);
         }
+    }
+
+    @PostMapping("1.0/levelOnePublicAir")
+    public void getLevelOnePublicAir(@RequestHeader String itemCode) {
+        AirServerInterface airServer = new AirServerInterface();
+
+        airServer.getLevelOneAirData(itemCode, airRepository);
     }
 
     @GetMapping("1.0/todayDust")

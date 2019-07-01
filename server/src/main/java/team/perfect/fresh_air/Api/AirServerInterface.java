@@ -1,5 +1,8 @@
 package team.perfect.fresh_air.Api;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonArray;
@@ -10,6 +13,7 @@ import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import ch.qos.logback.core.joran.conditional.ElseAction;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -24,34 +28,31 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import team.perfect.fresh_air.Contract.AddressLevelOneContract;
 import team.perfect.fresh_air.Contract.AirContract;
+import team.perfect.fresh_air.Contract.AirItemCodeContract;
 import team.perfect.fresh_air.Contract.ApiContract;
+import team.perfect.fresh_air.DAO.AddressPK;
 import team.perfect.fresh_air.DAO.Air;
 import team.perfect.fresh_air.Repository.AirRepository;
 
 public class AirServerInterface {
     private Retrofit retrofit;
-    
+
     public AirServerInterface() {
-        
+
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(100, TimeUnit.SECONDS)
-            .readTimeout(100, TimeUnit.SECONDS)    
-            .addInterceptor(interceptor).build();
+        OkHttpClient client = new OkHttpClient.Builder().connectTimeout(100, TimeUnit.SECONDS)
+                .readTimeout(100, TimeUnit.SECONDS).addInterceptor(interceptor).build();
 
-        this.retrofit = new Retrofit.Builder()
-                .baseUrl(ApiContract.AIR_SERVER_ADDRESS)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        this.retrofit = new Retrofit.Builder().baseUrl(ApiContract.AIR_SERVER_ADDRESS).client(client)
+                .addConverterFactory(GsonConverterFactory.create()).build();
     }
 
-    public void getAirData(AddressLevelOneContract address, AirRepository airRepository) {
+    public void getLevelTwoAirData(AddressLevelOneContract address, AirRepository airRepository) {
         if (address != null) {
             AirApi airApi = retrofit.create(AirApi.class);
 
-            Call<JsonObject> request = airApi.getAirData(address.getServerKey());
+            Call<JsonObject> request = airApi.getLevelTwoAirData(address.getServerKey());
 
             request.enqueue(new Callback<JsonObject>() {
                 @Override
@@ -61,7 +62,7 @@ public class AirServerInterface {
 
                     for (JsonElement curElem : airDataList) {
                         Air curAir = new Air(address.getBixbyKey(), curElem.getAsJsonObject());
-                        airRepository.delete(curAir); 
+                        airRepository.delete(curAir);
                         airRepository.save(curAir);
                     }
                 }
@@ -72,5 +73,47 @@ public class AirServerInterface {
                 }
             });
         }
+    }
+
+    public void getLevelOneAirData(String itemCode, AirRepository airRepository) {
+        AirApi airApi = retrofit.create(AirApi.class);
+
+        Call<JsonObject> request = airApi.getLevelOneAirData(itemCode);
+
+        request.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                // response format 확인 후 수정 필요
+                JsonObject airData = response.body().get(AirContract.LIST).getAsJsonArray().get(0).getAsJsonObject();
+                String dataTime = airData.get(AirContract.DATA_TIME).getAsString();
+                List<Air> airList = new ArrayList<Air>();
+                for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
+                    if (airData.get(address.name()) != null) {
+                        int value = airData.get(address.name()).getAsInt();
+
+                        if (airRepository.existsById(new AddressPK(address.getBixbyKey(), ""))) {
+                            if (itemCode.equals(AirItemCodeContract.PM100))
+                                airRepository.updatePM100(address.getBixbyKey(), dataTime, value);
+                            else if (itemCode.equals(AirItemCodeContract.PM25))
+                                airRepository.updatePM25(address.getBixbyKey(), dataTime, value);
+                        } else {
+                            Air air = new Air(address.getBixbyKey(), "", dataTime);
+
+                            if (itemCode.equals(AirItemCodeContract.PM100))
+                                air.setPm100(value);
+                            else if (itemCode.equals(AirItemCodeContract.PM25))
+                                air.setPm25(value);
+
+                            airRepository.save(air);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+
+            }
+        });
     }
 }
