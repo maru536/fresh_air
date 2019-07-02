@@ -1,6 +1,6 @@
 package team.perfect.fresh_air.Contract;
 
-public class DustStandard {
+public class DustStandardContract {
     public static final int goodPm100 = 30;
     public static final int normalPm100 = 80;
     public static final int badPm100 = 150;

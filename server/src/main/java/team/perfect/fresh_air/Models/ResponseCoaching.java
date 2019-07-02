@@ -1,4 +1,4 @@
-package team.perfect.fresh_air.Model;
+package team.perfect.fresh_air.Models;
 
 import team.perfect.fresh_air.DAO.Air;
 import team.perfect.fresh_air.DAO.LatestDust;

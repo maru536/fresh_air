@@ -1,26 +1,13 @@
 package team.perfect.fresh_air.Api;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-
-import ch.qos.logback.core.joran.conditional.ElseAction;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Call;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -86,7 +73,6 @@ public class AirServerInterface {
                 // response format 확인 후 수정 필요
                 JsonObject airData = response.body().get(AirContract.LIST).getAsJsonArray().get(0).getAsJsonObject();
                 String dataTime = airData.get(AirContract.DATA_TIME).getAsString();
-                List<Air> airList = new ArrayList<Air>();
                 for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
                     String lowerAddress = address.name().toLowerCase();
                     if (airData.get(lowerAddress) != null) {

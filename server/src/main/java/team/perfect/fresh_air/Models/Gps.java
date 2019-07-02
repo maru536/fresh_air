@@ -1,6 +1,4 @@
-package team.perfect.fresh_air.Model;
-
-import javax.persistence.Entity;
+package team.perfect.fresh_air.Models;
 
 public class Gps {
     private String provider;

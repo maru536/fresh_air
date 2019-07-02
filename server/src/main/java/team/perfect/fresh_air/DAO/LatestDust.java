@@ -1,6 +1,5 @@
 package team.perfect.fresh_air.DAO;
 
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;

@@ -1,6 +1,5 @@
 package team.perfect.fresh_air.DAO;
 
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -200,5 +199,13 @@ public class Air {
 
     public void setSo2(float so2) {
         this.so2 = so2;
+    }
+
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
+    }
+
+    public String getDateTime() {
+        return this.dateTime;
     }
 }

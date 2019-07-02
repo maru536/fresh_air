@@ -19,11 +19,6 @@ public class DustPK implements Serializable {
 		this.time = time;
     }
 
-    public DustPK(long time) {
-		super();
-		this.userId = userId;
-    }
-
     public String getUserId() {
         return this.userId;
     }

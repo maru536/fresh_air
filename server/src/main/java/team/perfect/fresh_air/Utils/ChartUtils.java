@@ -1,4 +1,4 @@
-package team.perfect.fresh_air.Controllers;
+package team.perfect.fresh_air.Utils;
 
 import java.awt.Color;
 import java.io.IOException;

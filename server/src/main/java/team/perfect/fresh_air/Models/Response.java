@@ -1,4 +1,4 @@
-package team.perfect.fresh_air.Model;
+package team.perfect.fresh_air.Models;
 
 public class Response {
     int code;
