@@ -88,8 +88,9 @@ public class AirServerInterface {
                 String dataTime = airData.get(AirContract.DATA_TIME).getAsString();
                 List<Air> airList = new ArrayList<Air>();
                 for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
-                    if (airData.get(address.name()) != null) {
-                        int value = airData.get(address.name()).getAsInt();
+                    String lowerAddress = address.name().toLowerCase();
+                    if (airData.get(lowerAddress) != null) {
+                        int value = airData.get(lowerAddress).getAsInt();
 
                         if (airRepository.existsById(new AddressPK(address.getBixbyKey(), ""))) {
                             if (itemCode.equals(AirItemCodeContract.PM100))

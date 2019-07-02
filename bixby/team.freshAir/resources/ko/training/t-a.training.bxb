@@ -1,3 +1,8 @@
+train (t-a5k65xxsszjnifhsgya9ecqfv) {
+  utterance ([g:coachingDustResponseConcept] 초미세먼지 분석 리포트 알려줘)
+  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
+  last-modified (1561982525678)
+}
 train (t-angw6htvk2809bq5neprvyg1h) {
   utterance ([g:ShowYesterdayDust] 어제의 미세먼지 보여줘)
   plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)

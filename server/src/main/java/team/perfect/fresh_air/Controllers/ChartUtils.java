@@ -17,8 +17,8 @@ public class ChartUtils {
         // Create Chart
         XYChart chart = new XYChart(50 * 16, 50 * 9);
 
-        chart.setXAxisTitle("시간");
-        chart.setYAxisTitle("㎍/㎥");
+        chart.setXAxisTitle("Hour");
+        chart.setYAxisTitle("ug/m3");
 
         chart.getStyler().setChartBackgroundColor(new Color(255, 255, 255, 255));
         chart.getStyler().setChartTitleVisible(true);

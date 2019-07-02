@@ -33,7 +33,7 @@ public class AddressPK implements Serializable {
 
             if (address.get("levelTwo") != null && address.get("levelTwo").isJsonPrimitive()) {
                 try {
-                    this.addressLevelOne = address.get("levelTwo").getAsString();
+                    this.addressLevelTwo = address.get("levelTwo").getAsString();
                 } catch (ClassCastException | IllegalStateException e) {
 
                 }

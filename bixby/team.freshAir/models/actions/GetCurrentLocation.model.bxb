@@ -18,13 +18,7 @@ action (GetCurrentLocation) {
   output (addressConcept) {
     evaluate {
       if (address.country.countryCode2 == 'KR') {
-        if (exists(address.levelOne.name) && address.levelOne.name == '경기도' && exists(address.locality)) {
-          addressConcept {
-            levelOne: $expr(address.levelOne.name)
-            levelTwo: $expr(address.locality)
-          }
-        }
-        else-if (exists(address.locality) && exists(address.levelOne.name)) {
+        if (exists(address.levelOne.name) && exists(address.locality)) {
           addressConcept {
             levelOne: $expr(address.levelOne.name)
             levelTwo: $expr(address.locality)
@@ -34,6 +28,30 @@ action (GetCurrentLocation) {
           addressConcept {
             levelOne: $expr(address.locality)
             levelTwo: $expr(address.subLocalityOne)
+          }
+        }
+        else-if (exists(address.locality) && exists(address.subLocalityTwo)) {
+          addressConcept {
+            levelOne: $expr(address.locality)
+            levelTwo: $expr(address.subLocalityTwo)
+          }
+        }
+        else-if (exists(address.locality) && exists(address.subLocalityThree)) {
+          addressConcept {
+            levelOne: $expr(address.locality)
+            levelTwo: $expr(address.subLocalityThree)
+          }
+        }
+        else-if (exists(address.locality) && exists(address.subLocalityFour)) {
+          addressConcept {
+            levelOne: $expr(address.locality)
+            levelTwo: $expr(address.subLocalityFour)
+          }
+        }
+        else {
+          addressConcept {
+            levelOne: $expr(' ')
+            levelTwo: $expr(' ')
           }
         }
       }

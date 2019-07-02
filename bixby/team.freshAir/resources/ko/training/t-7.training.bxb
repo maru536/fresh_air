@@ -1,3 +1,8 @@
+train (t-7a4dj0kdn02hycdf35nmud2ov) {
+  utterance ([g:publicDustConcept] 근처 미세먼지 보여줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561982478468)
+}
 train (t-7zp1reu1v6ekiljasywbb2l1b) {
   utterance ([g:latestDustConcept] 최근 초미세먼지 농도 리포트 해줘)
   plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSy0ksSS0ucSktLnHOz0tOLShhAAFGEAEA)

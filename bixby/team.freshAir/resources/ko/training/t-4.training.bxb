@@ -3,3 +3,8 @@ train (t-49b0jltmqsavcz3pp0611kv90) {
   plan (Y2BkkCtILUpLTC7RSytKLc5wzCzSSywoCC3Kcc7PS04tKGEAAUYQAQA=)
   last-modified (1561864171382)
 }
+train (t-4ijw2lsus5rh6wq4lz3qr890u) {
+  utterance ([g:coachingDustResponseConcept] 초미세먼지 코칭 리포트 알려줘)
+  plan (Y2Bk0ClILUpLTC7RSytKLc5wzCzSS85PTM7IzEt3KS0uCUotLsjPK051zs9LTi0oYQABRhABAA==)
+  last-modified (1561982580878)
+}

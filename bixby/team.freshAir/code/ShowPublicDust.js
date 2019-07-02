@@ -4,7 +4,7 @@ var dates = require('dates');
 var fail = require('fail');
 
 module.exports.function = function showPublicDust (address) {
-  if (address != null && address.levelOne != null && address.levelTwo != null) {
+  if (address != null && address.levelOne != null) {
     var options = {
       format: 'json', 
       headers: {
@@ -12,9 +12,18 @@ module.exports.function = function showPublicDust (address) {
       }
     };
 
-    var body = {
-      "levelOne": address.levelOne,
-      "levelTwo": address.levelTwo
+    var body;
+    if (address.levelTwo != null) {
+      body = {
+        "levelOne": address.levelOne,
+        "levelTwo": address.levelTwo
+      }
+    }
+    else {
+      body = {
+        "levelOne": address.levelOne,
+        "levelTwo": ''
+      }
     }
 
     var response = http.postUrl('http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/1.0/publicDust', body, options);

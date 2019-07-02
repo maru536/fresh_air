@@ -152,8 +152,7 @@ public class RestApiController {
         if (publicAir.isPresent())
             return publicAir.get();
         else {
-            address.setAddressLevelTwo("");
-            publicAir = this.airRepository.findById(address);
+            publicAir = this.airRepository.findById(new AddressPK(address.getAddressLevelOne(), ""));
 
             if (publicAir.isPresent())
                 return publicAir.get();

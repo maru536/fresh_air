@@ -13,3 +13,8 @@ train (t-wvcn6560mant7995r8yey9db9) {
   plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
   last-modified (1561863865207)
 }
+train (t-wymwys1rcl1rv8lfxdfz2tfg3) {
+  utterance ([g:SignOut] 로그아웃)
+  plan (Y2BikCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGGQwJAPzkzP8y8tYWAEQgYoBpIA)
+  last-modified (1561984801167)
+}

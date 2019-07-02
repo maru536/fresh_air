@@ -3,6 +3,11 @@ train (t-k189cyiy9y9wjqlssn9ij09az) {
   plan (Y2BhkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzPCy1gkMKQyIRrwjS0ILG4uBwuz8zAyMAEJBmANAhCAJgFAA==)
   last-modified (1561863001942)
 }
+train (t-ksnedawei0ugi42axti0pno8p) {
+  utterance ([g:publicDustConcept] 근처 초미세먼지 수치 보여줘)
+  plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
+  last-modified (1561982425165)
+}
 train (t-kxbzy63nj3rc4ms6csqp551mp) {
   utterance ([g:publicDustConcept] 지금 주변 미세먼지 알려줘)
   plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
