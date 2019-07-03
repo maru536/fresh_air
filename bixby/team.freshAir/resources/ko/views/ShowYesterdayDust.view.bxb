@@ -22,7 +22,7 @@ result-view {
           }
           
           image {
-            url ("http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/1.0/yesterdayChart/#{value(userDust.userId)}")
+            url ("http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/2.0/yesterdayChart/#{value(userDust.userId)}")
           }
         }
       }
