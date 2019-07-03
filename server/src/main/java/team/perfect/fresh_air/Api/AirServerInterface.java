@@ -1,5 +1,6 @@
 package team.perfect.fresh_air.Api;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonArray;
@@ -41,24 +42,17 @@ public class AirServerInterface {
 
             Call<JsonObject> request = airApi.getLevelTwoAirData(address.getServerKey());
 
-            request.enqueue(new Callback<JsonObject>() {
-                @Override
-                public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
-                    System.out.println(_response.body().toString());
-                    JsonArray airDataList = _response.body().get(AirContract.LIST).getAsJsonArray();
+            try {
+                JsonArray airDataList = request.execute().body().get(AirContract.LIST).getAsJsonArray();
 
-                    for (JsonElement curElem : airDataList) {
-                        Air curAir = new Air(address.getBixbyKey(), curElem.getAsJsonObject());
-                        airRepository.delete(curAir);
-                        airRepository.save(curAir);
-                    }
+                for (JsonElement curElem : airDataList) {
+                    Air curAir = new Air(address.getBixbyKey(), curElem.getAsJsonObject());
+                    airRepository.delete(curAir);
+                    airRepository.save(curAir);
                 }
+            } catch (IOException | RuntimeException e) {
 
-                @Override
-                public void onFailure(Call<JsonObject> _call, Throwable _t) {
-
-                }
-            });
+            }
         }
     }
 
@@ -67,40 +61,33 @@ public class AirServerInterface {
 
         Call<JsonObject> request = airApi.getLevelOneAirData(itemCode.name().toLowerCase());
 
-        request.enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                // response format 확인 후 수정 필요
-                JsonObject airData = response.body().get(AirContract.LIST).getAsJsonArray().get(0).getAsJsonObject();
-                String dataTime = airData.get(AirContract.DATA_TIME).getAsString();
-                for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
-                    String lowerAddress = address.name().toLowerCase();
-                    if (airData.get(lowerAddress) != null) {
-                        int value = airData.get(lowerAddress).getAsInt();
+        try {
+            JsonObject airData = request.execute().body().get(AirContract.LIST).getAsJsonArray().get(0).getAsJsonObject();
+            String dataTime = airData.get(AirContract.DATA_TIME).getAsString();
+            for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
+                String lowerAddress = address.name().toLowerCase();
+                if (airData.get(lowerAddress) != null) {
+                    int value = airData.get(lowerAddress).getAsInt();
 
-                        if (airRepository.existsById(new AddressPK(address.getBixbyKey(), ""))) {
-                            if (itemCode.equals(AirItemCodeContract.PM10))
-                                airRepository.updatePM100(address.getBixbyKey(), dataTime, value);
-                            else if (itemCode.equals(AirItemCodeContract.PM25))
-                                airRepository.updatePM25(address.getBixbyKey(), dataTime, value);
-                        } else {
-                            Air air = new Air(address.getBixbyKey(), "", dataTime);
+                    if (airRepository.existsById(new AddressPK(address.getBixbyKey(), ""))) {
+                        if (itemCode.equals(AirItemCodeContract.PM10))
+                            airRepository.updatePM100(address.getBixbyKey(), dataTime, value);
+                        else if (itemCode.equals(AirItemCodeContract.PM25))
+                            airRepository.updatePM25(address.getBixbyKey(), dataTime, value);
+                    } else {
+                        Air air = new Air(address.getBixbyKey(), "", dataTime);
 
-                            if (itemCode.equals(AirItemCodeContract.PM10))
-                                air.setPm100(value);
-                            else if (itemCode.equals(AirItemCodeContract.PM25))
-                                air.setPm25(value);
+                        if (itemCode.equals(AirItemCodeContract.PM10))
+                            air.setPm100(value);
+                        else if (itemCode.equals(AirItemCodeContract.PM25))
+                            air.setPm25(value);
 
-                            airRepository.save(air);
-                        }
+                        airRepository.save(air);
                     }
                 }
             }
+        } catch (IOException | RuntimeException e) {
 
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
-
-            }
-        });
+        }
     }
 }
