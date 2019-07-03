@@ -17,6 +17,7 @@ import team.perfect.fresh_air.Repository.DustRepository;
 
 @Component
 public class AirSyncController {
+    private static final long API_CALL_INTERVAL = 5000;
     
     @Autowired
     private AirRepository airRepository;
@@ -27,17 +28,38 @@ public class AirSyncController {
     public void syncLevelTwoAir() {
         AirServerInterface airServer = new AirServerInterface();
 
-        for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
-            airServer.getLevelTwoAirData(address, airRepository);
-        }
+        new Thread(new Runnable(){
+            @Override
+            public void run() {
+                for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
+                    airServer.getLevelTwoAirData(address, airRepository);
+                    try {
+                        Thread.sleep(API_CALL_INTERVAL);
+                    } catch (InterruptedException e) {
+
+                    }
+                }
+            }
+        }).start();
     }
 
     @Scheduled(cron = "0 35 * * * *")
     public void syncLevelOneAir() {
         AirServerInterface airServer = new AirServerInterface();
  
-        for (AirItemCodeContract itemCode : AirItemCodeContract.values())
-            airServer.getLevelOneAirData(itemCode, airRepository);
+        new Thread(new Runnable(){
+            @Override
+            public void run() {
+                for (AirItemCodeContract itemCode : AirItemCodeContract.values()) {
+                    airServer.getLevelOneAirData(itemCode, airRepository);
+                    try {
+                        Thread.sleep(API_CALL_INTERVAL);
+                    } catch (InterruptedException e) {
+
+                    }
+                }
+            }
+        }).start();
     }
 
     @Scheduled(cron = "0 0/5 * * * *")

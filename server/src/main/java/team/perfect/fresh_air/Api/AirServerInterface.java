@@ -27,20 +27,6 @@ import team.perfect.fresh_air.Repository.AirRepository;
 public class AirServerInterface {
     private Retrofit retrofit;
 
-    private void printStartTime(String address) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        Date now = new Date();
-        String strDate = sdf.format(now);
-        System.out.println("\n\n\nStart Sync Time(" +address+ ") :: " +strDate+ "\n\n\n");
-    }
-
-    private void printEndTime(String address) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        Date now = new Date();
-        String strDate = sdf.format(now);
-        System.out.println("\n\n\nEnd Sync Time(" +address+ ") :: " +strDate+ "\n\n\n");
-    }
-
     public AirServerInterface() {
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
@@ -53,7 +39,6 @@ public class AirServerInterface {
     }
 
     public void getLevelTwoAirData(AddressLevelOneContract address, AirRepository airRepository) {
-        printStartTime(address.name());
         if (address != null) {
             AirApi airApi = retrofit.create(AirApi.class);
 
@@ -71,11 +56,9 @@ public class AirServerInterface {
 
             }
         }
-        printEndTime(address.name());
     }
 
     public void getLevelOneAirData(AirItemCodeContract itemCode, AirRepository airRepository) {
-        printStartTime(itemCode.name());
         AirApi airApi = retrofit.create(AirApi.class);
 
         Call<JsonObject> request = airApi.getLevelOneAirData(itemCode.name().toLowerCase());
@@ -108,7 +91,5 @@ public class AirServerInterface {
         } catch (IOException | RuntimeException e) {
 
         }
-        
-        printEndTime(itemCode.name());
     }
 }
