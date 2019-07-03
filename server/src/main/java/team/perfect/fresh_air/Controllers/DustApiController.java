@@ -129,17 +129,6 @@ public class DustApiController {
         airServer.getLevelOneAirData(itemCode, airRepository);
     }
 
-    private long getDayStartTime(long dayTime) {
-        Calendar dayStartDate = Calendar.getInstance();
-        dayStartDate.setTimeInMillis(dayTime);
-
-        dayStartDate.set(Calendar.HOUR, 0);
-        dayStartDate.set(Calendar.MINUTE, 0);
-        dayStartDate.set(Calendar.SECOND, 0);
-
-        return dayStartDate.getTimeInMillis();
-    }
-
     @GetMapping("1.0/todayDust")
     public Response todayDust(@RequestHeader String userId) {
         List<LatestDust> dustList = queryTodayDustByUserId(System.currentTimeMillis(), userId);
@@ -219,7 +208,7 @@ public class DustApiController {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(currentTime);
-        int currentHour = calendar.get(Calendar.HOUR);
+        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
 
         setChartData(currentTime, currentHour, dustList, pm100List, pm25List, hourXAxis);
 
@@ -314,15 +303,30 @@ public class DustApiController {
         }
     }
     
-    private long getDayEndTime(long dayTime) {
+    private long getDayStartTime(long dayTime) {
         Calendar dayStartDate = Calendar.getInstance();
         dayStartDate.setTimeInMillis(dayTime);
 
-        dayStartDate.set(Calendar.HOUR, 23);
-        dayStartDate.set(Calendar.MINUTE, 59);
-        dayStartDate.set(Calendar.SECOND, 59);
+        dayStartDate.set(Calendar.HOUR_OF_DAY, 0);
+        dayStartDate.set(Calendar.MINUTE, 0);
+        dayStartDate.set(Calendar.SECOND, 0);
+        dayStartDate.set(Calendar.MILLISECOND, 0);
+        long time = dayStartDate.getTimeInMillis();
 
         return dayStartDate.getTimeInMillis();
+    }
+    
+    private long getDayEndTime(long dayTime) {
+        Calendar dayEndDate = Calendar.getInstance();
+        dayEndDate.setTimeInMillis(dayTime);
+
+        dayEndDate.set(Calendar.HOUR_OF_DAY, 23);
+        dayEndDate.set(Calendar.MINUTE, 59);
+        dayEndDate.set(Calendar.SECOND, 59);
+        dayEndDate.set(Calendar.MILLISECOND, 999);
+        long time = dayEndDate.getTimeInMillis();
+
+        return dayEndDate.getTimeInMillis();
     }
 
     private List<LatestDust> queryTodayDustByUserId(long todayTime, String userId) {
