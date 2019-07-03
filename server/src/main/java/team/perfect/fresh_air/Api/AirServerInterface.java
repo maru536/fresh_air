@@ -62,10 +62,10 @@ public class AirServerInterface {
         }
     }
 
-    public void getLevelOneAirData(String itemCode, AirRepository airRepository) {
+    public void getLevelOneAirData(AirItemCodeContract itemCode, AirRepository airRepository) {
         AirApi airApi = retrofit.create(AirApi.class);
 
-        Call<JsonObject> request = airApi.getLevelOneAirData(itemCode);
+        Call<JsonObject> request = airApi.getLevelOneAirData(itemCode.name().toLowerCase());
 
         request.enqueue(new Callback<JsonObject>() {
             @Override
@@ -79,14 +79,14 @@ public class AirServerInterface {
                         int value = airData.get(lowerAddress).getAsInt();
 
                         if (airRepository.existsById(new AddressPK(address.getBixbyKey(), ""))) {
-                            if (itemCode.equals(AirItemCodeContract.PM100))
+                            if (itemCode.equals(AirItemCodeContract.PM10))
                                 airRepository.updatePM100(address.getBixbyKey(), dataTime, value);
                             else if (itemCode.equals(AirItemCodeContract.PM25))
                                 airRepository.updatePM25(address.getBixbyKey(), dataTime, value);
                         } else {
                             Air air = new Air(address.getBixbyKey(), "", dataTime);
 
-                            if (itemCode.equals(AirItemCodeContract.PM100))
+                            if (itemCode.equals(AirItemCodeContract.PM10))
                                 air.setPm100(value);
                             else if (itemCode.equals(AirItemCodeContract.PM25))
                                 air.setPm25(value);

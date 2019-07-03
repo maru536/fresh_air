@@ -55,17 +55,6 @@ public class DustApiController {
             return new Response(500, "Save dust fail");
     }
 
-    @PostMapping("1.0/testDust")
-    public Response postTestDust(@RequestHeader String userId) {
-        Random random = new Random();
-        LatestDust dust = new LatestDust(userId, System.currentTimeMillis(), random.nextInt(100), random.nextInt(150));
-
-        if (this.dustRepository.save(dust) != null)
-            return new Response(200, "Save dust Success");
-        else
-            return new Response(500, "Save dust fail");
-    }
-
     @GetMapping("1.0/lastestDust")
     public Response latestDust(@RequestHeader String userId) {
         Optional<LatestDust> latestDust = this.dustRepository.findFirstByUserIdOrderByTimeDesc(userId);
@@ -109,24 +98,6 @@ public class DustApiController {
                 return new Response(404, "There is no data");
             }
         }
-    }
-
-    @PostMapping("1.0/test")
-    public void Test(@RequestHeader String address) {
-        AirServerInterface airServer = new AirServerInterface();
-
-        try {
-            airServer.getLevelTwoAirData(AddressLevelOneContract.valueOf(address), this.airRepository);
-        } catch (IllegalArgumentException iae) {
-            System.out.println("Invaild address: " + address);
-        }
-    }
-
-    @PostMapping("1.0/levelOnePublicAir")
-    public void getLevelOnePublicAir(@RequestHeader String itemCode) {
-        AirServerInterface airServer = new AirServerInterface();
-
-        airServer.getLevelOneAirData(itemCode, airRepository);
     }
 
     @GetMapping("1.0/todayDust")
