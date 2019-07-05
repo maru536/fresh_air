@@ -2,7 +2,7 @@ package com.perfect.freshair.Model;
 
 import android.content.ContentValues;
 
-import com.perfect.freshair.DB.StatusDBHandler;
+import com.perfect.freshair.DB.DustMeasurementDBHandler;
 
 public class Dust {
     private int pm25 = 0;
@@ -28,8 +28,8 @@ public class Dust {
     public ContentValues toValues() {
         ContentValues values = new ContentValues();
 
-        values.put(StatusDBHandler.Column.PM25.name(), this.pm25);
-        values.put(StatusDBHandler.Column.PM100.name(), this.pm100);
+        values.put(DustMeasurementDBHandler.Column.PM25.name(), this.pm25);
+        values.put(DustMeasurementDBHandler.Column.PM100.name(), this.pm100);
 
         return values;
     }

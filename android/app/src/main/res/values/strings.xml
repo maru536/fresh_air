@@ -36,7 +36,7 @@
     <string name="APP_BACKGROUND_WORKER_TAG">com.perfect.freshair.my_background_work</string>
     <!-- Strings related to login -->
     <string name="prompt_id">ID</string>
-    <string name="prompt_password">Password (optional)</string>
+    <string name="prompt_password">Password</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_up">Sign up</string>
     <string name="regist">Regist</string>
@@ -44,8 +44,8 @@
     <string name="sign_in_fail">ID or Password is incorrect</string>
     <string name="sign_up_short">Sign up</string>
     <string name="sign_up_fail">ID is duplicate</string>
-    <string name="error_invalid_id">This id is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_invalid_id">5자 이상, 20자 이하, 알파벳,숫자 허용</string>
+    <string name="error_invalid_password">6자 이상, 20자 이하, 알파벳,숫자,일부 특수문자 허용</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing id

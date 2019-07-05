@@ -1,8 +1,7 @@
-package com.perfect.freshair.Utils;
+package com.perfect.freshair.Controller;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.location.GnssStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -12,8 +11,8 @@ import android.util.Log;
 
 import com.perfect.freshair.Callback.LocationCallback;
 
-public class GpsUtils {
-    private static final String TAG = "GpsUtils";
+public class GpsController {
+    private static final String TAG = "GpsController";
 
     public static final int MIN_LOCATION_UPDATE_TIME = 0;
     public static final int MIN_LOCATION_UPDATE_DISTANCE = 0;
@@ -21,7 +20,7 @@ public class GpsUtils {
     private LocationManager locationManager;
     private LocationCallback mLocationCallback;
 
-    public GpsUtils(Context _appContext) {
+    public GpsController(Context _appContext) {
         this.locationManager = (LocationManager)_appContext.getSystemService(Context.LOCATION_SERVICE);
     }
 
@@ -31,9 +30,6 @@ public class GpsUtils {
                 this.MIN_LOCATION_UPDATE_TIME, this.MIN_LOCATION_UPDATE_DISTANCE, this.mLocationListener, Looper.getMainLooper());
 
         this.locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                this.MIN_LOCATION_UPDATE_TIME, this.MIN_LOCATION_UPDATE_DISTANCE, this.mLocationListener, Looper.getMainLooper());
-
-        this.locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
                 this.MIN_LOCATION_UPDATE_TIME, this.MIN_LOCATION_UPDATE_DISTANCE, this.mLocationListener, Looper.getMainLooper());
     }
 

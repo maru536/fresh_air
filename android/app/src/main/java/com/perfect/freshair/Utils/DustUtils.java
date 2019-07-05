@@ -1,13 +1,13 @@
 package com.perfect.freshair.Utils;
 
-import com.perfect.freshair.DB.StatusDBHandler;
-import com.perfect.freshair.Model.CurrentStatus;
+import com.perfect.freshair.DB.DustMeasurementDBHandler;
+import com.perfect.freshair.Model.DustMeasurement;
 
 import java.sql.Timestamp;
 import java.util.List;
 
 public class DustUtils {
-    public static int calcAvgDayDust(StatusDBHandler dbHandler) {
+    public static int calcAvgDayDust(DustMeasurementDBHandler dbHandler) {
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         Timestamp startTime = currentTime;
         Timestamp endTime = currentTime;
@@ -20,11 +20,11 @@ public class DustUtils {
         endTime.setMinutes(59);
         endTime.setSeconds(59);
 
-        List<CurrentStatus> todayStatusList = dbHandler.search(startTime.getTime(), endTime.getTime());
+        List<DustMeasurement> todayStatusList = dbHandler.search(startTime.getTime(), endTime.getTime());
 
         int sumDust = 0;
 
-        for (CurrentStatus status : todayStatusList)
+        for (DustMeasurement status : todayStatusList)
             sumDust += status.getDust().getPm25();
 
         return sumDust / todayStatusList.size();

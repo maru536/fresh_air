@@ -7,25 +7,20 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
-import com.perfect.freshair.DB.StatusDBHandler;
-import com.perfect.freshair.Model.CurrentStatus;
+import com.perfect.freshair.DB.DustMeasurementDBHandler;
+import com.perfect.freshair.Model.DustMeasurement;
 import com.perfect.freshair.Model.Dust;
-import com.perfect.freshair.Model.LatestDust;
-import com.perfect.freshair.Model.Position;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
-import com.perfect.freshair.Utils.GpsUtils;
 import com.perfect.freshair.Utils.MyBLEPacketUtilis;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
@@ -37,9 +32,9 @@ public class DataUpdateWorker extends Worker {
 
     private BlueToothUtils blueToothUtils;
     private boolean isDustReceive;
-    private LatestDust latestDust;
+    private DustMeasurement latestDust;
     private Dust receivedDust;
-    private StatusDBHandler statusDBHandler;
+    private DustMeasurementDBHandler dustMeasurementDBHandler;
     private GPSServerInterface serverInterface = null;
 
     private ScanCallback scanCallback = new ScanCallback() {
@@ -58,16 +53,16 @@ public class DataUpdateWorker extends Worker {
 
             isDustReceive = true;
             receivedDust = new Dust(MyBLEPacketUtilis.getMajor(majorMinor), MyBLEPacketUtilis.getMinor(majorMinor));
-            latestDust = new LatestDust(System.currentTimeMillis(), receivedDust);
+            latestDust = new DustMeasurement(System.currentTimeMillis(), receivedDust);
             if (serverInterface == null)
                 serverInterface = new GPSServerInterface();
 
-            statusDBHandler.add(new CurrentStatus(System.currentTimeMillis(), receivedDust));
+            dustMeasurementDBHandler.add(new DustMeasurement(System.currentTimeMillis(), receivedDust));
             serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), latestDust, responseCallback);
 
             blueToothUtils.scanLeDevice(false, scanCallback);
-            Log.i("Major", latestDust.getPm25() + "");
-            Log.i("Minor", latestDust.getPm100() + "");
+            Log.i("Major", latestDust.getDust().getPm25() + "");
+            Log.i("Minor", latestDust.getDust().getPm100() + "");
 
             Intent intent = new Intent();
             intent.setAction(CommonEnumeration.dataUpdateAction);
@@ -93,8 +88,8 @@ public class DataUpdateWorker extends Worker {
 
     public DataUpdateWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
-        statusDBHandler = new StatusDBHandler(getApplicationContext());
-        //gpsUtils = new GpsUtils(getApplicationContext());
+        dustMeasurementDBHandler = new DustMeasurementDBHandler(getApplicationContext());
+        //gpsUtils = new GpsController(getApplicationContext());
     }
 
     @NonNull
@@ -123,6 +118,6 @@ public class DataUpdateWorker extends Worker {
                 Log.i(this.toString(), "bluetooth is not enabled or supported.");
             }
         }
-        return Result.success();
+        return Result.retry();
     }
 }

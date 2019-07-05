@@ -93,7 +93,7 @@ public class SignUpActivity extends AppCompatActivity {
             isInvalid = true;
         }
 
-        if (!TextUtils.isEmpty(mPasswd) && !isPasswordValid(mPasswd)) {
+        if (!isPasswordValid(mPasswd)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             isInvalid = true;
@@ -130,12 +130,12 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean isIdValid(String _id) {
         //TODO: Replace this with your own logic
-        return _id.length() > 4;
+        return _id.matches("^[a-z0-9]{5,20}$");
     }
 
     private boolean isPasswordValid(String _password) {
         //TODO: Replace this with your own logic
-        return _password.length() > 4;
+        return _password.matches("^[a-z0-9!@#$%^&*()-_+=|\\`~,./-]{6,20}$");
     }
 
     /**

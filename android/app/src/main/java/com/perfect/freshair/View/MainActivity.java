@@ -27,8 +27,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.work.BackoffPolicy;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -40,9 +43,6 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Callback.ResponseDustCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
@@ -50,18 +50,19 @@ import com.perfect.freshair.Common.PermissionEnumeration;
 import com.perfect.freshair.Control.DataUpdateWorker;
 import com.perfect.freshair.Control.DrawerItemClickListener;
 import com.perfect.freshair.Control.NavArrayAdapter;
-import com.perfect.freshair.DB.StatusDBHandler;
-import com.perfect.freshair.Model.CurrentStatus;
+import com.perfect.freshair.Controller.GpsController;
+import com.perfect.freshair.DB.DustMeasurementDBHandler;
+import com.perfect.freshair.Model.DustMeasurement;
 import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
-import com.perfect.freshair.Utils.GpsUtils;
 import com.perfect.freshair.Utils.MicroDustUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -76,12 +77,13 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView mDrawerList;
     private NavArrayAdapter arrayAdapter;
-    private StatusDBHandler statusDBHandler;
+    private DustMeasurementDBHandler dustMeasurementDBHandler;
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mNavigationMenu;
     private GPSServerInterface serverInterface;
-    private GpsUtils gpsUtils;
+    private GpsController gpsController;
     Thread updateThread;
+    PeriodicWorkRequest saveRequest;
     final String myUniqueWorkName = "com.perfect.freshair.ViewoneTimeRequest";
     private boolean tRunning = false;
     LineChart lineChart;
@@ -101,8 +103,6 @@ public class MainActivity extends AppCompatActivity {
     };
     private IntentFilter intentFilter;
 
-    private FusedLocationProviderClient fusedLocationClient;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PermissionEnumeration.MY_ACCESS_FINE_LOCATION);
         }
 
-        gpsUtils = new GpsUtils(this.getApplicationContext());
+        gpsController = new GpsController(this.getApplicationContext());
 
         //appcompat toolbar initialization
         Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         intentFilter = new IntentFilter();
         intentFilter.addAction(CommonEnumeration.dataUpdateAction);
 
-        statusDBHandler = new StatusDBHandler(getApplicationContext());
+        dustMeasurementDBHandler = new DustMeasurementDBHandler(getApplicationContext());
         blueToothUtils = new BlueToothUtils(getApplicationContext());
 
         //drawer view
@@ -190,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
         l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
         l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
 
+        /*
         updateThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -210,6 +211,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         updateThread.start();
+        */
+
+        OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(DataUpdateWorker.class).setBackoffCriteria(
+                BackoffPolicy.LINEAR,
+                OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
+                TimeUnit.MILLISECONDS).addTag(myUniqueWorkName).build();
+        WorkManager.getInstance().cancelAllWorkByTag(myUniqueWorkName);
+        WorkManager.getInstance().enqueue(oneTimeWorkRequest);
 
         //dust information
         int tempMajor = 30; // have to get the value from local database
@@ -231,77 +240,6 @@ public class MainActivity extends AppCompatActivity {
         updateChartData();
     }
 
-    LocationCallback locationCallback = new LocationCallback() {
-        @Override
-        public void onLocationResult(LocationResult locationResult) {
-            if (locationResult == null) {
-                return;
-            }
-
-            if(fusedLocationClient == null)
-            {
-                fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
-            }
-
-            fusedLocationClient.removeLocationUpdates(locationCallback);
-
-            for (Location location : locationResult.getLocations()) {
-                // Update UI with location data
-                // ...
-                if (location != null) {
-                    // Logic to handle location object
-                    String res = "latitude : " + location.getLatitude() + " attitude : " + location.getLongitude();
-                    final List<Address> list = getCurrentAddress(location.getLatitude(), location.getLongitude());
-                    if(list != null && list.size() > 0)
-                    {
-                        Log.i(getApplicationContext().toString(), list.get(0).getAdminArea()+" ,"+ list.get(0).getLocality() + " ," + list.get(0).getAddressLine(0).toString());
-                        if (serverInterface == null)
-                            serverInterface = new GPSServerInterface();
-
-                        final ArrayList<String> sidogun = new ArrayList<String>();
-
-                        if(list.get(0).getAdminArea() != null)
-                        {
-                            sidogun.add(list.get(0).getAdminArea());
-                        }else
-                        {
-                            sidogun.add(list.get(0).getSubAdminArea());
-                        }
-
-                        if(list.get(0).getLocality() != null)
-                        {
-                            sidogun.add(list.get(0).getLocality());
-                        }else
-                        {
-                            sidogun.add(list.get(0).getSubLocality());
-                        }
-
-                        serverInterface.publicDust(sidogun.get(0), sidogun.get(1), new ResponseDustCallback() {
-                            @Override
-                            public void responseDustCallback(int code, Dust dust) {
-                                String addr = sidogun.get(0) + " " +sidogun.get(1);
-                                if(code == 404 || (dust.getPm25() < 0 && dust.getPm100() < 0))
-                                {
-                                    Toast.makeText(getApplicationContext(),code + " 서버에서 "+addr+" 미세먼지 값을 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
-                                }
-                                else if(dust != null)
-                                {
-                                    Log.i("publicDustApi", "PM10: " +dust.getPm100()+ " / PM2.5: " +dust.getPm25());
-                                    strPublicDustValue = getPublicDustString(addr, dust.getPm100(), dust.getPm25());
-                                    checkDustDisplay();
-                                }
-
-                            }
-                        });
-                    }
-                }else
-                {
-                    Log.e(toString(), "loaction is null");
-                }
-            }
-        };
-    };
-
     public void getPublicData()
     {
         Log.i("GPSUtils", "getPublicData");
@@ -316,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 Log.i("GPSUtils", "requestGPS");
-                gpsUtils.requestGPS(new com.perfect.freshair.Callback.LocationCallback() {
+                gpsController.requestGPS(new com.perfect.freshair.Callback.LocationCallback() {
                     @Override
                     public void onLocationChanged(Location location) {
                         Log.i("GPSUtils", "onGpsChanged");
@@ -369,87 +307,6 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         }
-
-        /*
-        Log.i(toString(), "refresh");
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
-        }
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PermissionEnumeration.MY_ACCESS_FINE_LOCATION);
-        }
-
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        if(fusedLocationClient == null)
-        {
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
-        }
-
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-        */
-        /*fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            // Logic to handle location object
-                            String res = "latitude : " + location.getLatitude() + " attitude : " + location.getLongitude();
-                            final List<Address> list = getCurrentAddress(location.getLatitude(), location.getLongitude());
-                            if(list != null && list.size() > 0)
-                            {
-                                Log.i(getApplicationContext().toString(), list.get(0).getAdminArea()+" ,"+ list.get(0).getLocality() + " ," + list.get(0).getAddressLine(0).toString());
-                                if (serverInterface == null)
-                                    serverInterface = new GPSServerInterface();
-
-                                final ArrayList<String> sidogun = new ArrayList<String>();
-
-                                if(list.get(0).getAdminArea() != null)
-                                {
-                                    sidogun.add(list.get(0).getAdminArea());
-                                }else
-                                {
-                                    sidogun.add(list.get(0).getSubAdminArea());
-                                }
-
-                                if(list.get(0).getLocality() != null)
-                                {
-                                    sidogun.add(list.get(0).getLocality());
-                                }else
-                                {
-                                    sidogun.add(list.get(0).getSubLocality());
-                                }
-
-                                serverInterface.publicDust(sidogun.get(0), sidogun.get(1), new ResponseDustCallback() {
-                                    @Override
-                                    public void responseDustCallback(int code, Dust dust) {
-                                        String addr = sidogun.get(0) + " " +sidogun.get(1);
-                                        if(code == 404)
-                                        {
-                                            Toast.makeText(getApplicationContext(),code + " 서버에서 "+addr+" 미세먼지 값을 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
-                                        }
-                                        if(dust != null)
-                                        {
-
-                                            Log.i("publicDustApi", "PM10: " +dust.getPm100()+ " / PM2.5: " +dust.getPm25());
-                                            strPublicDustValue = getPublicDustString(addr, dust.getPm100(), dust.getPm25());
-                                            checkDustDisplay();
-                                        }
-
-                                    }
-                                });
-                            }
-                        }else
-                        {
-                            Log.e(toString(), "loaction is null");
-                        }
-                    }
-                });*/
     }
 
     private String getDustString(int pm2dot5, int pm10) {
@@ -474,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
     {
         long eightHouresInMilis = 8*60*1000*60;
         long currentTime = System.currentTimeMillis();
-        List<CurrentStatus> data = statusDBHandler.search(currentTime-eightHouresInMilis, currentTime);
+        List<DustMeasurement> data = dustMeasurementDBHandler.search(currentTime-eightHouresInMilis, currentTime);
 
         if(data != null)
         {
@@ -483,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
             int limitCount = 30;
 
             for (int i = data.size() - 1; i >= 0 && limitCount-- >= 0; i--) {
-                CurrentStatus mydata = data.get(i);
+                DustMeasurement mydata = data.get(i);
                 long oldTime = mydata.getTimestamp();
                 float xValue = (float)((currentTime - oldTime) / 1000);
                 pm10Entries.add(new Entry(xValue,mydata.getDust().getPm100()));
@@ -542,9 +399,9 @@ public class MainActivity extends AppCompatActivity {
             textCoach.setVisibility(View.INVISIBLE);
             textPublicValue.setVisibility(View.INVISIBLE);
         } else {
-            CurrentStatus currentStatus = statusDBHandler.latestRow();
-            if (currentStatus != null) {
-                textDust.setText(getDustString(currentStatus.getDust().getPm25(), currentStatus.getDust().getPm100()));
+            DustMeasurement dustMeasurement = dustMeasurementDBHandler.latestRow();
+            if (dustMeasurement != null) {
+                textDust.setText(getDustString(dustMeasurement.getDust().getPm25(), dustMeasurement.getDust().getPm100()));
                 textDust.setVisibility(View.VISIBLE);
                 textCoach.setVisibility(View.VISIBLE);
                 textNoDevice.setVisibility(View.INVISIBLE);
@@ -597,12 +454,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //worker
-        Log.i("FreshAir_Main", "onDestroy");
-        /*WorkManager.getInstance().cancelAllWorkByTag(myUniqueWorkName);
+        WorkManager.getInstance().cancelAllWork();
         saveRequest =
-                new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 20, TimeUnit.MINUTES, 1, TimeUnit.MINUTES).build();
-        WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.KEEP, saveRequest);*/
+                new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES).build();
+        WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.REPLACE, saveRequest);
     }
 
     @Override

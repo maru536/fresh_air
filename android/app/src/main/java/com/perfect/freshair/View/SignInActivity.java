@@ -165,12 +165,12 @@ public class SignInActivity extends AppCompatActivity {
 
     private boolean isIdValid(String _id) {
         //TODO: Replace this with your own logic
-        return _id.length() > 4;
+        return _id.matches("^[a-z0-9]{5,20}$");
     }
 
     private boolean isPasswordValid(String _password) {
         //TODO: Replace this with your own logic
-        return _password.length() > 4;
+        return _password.matches("^[a-z0-9!@#$%^&*()-_+=|\\`~,./-]{6,20}$");
     }
 
     /**
