@@ -27,9 +27,6 @@ public class Position {
     public ContentValues toValues() {
         ContentValues values = new ContentValues();
 
-        values.put(StatusDBHandler.Column.LAT.name(), this.lat);
-        values.put(StatusDBHandler.Column.LNG.name(), this.lng);
-
         return values;
     }
 }

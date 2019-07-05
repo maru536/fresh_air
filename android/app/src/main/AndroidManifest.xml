@@ -33,7 +33,6 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/MyAppTheme">
-        <activity android:name=".View.TestGPSActivity"></activity>
         <activity android:name=".View.AppInfoActivity" />
         <activity android:name=".View.DeviceRegisterActivity" />
         <activity android:name=".View.MainActivity" />
@@ -49,22 +48,12 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <service
-            android:name=".Service.GPSService"
-            android:enabled="true"
-            android:exported="true" />
-
-        <receiver
-            android:name=".Receiver.BootReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
         <activity
             android:name=".View.SignInActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -72,10 +61,6 @@
                 <data
                     android:host="deeplink"
                     android:scheme="dust_coach" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".View.SignUpActivity" />

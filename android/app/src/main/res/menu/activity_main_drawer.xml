@@ -16,9 +16,5 @@
             android:id="@+id/nav_setting"
             android:icon="@drawable/ic_menu_manage"
             android:title="@string/title_setting" />
-        <item
-            android:id="@+id/nav_map_test"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/title_map_test" />
     </group>
 </menu>

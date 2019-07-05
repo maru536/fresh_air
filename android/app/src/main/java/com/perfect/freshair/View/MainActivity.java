@@ -27,10 +27,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -41,15 +39,11 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.perfect.freshair.API.GPSServerInterface;
-import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Callback.ResponseDustCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.Common.PermissionEnumeration;
@@ -59,25 +53,15 @@ import com.perfect.freshair.Control.NavArrayAdapter;
 import com.perfect.freshair.DB.StatusDBHandler;
 import com.perfect.freshair.Model.CurrentStatus;
 import com.perfect.freshair.Model.Dust;
-import com.perfect.freshair.Model.Gps;
-import com.perfect.freshair.Model.GpsProvider;
-import com.perfect.freshair.Model.LatestDust;
-import com.perfect.freshair.Model.Position;
-import com.perfect.freshair.Model.PositionStatus;
-import com.perfect.freshair.Model.Satellite;
-import com.perfect.freshair.Model.TempData;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
+import com.perfect.freshair.Utils.GpsUtils;
 import com.perfect.freshair.Utils.MicroDustUtils;
-import com.perfect.freshair.Utils.MyBLEPacketUtilis;
-import com.perfect.freshair.Utils.PreferencesUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -96,13 +80,11 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mNavigationMenu;
     private GPSServerInterface serverInterface;
-    PeriodicWorkRequest saveRequest;
+    private GpsUtils gpsUtils;
     Thread updateThread;
     final String myUniqueWorkName = "com.perfect.freshair.ViewoneTimeRequest";
     private boolean tRunning = false;
     LineChart lineChart;
-    TempData[] dataList;
-    Dust receivedDust;
     private BlueToothUtils blueToothUtils;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -129,6 +111,12 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
         }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PermissionEnumeration.MY_ACCESS_FINE_LOCATION);
+        }
+
+        gpsUtils = new GpsUtils(this.getApplicationContext());
 
         //appcompat toolbar initialization
         Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
@@ -292,13 +280,12 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void responseDustCallback(int code, Dust dust) {
                                 String addr = sidogun.get(0) + " " +sidogun.get(1);
-                                if(code == 404)
+                                if(code == 404 || (dust.getPm25() < 0 && dust.getPm100() < 0))
                                 {
                                     Toast.makeText(getApplicationContext(),code + " 서버에서 "+addr+" 미세먼지 값을 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
                                 }
-                                if(dust != null)
+                                else if(dust != null)
                                 {
-
                                     Log.i("publicDustApi", "PM10: " +dust.getPm100()+ " / PM2.5: " +dust.getPm25());
                                     strPublicDustValue = getPublicDustString(addr, dust.getPm100(), dust.getPm25());
                                     checkDustDisplay();
@@ -317,6 +304,73 @@ public class MainActivity extends AppCompatActivity {
 
     public void getPublicData()
     {
+        Log.i("GPSUtils", "getPublicData");
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PermissionEnumeration.MY_ACCESS_FINE_LOCATION);
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                Log.i("GPSUtils", "requestGPS");
+                gpsUtils.requestGPS(new com.perfect.freshair.Callback.LocationCallback() {
+                    @Override
+                    public void onLocationChanged(Location location) {
+                        Log.i("GPSUtils", "onGpsChanged");
+                        String res = "latitude : " + location.getLatitude() + " attitude : " + location.getLongitude();
+                        final List<Address> list = getCurrentAddress(location.getLatitude(), location.getLongitude());
+                        if(list != null && list.size() > 0)
+                        {
+                            Log.i(getApplicationContext().toString(), list.get(0).getAdminArea()+" ,"+ list.get(0).getLocality() + " ," + list.get(0).getAddressLine(0).toString());
+                            if (serverInterface == null)
+                                serverInterface = new GPSServerInterface();
+
+                            final ArrayList<String> sidogun = new ArrayList<String>();
+
+                            if(list.get(0).getAdminArea() != null)
+                            {
+                                sidogun.add(list.get(0).getAdminArea());
+                            }else
+                            {
+                                sidogun.add(list.get(0).getSubAdminArea());
+                            }
+
+                            if(list.get(0).getLocality() != null)
+                            {
+                                sidogun.add(list.get(0).getLocality());
+                            }else
+                            {
+                                sidogun.add(list.get(0).getSubLocality());
+                            }
+
+                            serverInterface.publicDust(sidogun.get(0), sidogun.get(1), new ResponseDustCallback() {
+                                @Override
+                                public void responseDustCallback(int code, Dust dust) {
+                                    String addr = sidogun.get(0) + " " +sidogun.get(1);
+                                    if(code == 404)
+                                    {
+                                        Toast.makeText(getApplicationContext(),code + " 서버에서 "+addr+" 미세먼지 값을 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
+                                    }
+                                    if(dust != null)
+                                    {
+
+                                        Log.i("publicDustApi", "PM10: " +dust.getPm100()+ " / PM2.5: " +dust.getPm25());
+                                        strPublicDustValue = getPublicDustString(addr, dust.getPm100(), dust.getPm25());
+                                        checkDustDisplay();
+                                    }
+
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        /*
         Log.i(toString(), "refresh");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PermissionEnumeration.MY_ACCESS_COARSE_LOCATION);
@@ -337,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-
+        */
         /*fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                     @Override
@@ -399,11 +453,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getDustString(int pm2dot5, int pm10) {
-        return String.format("현재 미세먼지 농도는 %d㎍/㎥" + "\r\n" +"초미세먼지 농도는 %d㎍/㎥"+"\r\n"+" \"%s\"입니다.", pm10, pm2dot5,  MicroDustUtils.parseDustValue(pm10));
+        return String.format("현재 미세먼지 농도는 %d㎍/㎥" + "\r\n" +"초미세먼지 농도는 %d㎍/㎥"+"\r\n"+" \"%s\"입니다.", pm10, pm2dot5,  MicroDustUtils.parsePM10Value(pm10));
     }
 
     private String getPublicDustString(String addr, int pm2dot5, int pm10) {
-        return String.format("현재 %s\r\n미세먼지 농도는 %d㎍/㎥" + "\r\n" +"초미세먼지 농도는 %d㎍/㎥"+"\r\n"+" \"%s\"입니다.", addr, pm10, pm2dot5,  MicroDustUtils.parseDustValue(pm10));
+        if (pm2dot5 < 0 && pm10 < 0)
+            return String.format("현재 %s\r\n미세먼지 및 초미세먼지 농도 측정값이 없습니다.", addr);
+        else {
+            String message = "현재 " + addr + "\n";
+            if (pm10 >= 0)
+                message += "미세먼지 농도는 " + pm10 + "㎍/㎥으로 " +MicroDustUtils.parsePM10Value(pm10)+ "입니다.\n";
+            if (pm2dot5 >= 0)
+                message += "초미세먼지 농도는 " + pm2dot5 + "㎍/㎥으로 " +MicroDustUtils.parsePM25Value(pm2dot5)+ "입니다.\n";
+
+            return message;
+        }
     }
 
     private void updateChartData()
@@ -534,11 +598,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         //worker
-        WorkManager.getInstance().cancelUniqueWork(myUniqueWorkName);
-        tRunning = false;
+        Log.i("FreshAir_Main", "onDestroy");
+        /*WorkManager.getInstance().cancelAllWorkByTag(myUniqueWorkName);
         saveRequest =
-                new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 10, TimeUnit.SECONDS, 10, TimeUnit.SECONDS).build();
-        WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.KEEP, saveRequest);
+                new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 20, TimeUnit.MINUTES, 1, TimeUnit.MINUTES).build();
+        WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.KEEP, saveRequest);*/
     }
 
     @Override
@@ -549,6 +613,8 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
+                    getPublicData();
+
                 } else {
                     Toast.makeText(this, "sorry, this app requires bluetooth feature.", Toast.LENGTH_SHORT).show();
                     // permission denied, boo! Disable the
@@ -561,6 +627,7 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
+                    getPublicData();
                 } else {
                     Toast.makeText(this, "sorry, this app requires bluetooth feature.", Toast.LENGTH_SHORT).show();
                     // permission denied, boo! Disable the

@@ -12,7 +12,7 @@ public class MicroDustUtils {
     public static final String dust_worst = "매우 나쁨";
 
 
-    static public String parseDustValue(int value)
+    static public String parsePM10Value(int value)
     {
         String ret = dust_normal;
         //좋음`은 0~30㎍/㎥, `보통`은 31~80㎍/㎥, `나쁨`은 81~150㎍/㎥, `매우 나쁨`은 151㎍/㎥
@@ -23,6 +23,26 @@ public class MicroDustUtils {
         {
             ret = dust_normal;
         }else if(value <= 150)
+        {
+            ret = dust_bad;
+        }else{
+            ret = dust_worst;
+        }
+
+        return ret;
+    }
+
+    static public String parsePM25Value(int value)
+    {
+        String ret = dust_normal;
+        //좋음`은 0~30㎍/㎥, `보통`은 31~80㎍/㎥, `나쁨`은 81~150㎍/㎥, `매우 나쁨`은 151㎍/㎥
+        if(value <= 15)
+        {
+            ret = dust_good;
+        }else if(value <= 35)
+        {
+            ret = dust_normal;
+        }else if(value <= 75)
         {
             ret = dust_bad;
         }else{

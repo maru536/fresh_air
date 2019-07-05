@@ -16,18 +16,13 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.perfect.freshair.API.GPSServerInterface;
-import com.perfect.freshair.Callback.GpsCallback;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.DB.StatusDBHandler;
 import com.perfect.freshair.Model.CurrentStatus;
 import com.perfect.freshair.Model.Dust;
-import com.perfect.freshair.Model.Gps;
-import com.perfect.freshair.Model.GpsProvider;
 import com.perfect.freshair.Model.LatestDust;
 import com.perfect.freshair.Model.Position;
-import com.perfect.freshair.Model.PositionStatus;
-import com.perfect.freshair.Model.Satellite;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
 import com.perfect.freshair.Utils.GpsUtils;
@@ -36,7 +31,6 @@ import com.perfect.freshair.Utils.PreferencesUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class DataUpdateWorker extends Worker {
     private static final String TAG = "DataUpdateWorker";
@@ -46,7 +40,6 @@ public class DataUpdateWorker extends Worker {
     private LatestDust latestDust;
     private Dust receivedDust;
     private StatusDBHandler statusDBHandler;
-    private GpsUtils gpsUtils;
     private GPSServerInterface serverInterface = null;
 
     private ScanCallback scanCallback = new ScanCallback() {
@@ -69,10 +62,9 @@ public class DataUpdateWorker extends Worker {
             if (serverInterface == null)
                 serverInterface = new GPSServerInterface();
 
-            statusDBHandler.add(new CurrentStatus(System.currentTimeMillis(), receivedDust, new Gps(new Position(0.0, 0.0), GpsProvider.UNKNOWN, 0.0f, new Satellite(0,0), 0, PositionStatus.UNKNOWN)));
+            statusDBHandler.add(new CurrentStatus(System.currentTimeMillis(), receivedDust));
             serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), latestDust, responseCallback);
 
-            //gpsUtils.requestGPS(gpsCallback);
             blueToothUtils.scanLeDevice(false, scanCallback);
             Log.i("Major", latestDust.getPm25() + "");
             Log.i("Minor", latestDust.getPm100() + "");
@@ -133,12 +125,4 @@ public class DataUpdateWorker extends Worker {
         }
         return Result.success();
     }
-
-    private GpsCallback gpsCallback = new GpsCallback() {
-        @Override
-        public void onGpsChanged(Gps gps) {
-            if (isDustReceive)
-                statusDBHandler.add(new CurrentStatus(System.currentTimeMillis(), receivedDust, gps));
-        }
-    };
 }

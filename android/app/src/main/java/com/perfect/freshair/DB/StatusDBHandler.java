@@ -17,8 +17,7 @@ public class StatusDBHandler extends SQLiteOpenHelper {
     public static final String TABLE_LOCATION = "status";
 
     public enum Column {
-        ID, TIMESTAMP, PM25, PM100, LAT, LNG, PROVIDER, ACC,
-        TOTAL_SATE, USE_SATE, ELAPSE_TIME, POSITION_STATUS;
+        ID, TIMESTAMP, PM25, PM100;
     }
 
     public StatusDBHandler(Context context) {
@@ -31,15 +30,7 @@ public class StatusDBHandler extends SQLiteOpenHelper {
                 +Column.ID+ " INTEGER PRIMARY KEY,"
                 +Column.TIMESTAMP+ " INTEGER,"
                 +Column.PM25+ " INTEGER,"
-                +Column.PM100+ " INTEGER,"
-                +Column.LAT+ " REAL,"
-                +Column.LNG+ " REAL,"
-                +Column.PROVIDER+ " TEXT,"
-                +Column.ACC+ " REAL,"
-                +Column.TOTAL_SATE+ " INTEGER,"
-                +Column.USE_SATE+ " INTEGER,"
-                +Column.ELAPSE_TIME+ " INTEGER,"
-                +Column.POSITION_STATUS+ " TEXT);";
+                +Column.PM100+ " INTEGER);";
 
         db.execSQL(createQuery);
     }

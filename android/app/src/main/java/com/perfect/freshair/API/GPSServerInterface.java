@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Callback.ResponseDustCallback;
 import com.perfect.freshair.Model.Dust;
-import com.perfect.freshair.Model.DustGPS;
 import com.perfect.freshair.Model.LatestDust;
 
 import okhttp3.OkHttpClient;

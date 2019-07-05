@@ -8,10 +8,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.perfect.freshair.Utils.PreferencesUtils;
-import com.perfect.freshair.View.AppInfoActivity;
 import com.perfect.freshair.View.DeviceRegisterActivity;
 import com.perfect.freshair.View.SignInActivity;
-import com.perfect.freshair.View.TestGPSActivity;
 
 public class DrawerItemClickListener implements ListView.OnItemClickListener {
 
@@ -28,7 +26,7 @@ public class DrawerItemClickListener implements ListView.OnItemClickListener {
             case 0://디바이스 연결
                 activity.startActivity(new Intent(activity.getApplicationContext(), DeviceRegisterActivity.class));
                 break;
-            case 1://GPS 테스트
+            case 1://로그아웃
                 PreferencesUtils.clearUser(activity.getApplicationContext());
                 activity.finish();
                 activity.startActivity(new Intent(activity.getApplicationContext(), SignInActivity.class));

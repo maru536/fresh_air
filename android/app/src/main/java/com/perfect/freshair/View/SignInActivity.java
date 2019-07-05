@@ -53,6 +53,9 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
+        if (PreferencesUtils.getUser(this).equals("test1"))
+            PreferencesUtils.clearUser(this);
+
         String userId;
         try {
             userId = getIntent().getData().getQueryParameter("userId");
