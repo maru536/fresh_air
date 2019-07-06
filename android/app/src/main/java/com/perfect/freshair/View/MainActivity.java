@@ -42,7 +42,6 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.perfect.freshair.API.GPSServerInterface;
 import com.perfect.freshair.Callback.ResponseDustCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
@@ -51,8 +50,8 @@ import com.perfect.freshair.Control.DataUpdateWorker;
 import com.perfect.freshair.Control.DrawerItemClickListener;
 import com.perfect.freshair.Control.NavArrayAdapter;
 import com.perfect.freshair.Controller.GpsController;
-import com.perfect.freshair.DB.DustMeasurementDBHandler;
-import com.perfect.freshair.Model.DustMeasurement;
+import com.perfect.freshair.DB.MeasurementDBHandler;
+import com.perfect.freshair.Model.Measurement;
 import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
@@ -77,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView mDrawerList;
     private NavArrayAdapter arrayAdapter;
-    private DustMeasurementDBHandler dustMeasurementDBHandler;
+    private MeasurementDBHandler measurementDBHandler;
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mNavigationMenu;
     private GPSServerInterface serverInterface;
@@ -127,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         intentFilter = new IntentFilter();
         intentFilter.addAction(CommonEnumeration.dataUpdateAction);
 
-        dustMeasurementDBHandler = new DustMeasurementDBHandler(getApplicationContext());
+        measurementDBHandler = new MeasurementDBHandler(getApplicationContext());
         blueToothUtils = new BlueToothUtils(getApplicationContext());
 
         //drawer view
@@ -190,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
         l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
         l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
 
+
         /*
         updateThread = new Thread(new Runnable() {
             @Override
@@ -200,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
                     try{
                         Log.i(toString(), "thread is running");
                         Thread.sleep(5000);
+                        WorkManager.getInstance().cancelAllWork();
                         OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(DataUpdateWorker.class).build();
                         WorkManager.getInstance().enqueueUniqueWork(myUniqueWorkName, ExistingWorkPolicy.KEEP, oneTimeWorkRequest);
                     }catch (Exception e)
@@ -213,12 +214,12 @@ public class MainActivity extends AppCompatActivity {
         updateThread.start();
         */
 
-        OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(DataUpdateWorker.class).setBackoffCriteria(
-                BackoffPolicy.LINEAR,
-                OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
-                TimeUnit.MILLISECONDS).addTag(myUniqueWorkName).build();
-        WorkManager.getInstance().cancelAllWorkByTag(myUniqueWorkName);
-        WorkManager.getInstance().enqueue(oneTimeWorkRequest);
+
+        WorkManager.getInstance().cancelAllWork();
+        saveRequest =
+                new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES).addTag(myUniqueWorkName).build();
+        WorkManager.getInstance().enqueue(saveRequest);
+
 
         //dust information
         int tempMajor = 30; // have to get the value from local database
@@ -331,7 +332,7 @@ public class MainActivity extends AppCompatActivity {
     {
         long eightHouresInMilis = 8*60*1000*60;
         long currentTime = System.currentTimeMillis();
-        List<DustMeasurement> data = dustMeasurementDBHandler.search(currentTime-eightHouresInMilis, currentTime);
+        List<Measurement> data = measurementDBHandler.search(currentTime-eightHouresInMilis, currentTime);
 
         if(data != null)
         {
@@ -340,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
             int limitCount = 30;
 
             for (int i = data.size() - 1; i >= 0 && limitCount-- >= 0; i--) {
-                DustMeasurement mydata = data.get(i);
+                Measurement mydata = data.get(i);
                 long oldTime = mydata.getTimestamp();
                 float xValue = (float)((currentTime - oldTime) / 1000);
                 pm10Entries.add(new Entry(xValue,mydata.getDust().getPm100()));
@@ -377,7 +378,8 @@ public class MainActivity extends AppCompatActivity {
         String defaultValue = "none";
         String deviceAddr = sharedPreferences.getString(getApplicationContext().getString(R.string.my_preference_ble_addr_key), defaultValue);
 
-        if(blueToothUtils.getBLEEnabled() && !deviceAddr.equals(defaultValue))
+        //if(blueToothUtils.getBLEEnabled() && !deviceAddr.equals(defaultValue))
+        if (true)
         {
             OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(DataUpdateWorker.class).build();
             WorkManager.getInstance().enqueueUniqueWork(myUniqueWorkName, ExistingWorkPolicy.KEEP, oneTimeWorkRequest);
@@ -392,16 +394,17 @@ public class MainActivity extends AppCompatActivity {
         String defaultValue = "none";
         String deviceAddr = sharedPreferences.getString(getApplicationContext().getString(R.string.my_preference_ble_addr_key), defaultValue);
 
-        if (!blueToothUtils.getBLEEnabled() || deviceAddr.equals(defaultValue) && strPublicDustValue.equals("none")) {
+        //if (!blueToothUtils.getBLEEnabled() || deviceAddr.equals(defaultValue) && strPublicDustValue.equals("none")) {
+        if (false) {
             textDust.setVisibility(View.INVISIBLE);
             textNoDevice.setVisibility(View.VISIBLE);
             textNoValue.setVisibility(View.INVISIBLE);
             textCoach.setVisibility(View.INVISIBLE);
             textPublicValue.setVisibility(View.INVISIBLE);
         } else {
-            DustMeasurement dustMeasurement = dustMeasurementDBHandler.latestRow();
-            if (dustMeasurement != null) {
-                textDust.setText(getDustString(dustMeasurement.getDust().getPm25(), dustMeasurement.getDust().getPm100()));
+            Measurement measurement = measurementDBHandler.latestRow();
+            if (measurement != null) {
+                textDust.setText(getDustString(measurement.getDust().getPm25(), measurement.getDust().getPm100()));
                 textDust.setVisibility(View.VISIBLE);
                 textCoach.setVisibility(View.VISIBLE);
                 textNoDevice.setVisibility(View.INVISIBLE);
@@ -454,10 +457,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        WorkManager.getInstance().cancelAllWork();
-        saveRequest =
-                new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES).build();
-        WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.REPLACE, saveRequest);
+
+        //WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.REPLACE, saveRequest);
+
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.perfect.freshair.Utils;
 
-import com.perfect.freshair.Model.DustMeasurement;
+import com.perfect.freshair.Model.Measurement;
 
 import java.util.List;
 
@@ -72,7 +72,7 @@ public class MicroDustUtils {
         return ret;
     }
 
-    static public int getDustAverage(List<DustMeasurement> list)
+    static public int getDustAverage(List<Measurement> list)
     {
         int size = list.size();
         int sum = 0;

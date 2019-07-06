@@ -31,6 +31,9 @@ public class GpsController {
 
         this.locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                 this.MIN_LOCATION_UPDATE_TIME, this.MIN_LOCATION_UPDATE_DISTANCE, this.mLocationListener, Looper.getMainLooper());
+
+        this.locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
+                this.MIN_LOCATION_UPDATE_TIME, this.MIN_LOCATION_UPDATE_DISTANCE, this.mLocationListener, Looper.getMainLooper());
     }
 
     private void unregistRequest() {

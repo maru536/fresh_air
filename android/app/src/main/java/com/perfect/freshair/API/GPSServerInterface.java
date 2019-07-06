@@ -1,13 +1,12 @@
 package com.perfect.freshair.API;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Callback.ResponseDustCallback;
 import com.perfect.freshair.Model.Dust;
-import com.perfect.freshair.Model.DustMeasurement;
+import com.perfect.freshair.Model.Measurement;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -36,10 +35,10 @@ public class GPSServerInterface {
                 .build();
     }
 
-    public void postDust(String _userId, DustMeasurement newDustMeasurement, final ResponseCallback _callback) {
+    public void postDust(String _userId, Measurement newMeasurement, final ResponseCallback _callback) {
         GPSAPI gpsApi = mRetrofit.create(GPSAPI.class);
 
-        JsonObject requestBody = newDustMeasurement.toJsonObject();
+        JsonObject requestBody = newMeasurement.toJsonObject();
 
         Call<JsonObject> request = gpsApi.postDust(_userId, requestBody);
         request.enqueue(new Callback<JsonObject>() {

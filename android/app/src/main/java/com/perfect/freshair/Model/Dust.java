@@ -2,7 +2,8 @@ package com.perfect.freshair.Model;
 
 import android.content.ContentValues;
 
-import com.perfect.freshair.DB.DustMeasurementDBHandler;
+import com.google.gson.JsonObject;
+import com.perfect.freshair.DB.MeasurementDBHandler;
 
 public class Dust {
     private int pm25 = 0;
@@ -28,9 +29,18 @@ public class Dust {
     public ContentValues toValues() {
         ContentValues values = new ContentValues();
 
-        values.put(DustMeasurementDBHandler.Column.PM25.name(), this.pm25);
-        values.put(DustMeasurementDBHandler.Column.PM100.name(), this.pm100);
+        values.put(MeasurementDBHandler.Column.PM25.name(), this.pm25);
+        values.put(MeasurementDBHandler.Column.PM100.name(), this.pm100);
 
         return values;
+    }
+
+    public JsonObject toJsonObject() {
+        JsonObject jsonObject = new JsonObject();
+
+        jsonObject.addProperty("pm100", this.pm100);
+        jsonObject.addProperty("pm25", this.pm25);
+
+        return jsonObject;
     }
 }

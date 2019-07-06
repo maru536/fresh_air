@@ -58,4 +58,5 @@
         <item>디바이스 등록</item>
         <item>로그아웃</item>
     </string-array>
+    <string name="title_activity_map">Map</string>
 </resources>
