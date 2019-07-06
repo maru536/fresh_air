@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 
 @Entity
 @IdClass(DustPK.class)
-@Table(name = "dust")
+@Table(name = "measurement")
 public class LatestDust {
     @Id
     private String userId;
@@ -17,7 +17,6 @@ public class LatestDust {
     private long time;
     private int pm25;
     private int pm100;
-    private float co2;
 
     public LatestDust() {
     }
@@ -63,12 +62,13 @@ public class LatestDust {
         return "PM2.5: " + this.pm25 + ", PM10: " + this.pm100;
     }
 
-    public float getCo2() {
-        return this.co2;
-    }
+    public JsonObject toJsonObject() {
+        JsonObject latestDust = new JsonObject();
 
-    public void setCo2(float co2) {
-        this.co2 = co2;
-    }
+        latestDust.addProperty("time", this.time);
+        latestDust.addProperty("pm100", this.pm100);
+        latestDust.addProperty("pm25", this.pm25);
 
+        return latestDust;
+    }
 }

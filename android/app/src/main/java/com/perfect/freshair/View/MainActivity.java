@@ -27,8 +27,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.work.BackoffPolicy;
-import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
@@ -42,7 +40,7 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.perfect.freshair.API.GPSServerInterface;
+import com.perfect.freshair.API.DustServerInterface;
 import com.perfect.freshair.Callback.ResponseDustCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.Common.PermissionEnumeration;
@@ -79,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private MeasurementDBHandler measurementDBHandler;
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mNavigationMenu;
-    private GPSServerInterface serverInterface;
+    private DustServerInterface serverInterface;
     private GpsController gpsController;
     Thread updateThread;
     PeriodicWorkRequest saveRequest;
@@ -265,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
                         {
                             Log.i(getApplicationContext().toString(), list.get(0).getAdminArea()+" ,"+ list.get(0).getLocality() + " ," + list.get(0).getAddressLine(0).toString());
                             if (serverInterface == null)
-                                serverInterface = new GPSServerInterface();
+                                serverInterface = new DustServerInterface();
 
                             final ArrayList<String> sidogun = new ArrayList<String>();
 

@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,7 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.perfect.freshair.API.GPSServerInterface;
+import com.perfect.freshair.API.DustServerInterface;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.PreferencesUtils;
@@ -36,7 +35,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     private String mId;
     private String mPasswd;
-    private GPSServerInterface mServerInterface;
+    private DustServerInterface mServerInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +105,7 @@ public class SignUpActivity extends AppCompatActivity {
             showProgress(true);
 
             if (mServerInterface == null)
-                mServerInterface = new GPSServerInterface();
+                mServerInterface = new DustServerInterface();
 
             mServerInterface.signUp(mId, mPasswd, new ResponseCallback() {
                 @Override

@@ -3,6 +3,7 @@ package com.perfect.freshair.API;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
+import com.perfect.freshair.Callback.ResponseBodyCallback;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Callback.ResponseDustCallback;
 import com.perfect.freshair.Model.Dust;
@@ -16,14 +17,14 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class GPSServerInterface {
-    private static final String TAG = GPSServerInterface.class.getSimpleName();
+public class DustServerInterface {
+    private static final String TAG = DustServerInterface.class.getSimpleName();
     private static final String RESPONSE_FAIL_MESSAGE = "Response error";
     private static final String API_FAIL_MESSAGE = "API fail";
     private static final int FAIL_CODE = -1;
     private Retrofit mRetrofit;
 
-    public GPSServerInterface() {
+    public DustServerInterface() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
@@ -36,11 +37,11 @@ public class GPSServerInterface {
     }
 
     public void postDust(String _userId, Measurement newMeasurement, final ResponseCallback _callback) {
-        GPSAPI gpsApi = mRetrofit.create(GPSAPI.class);
+        DustApi dustApi = mRetrofit.create(DustApi.class);
 
         JsonObject requestBody = newMeasurement.toJsonObject();
 
-        Call<JsonObject> request = gpsApi.postDust(_userId, requestBody);
+        Call<JsonObject> request = dustApi.postDust(_userId, requestBody);
         request.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
@@ -55,7 +56,7 @@ public class GPSServerInterface {
     }
 
     public void signUp(String _userId, String _passwd, final ResponseCallback _callback) {
-        GPSAPI gpsApi = mRetrofit.create(GPSAPI.class);
+        DustApi gpsApi = mRetrofit.create(DustApi.class);
 
         JsonObject userInfo = new JsonObject();
         userInfo.addProperty("id", _userId);
@@ -76,7 +77,7 @@ public class GPSServerInterface {
     }
 
     public void signIn(String _userId, String _passwd, final ResponseCallback _callback) {
-        GPSAPI gpsApi = mRetrofit.create(GPSAPI.class);
+        DustApi gpsApi = mRetrofit.create(DustApi.class);
 
         Call<JsonObject> request = gpsApi.signIn(_userId, _passwd);
         request.enqueue(new Callback<JsonObject>() {
@@ -93,17 +94,33 @@ public class GPSServerInterface {
     }
 
     public void publicDust(String addressLevelOne, String addressLevelTwo, final ResponseDustCallback _callback) {
-        GPSAPI gpsApi = mRetrofit.create(GPSAPI.class);
+        DustApi gpsApi = mRetrofit.create(DustApi.class);
 
         JsonObject address = new JsonObject();
         address.addProperty("levelOne", addressLevelOne);
         address.addProperty("levelTwo", addressLevelTwo);
 
-        Call<JsonObject> request = gpsApi.publicDust(address);
+        Call<JsonObject> request = gpsApi.syncUserDust(address);
         request.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
                 responseDustHandler(_response.body(), _callback);
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> _call, Throwable _t) {
+            }
+        });
+    }
+
+    public void syncUserDust(String userId, final ResponseBodyCallback callback) {
+        DustApi gpsApi = mRetrofit.create(DustApi.class);
+
+        Call<JsonObject> request = gpsApi.syncUserDust(userId);
+        request.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                callback.onResponseBodyCallback(response.body());
             }
 
             @Override
