@@ -17,7 +17,6 @@ import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.Controller.GpsController;
 import com.perfect.freshair.DB.MeasurementDBHandler;
-import com.perfect.freshair.Model.Gps;
 import com.perfect.freshair.Model.Measurement;
 import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.Utils.BlueToothUtils;
@@ -33,7 +32,7 @@ public class DataUpdateWorker extends Worker {
     private boolean isDustReceive;
     private boolean isLocationReceive;
     private Measurement receivedMeasurement;
-    private Gps receivedGps;
+    private Location receivedLocation;
     private Dust receivedDust;
     private MeasurementDBHandler measurementDBHandler;
     private GPSServerInterface serverInterface = null;
@@ -126,10 +125,10 @@ public class DataUpdateWorker extends Worker {
         @Override
         public void onLocationChanged(Location location) {
             isLocationReceive = true;
-            receivedGps = new Gps(location.getProvider(), location.getLatitude(), location.getLongitude(), location.getAccuracy());
+            receivedLocation = location;
 
             if (isAllReceive()) {
-                receivedMeasurement = new Measurement(System.currentTimeMillis(), receivedDust, receivedGps);
+                receivedMeasurement = new Measurement(System.currentTimeMillis(), receivedDust, receivedLocation);
                 if (serverInterface == null)
                     serverInterface = new GPSServerInterface();
 
@@ -147,6 +146,6 @@ public class DataUpdateWorker extends Worker {
     };
 
     private boolean isAllReceive() {
-        return (isDustReceive && isLocationReceive && receivedDust != null && receivedGps != null);
+        return (isDustReceive && isLocationReceive && receivedDust != null && receivedLocation != null);
     }
 }

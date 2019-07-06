@@ -2,6 +2,7 @@ package com.perfect.freshair.Model;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.location.Location;
 
 import com.google.gson.JsonObject;
 import com.perfect.freshair.DB.MeasurementDBHandler;
@@ -9,25 +10,26 @@ import com.perfect.freshair.DB.MeasurementDBHandler;
 public class Measurement {
     private long timestamp;
     private Dust dust;
-    private Gps gps;
+    private Location location;
 
-    public Measurement(long timestamp, Dust dust, Gps gps) {
+    public Measurement(long timestamp, Dust dust, Location location) {
         this.timestamp = timestamp;
         this.dust = dust;
-        this.gps = gps;
+        this.location = location;
     }
 
     public Measurement(Cursor cursor) {
         this.timestamp = cursor.getLong(MeasurementDBHandler.Column.TIMESTAMP.ordinal());
         this.dust = new Dust(cursor.getInt(MeasurementDBHandler.Column.PM25.ordinal()), cursor.getInt(MeasurementDBHandler.Column.PM100.ordinal()));
-        this.gps = new Gps(cursor.getString(MeasurementDBHandler.Column.PROVIDER.ordinal()), cursor.getDouble(MeasurementDBHandler.Column.LATITUDE.ordinal()),
-                cursor.getDouble(MeasurementDBHandler.Column.LONGITUDE.ordinal()), cursor.getFloat(MeasurementDBHandler.Column.ACCURACY.ordinal()));
+        this.location = new Location(cursor.getString(MeasurementDBHandler.Column.PROVIDER.ordinal()));
+        this.location.setAccuracy(cursor.getFloat(MeasurementDBHandler.Column.ACCURACY.ordinal()));
+        this.location.setLatitude(cursor.getDouble(MeasurementDBHandler.Column.LATITUDE.ordinal()));
+        this.location.setLongitude(cursor.getDouble(MeasurementDBHandler.Column.LONGITUDE.ordinal()));
     }
 
     public Dust getDust() {
         return dust;
     }
-
 
     public long getTimestamp() {
         return timestamp;
@@ -36,9 +38,12 @@ public class Measurement {
     public ContentValues toValues() {
         ContentValues values = new ContentValues();
 
-        values.put(MeasurementDBHandler.Column.TIMESTAMP.name(), System.currentTimeMillis());
+        values.put(MeasurementDBHandler.Column.TIMESTAMP.name(), this.timestamp);
+        values.put(MeasurementDBHandler.Column.PROVIDER.name(), this.location.getProvider());
+        values.put(MeasurementDBHandler.Column.ACCURACY.name(), this.location.getAccuracy());
+        values.put(MeasurementDBHandler.Column.LATITUDE.name(), this.location.getLatitude());
+        values.put(MeasurementDBHandler.Column.LONGITUDE.name(), this.location.getLongitude());
         values.putAll(this.dust.toValues());
-        values.putAll(this.gps.toValues());
 
         return values;
     }
@@ -49,8 +54,14 @@ public class Measurement {
         jsonObject.addProperty("time", this.timestamp);
         jsonObject.addProperty("pm100", this.dust.getPm100());
         jsonObject.addProperty("pm25", this.dust.getPm25());
-        jsonObject.addProperty("lat", this.gps.getLatitude());
-        jsonObject.addProperty("lng", this.gps.getLongitude());
+
+        JsonObject location = new JsonObject();
+        location.addProperty("provider", this.location.getProvider());
+        location.addProperty("latitude", this.location.getLatitude());
+        location.addProperty("latitude", this.location.getLatitude());
+        location.addProperty("latitude", this.location.getLatitude());
+
+        jsonObject.add("location", location);
 
         return jsonObject;
     }
@@ -67,11 +78,11 @@ public class Measurement {
         this.dust = dust;
     }
 
-    public Gps getGps() {
-        return gps;
+    public Location getLocation() {
+        return location;
     }
 
-    public void setGps(Gps gps) {
-        this.gps = gps;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 }

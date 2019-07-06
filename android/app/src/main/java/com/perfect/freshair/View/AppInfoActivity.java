@@ -2,7 +2,7 @@ package com.perfect.freshair.View;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -17,6 +17,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -24,7 +25,9 @@ import com.perfect.freshair.Control.DrawerItemClickListener;
 import com.perfect.freshair.Control.NavArrayAdapter;
 import com.perfect.freshair.DB.MeasurementDBHandler;
 import com.perfect.freshair.Model.Measurement;
+import com.perfect.freshair.Model.RepresentMeasurement;
 import com.perfect.freshair.R;
+import com.perfect.freshair.Utils.MeasurementUtils;
 
 import java.util.List;
 
@@ -36,6 +39,7 @@ public class AppInfoActivity extends AppCompatActivity implements OnMapReadyCall
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mNavigationMenu;
     private GoogleMap mMap;
+    List<RepresentMeasurement> allRepresentMeasurementList;
     private float mZoom = 16.0f;
 
     @Override
@@ -124,39 +128,53 @@ public class AppInfoActivity extends AppCompatActivity implements OnMapReadyCall
                 return;
             }
 
-            mMap.clear();
+            mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+                @Override
+                public void onCircleClick(Circle circle) {
+                    Location circleLocation = new Location("temp");
+                    circleLocation.setLatitude(circle.getCenter().latitude);
+                    circleLocation.setLongitude(circle.getCenter().longitude);
+                    int includingIndex = MeasurementUtils.indexOfIncludedInRepresentMeasurement(circleLocation, allRepresentMeasurementList);
+
+                    if (includingIndex > 0) {
+                        addLine(allRepresentMeasurementList.get(includingIndex - 1).getCenterPosition(), allRepresentMeasurementList.get(includingIndex).getCenterPosition());
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(allRepresentMeasurementList.get(includingIndex - 1).getCenterPosition(), mZoom));
+                    }
+                }
+            });
+
             List<Measurement> allMeasurement = this.measurementDBHandler.searchAll();
             LatLng previousPositon = null;
+            allRepresentMeasurementList = MeasurementUtils.representMeasurement(allMeasurement);
 
-            for (Measurement currentMeasurement : allMeasurement) {
-                LatLng currentPosition = new LatLng(currentMeasurement.getGps().getLatitude(), currentMeasurement.getGps().getLongitude());
-                addCircle(currentMeasurement);
+            for (RepresentMeasurement exploreRepresentMeasurement : allRepresentMeasurementList) {
+                addCircle(exploreRepresentMeasurement);
 
                 if (previousPositon != null)
-                    addLine(previousPositon, currentPosition);
-                previousPositon = currentPosition;
+                    addLine(previousPositon, exploreRepresentMeasurement.getCenterPosition());
+                previousPositon = exploreRepresentMeasurement.getCenterPosition();
             }
 
-            if (allMeasurement.size() > 0) {
-                Measurement latestMeasurement = allMeasurement.get(allMeasurement.size()-1);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latestMeasurement.getGps().getLatitude(), latestMeasurement.getGps().getLongitude()), mZoom));
+            if (allRepresentMeasurementList.size() > 0) {
+                RepresentMeasurement lastMeasurement = allRepresentMeasurementList.get(allRepresentMeasurementList.size() - 1);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastMeasurement.getCenterPosition(), mZoom));
             }
         }
     }
 
-    private void addCircle(Measurement measurement) {
-        int circleColor = transDustToColor(measurement.getDust().getPm100());
+    private void addCircle(RepresentMeasurement representMeasurementmeasurement) {
+        int circleColor = transDustToColor(representMeasurementmeasurement.getAveragePm100());
 
         mMap.addCircle(new CircleOptions()
-            .center(new LatLng(measurement.getGps().getLatitude(), measurement.getGps().getLongitude()))
-            .radius(measurement.getGps().getAccuracy())
+            .center(representMeasurementmeasurement.getCenterPosition())
+            .radius(representMeasurementmeasurement.getAverageAccuracy())
             .strokeColor(circleColor)
             .fillColor(circleColor)
-            .clickable(false));
+            .clickable(true));
     }
 
     private void addLine(LatLng start, LatLng end) {
-        mMap.addPolyline(new PolylineOptions().add(start, end).color(Color.BLACK));
+        mMap.addPolyline(new PolylineOptions().add(start, end).color(getResources().getColor(R.color.transparentBlack, null)));
     }
 
     private int transDustToColor(int _dust) {
