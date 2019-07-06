@@ -12,4 +12,6 @@ public interface DustRepository extends CrudRepository<LatestDust, DustPK> {
     Optional<LatestDust> findFirstByUserIdOrderByTimeDesc(String userId);
 
     List<LatestDust> findByUserIdAndTimeBetween(String userId, long startTime, long endTime);
+
+    List<LatestDust> findByUserIdAndTimeGreaterThanEqual(String userId, long startTime);
 }

@@ -8,7 +8,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 
-public interface GPSAPI {
+public interface DustApi {
     @POST("1.0/dust")
     Call<JsonObject> postDust(@Header("userId") String userId,
                                 @Body JsonObject body);
@@ -21,6 +21,9 @@ public interface GPSAPI {
                             @Header("passwd") String passwd);
 
 
-    @POST("1.0/publicDust")
-    Call<JsonObject> publicDust(@Body JsonObject address);
+    @POST("1.0/syncUserDust")
+    Call<JsonObject> syncUserDust(@Body JsonObject address);
+
+    @GET("1.0/syncUserDust")
+    Call<JsonObject> syncUserDust(@Header("userId") String userId);
 }

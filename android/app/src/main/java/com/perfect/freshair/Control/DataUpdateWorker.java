@@ -11,7 +11,7 @@ import android.util.Log;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import com.perfect.freshair.API.GPSServerInterface;
+import com.perfect.freshair.API.DustServerInterface;
 import com.perfect.freshair.Callback.LocationCallback;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
@@ -36,7 +36,7 @@ public class DataUpdateWorker extends Worker {
     private Gps receivedGps;
     private Dust receivedDust;
     private MeasurementDBHandler measurementDBHandler;
-    private GPSServerInterface serverInterface = null;
+    private DustServerInterface serverInterface = null;
     private GpsController gpsController;
 
     private ScanCallback scanCallback = new ScanCallback() {
@@ -131,7 +131,7 @@ public class DataUpdateWorker extends Worker {
             if (isAllReceive()) {
                 receivedMeasurement = new Measurement(System.currentTimeMillis(), receivedDust, receivedGps);
                 if (serverInterface == null)
-                    serverInterface = new GPSServerInterface();
+                    serverInterface = new DustServerInterface();
 
                 Log.i(this.toString(), receivedMeasurement.toString());
                 measurementDBHandler.add(receivedMeasurement);

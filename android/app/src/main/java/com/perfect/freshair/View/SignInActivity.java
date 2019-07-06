@@ -1,19 +1,13 @@
 package com.perfect.freshair.View;
 
-import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,12 +16,9 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.signin.SignIn;
-import com.perfect.freshair.API.GPSServerInterface;
+import com.perfect.freshair.API.DustServerInterface;
 import com.perfect.freshair.Callback.ResponseCallback;
-import com.perfect.freshair.Common.PermissionEnumeration;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
@@ -46,7 +37,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private String mId;
     private String mPasswd;
-    private GPSServerInterface mServerInterface;
+    private DustServerInterface mServerInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,7 +136,7 @@ public class SignInActivity extends AppCompatActivity {
             showProgress(true);
 
             if (mServerInterface == null)
-                mServerInterface = new GPSServerInterface();
+                mServerInterface = new DustServerInterface();
 
             //request Id
             mServerInterface.signIn(mId, mPasswd, new ResponseCallback() {

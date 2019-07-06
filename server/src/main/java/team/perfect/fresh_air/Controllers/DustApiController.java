@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import team.perfect.fresh_air.Models.Response;
 import team.perfect.fresh_air.Models.ResponseAir;
 import team.perfect.fresh_air.Models.ResponseCoaching;
 import team.perfect.fresh_air.Models.ResponseDust;
+import team.perfect.fresh_air.Models.ResponseDustList;
 import team.perfect.fresh_air.Models.ResponseLatestDust;
 import team.perfect.fresh_air.Repository.AirRepository;
 import team.perfect.fresh_air.Repository.DustRepository;
@@ -74,7 +76,7 @@ public class DustApiController {
         else
             return new Response(404, "There is no public dust data");
     }
-    
+
     @PostMapping("1.0/coachingDust")
     public Response air(@RequestHeader String userId, @RequestBody JsonObject address) {
         Air publicAir = queryAirByAddress(new AddressPK(address));
@@ -155,13 +157,12 @@ public class DustApiController {
 
             if (countPm100 > 0)
                 avgPm100 = sumPm100 / countPm100;
-            
-            if (countPm25 > 0) 
+
+            if (countPm25 > 0)
                 avgPm25 = sumPm25 / countPm25;
 
             if (avgPm25 > 0 || avgPm100 > 0) {
-                return new ResponseLatestDust(200, "Success",
-                    new LatestDust(userId, 0L, avgPm25, avgPm100));
+                return new ResponseLatestDust(200, "Success", new LatestDust(userId, 0L, avgPm25, avgPm100));
             }
         }
 
@@ -201,7 +202,25 @@ public class DustApiController {
         return ChartUtils.lineChart(pm100List, pm25List, hourXAxis);
     }
 
-    private void setChartData(long dayTime, int endHour, List<LatestDust> dustList, List<Integer> pm100List, List<Integer> pm25List, List<Integer> hourXAxis) {
+    @GetMapping("1.0/syncUserDust")
+    public Response syncUserDust(@RequestHeader String userId) {
+        List<LatestDust> userDustList = this.dustRepository.findByUserIdAndTimeGreaterThanEqual(userId,
+                getDayStartTime(System.currentTimeMillis() - TimeContract.A_DAY));
+
+        if (userDustList != null && userDustList.size() > 0) {
+            JsonArray dustArray = new JsonArray();
+
+            for (LatestDust exploreDust : userDustList)
+                dustArray.add(exploreDust.toJsonObject());
+
+            return new ResponseDustList(200, "Success", dustArray);
+        }
+
+        return new Response(404, "There is no dust data");
+    }
+
+    private void setChartData(long dayTime, int endHour, List<LatestDust> dustList, List<Integer> pm100List,
+            List<Integer> pm25List, List<Integer> hourXAxis) {
         int sumPm100 = 0;
         int sumPm25 = 0;
         int countPm100 = 0;
@@ -218,7 +237,7 @@ public class DustApiController {
                         sumPm100 += exploreDust.getPm100();
                         countPm100++;
                     }
-                    
+
                     if (exploreDust.getPm25() >= 0) {
                         sumPm25 += exploreDust.getPm25();
                         countPm25++;
@@ -249,7 +268,7 @@ public class DustApiController {
                     sumPm100 += exploreDust.getPm100();
                     countPm100++;
                 }
-                
+
                 if (exploreDust.getPm25() >= 0) {
                     sumPm25 += exploreDust.getPm25();
                     countPm25++;
@@ -258,7 +277,7 @@ public class DustApiController {
             exploreDust = null;
         }
     }
-    
+
     private Air queryAirByAddress(AddressPK address) {
         Optional<Air> publicAir = this.airRepository.findById(address);
 
@@ -273,7 +292,7 @@ public class DustApiController {
                 return null;
         }
     }
-    
+
     private long getDayStartTime(long dayTime) {
         Calendar dayStartDate = Calendar.getInstance();
         dayStartDate.setTimeInMillis(dayTime);
@@ -286,7 +305,7 @@ public class DustApiController {
 
         return dayStartDate.getTimeInMillis();
     }
-    
+
     private long getDayEndTime(long dayTime) {
         Calendar dayEndDate = Calendar.getInstance();
         dayEndDate.setTimeInMillis(dayTime);
@@ -307,7 +326,7 @@ public class DustApiController {
     }
 
     private List<LatestDust> queryDayDustByUserId(long yesterdayTime, String userId) {
-        return this.dustRepository.findByUserIdAndTimeBetween(userId, 
-            getDayStartTime(yesterdayTime), getDayEndTime(yesterdayTime));
+        return this.dustRepository.findByUserIdAndTimeBetween(userId, getDayStartTime(yesterdayTime),
+                getDayEndTime(yesterdayTime));
     }
 }
