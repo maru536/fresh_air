@@ -8,7 +8,6 @@ import java.util.List;
 public class RepresentMeasurement {
     List<Measurement> measurementList;
     LatLng centerPosition;
-    float sumAccuracy = 0.0f;
     int sumPm100 = 0;
     int sumPm25 = 0;
     long lastTime = -1L;
@@ -21,7 +20,6 @@ public class RepresentMeasurement {
     public void addMeasurement(Measurement newMeasurement) {
         double sumLatitude = centerPosition.latitude*measurementList.size() + newMeasurement.getLocation().getLatitude();
         double sumLongitude = centerPosition.longitude*measurementList.size() + newMeasurement.getLocation().getLongitude();
-        sumAccuracy += newMeasurement.getLocation().getAccuracy();
         measurementList.add(newMeasurement);
         centerPosition = new LatLng(sumLatitude / measurementList.size(), sumLongitude / measurementList.size());
         lastTime = newMeasurement.getTimestamp();
@@ -35,10 +33,6 @@ public class RepresentMeasurement {
 
     public LatLng getCenterPosition() {
         return centerPosition;
-    }
-
-    public float getAverageAccuracy() {
-        return sumAccuracy / measurementList.size();
     }
 
     public int getAveragePm100() {

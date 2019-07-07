@@ -1,7 +1,5 @@
 package team.perfect.fresh_air.Controllers;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +9,9 @@ import org.springframework.stereotype.Component;
 import team.perfect.fresh_air.Api.AirServerInterface;
 import team.perfect.fresh_air.Contract.AddressLevelOneContract;
 import team.perfect.fresh_air.Contract.AirItemCodeContract;
-import team.perfect.fresh_air.DAO.LatestDust;
+import team.perfect.fresh_air.DAO.DustWithLocationDAO;
 import team.perfect.fresh_air.Repository.AirRepository;
-import team.perfect.fresh_air.Repository.DustRepository;
+import team.perfect.fresh_air.Repository.DustWithLocationRepository;
 
 @Component
 public class AirSyncController {
@@ -22,7 +20,7 @@ public class AirSyncController {
     @Autowired
     private AirRepository airRepository;
     @Autowired
-    private DustRepository dustRepository;
+    private DustWithLocationRepository dustWithLocationRepository;
     
     @Scheduled(cron = "0 30 * * * *")
     public void syncLevelTwoAir() {
@@ -65,7 +63,8 @@ public class AirSyncController {
     @Scheduled(cron = "0 0/5 * * * *")
     public void postDustForTestUser() {
         Random random = new Random();
-        LatestDust dust = new LatestDust("testuser", System.currentTimeMillis(), random.nextInt(100), random.nextInt(150));
-        this.dustRepository.save(dust);
+        DustWithLocationDAO dust = new DustWithLocationDAO("testuser", System.currentTimeMillis(), 
+            random.nextInt(100), random.nextInt(150), "GPS", 37.4781327, 126.9493137);
+        this.dustWithLocationRepository.save(dust);
     }
 }

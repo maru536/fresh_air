@@ -167,7 +167,7 @@ public class AppInfoActivity extends AppCompatActivity implements OnMapReadyCall
 
         mMap.addCircle(new CircleOptions()
             .center(representMeasurementmeasurement.getCenterPosition())
-            .radius(representMeasurementmeasurement.getAverageAccuracy())
+            .radius(MeasurementUtils.includingArea)
             .strokeColor(circleColor)
             .fillColor(circleColor)
             .clickable(true));

@@ -2,13 +2,13 @@ package team.perfect.fresh_air.Utils;
 
 import team.perfect.fresh_air.Contract.DustStandardContract;
 import team.perfect.fresh_air.DAO.Air;
-import team.perfect.fresh_air.DAO.LatestDust;
+import team.perfect.fresh_air.DAO.Dust;
 
 public class CoachingUtils {
     private static final int PM25_DIFF_THRESHOLD = 50;
     private static final int PM100_DIFF_THRESHOLD = 50;
     
-    public static String makeLatestDustCoachingMessage(LatestDust dust) {
+    public static String makeLatestDustCoachingMessage(Dust dust) {
         String message;
 
         if (dust.getPm100() < DustStandardContract.goodPm100)
@@ -32,7 +32,7 @@ public class CoachingUtils {
         return message;
     }
 
-    public static String makeDiffCoachingMessage(LatestDust dust, Air air) {
+    public static String makeDiffCoachingMessage(Dust dust, Air air) {
         String message = "";
         int diffPm100 = dust.getPm100() - air.getPm100();
         int diffPm25 = dust.getPm25() - air.getPm25();

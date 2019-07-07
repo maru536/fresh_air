@@ -27,15 +27,16 @@ import team.perfect.fresh_air.Contract.TimeContract;
 import team.perfect.fresh_air.DAO.AddressPK;
 import team.perfect.fresh_air.DAO.Air;
 import team.perfect.fresh_air.DAO.Dust;
-import team.perfect.fresh_air.DAO.LatestDust;
+import team.perfect.fresh_air.DAO.DustWithLocationDAO;
+import team.perfect.fresh_air.DAO.UserDust;
 import team.perfect.fresh_air.Models.Response;
 import team.perfect.fresh_air.Models.ResponseAir;
 import team.perfect.fresh_air.Models.ResponseCoaching;
 import team.perfect.fresh_air.Models.ResponseDust;
 import team.perfect.fresh_air.Models.ResponseDustList;
-import team.perfect.fresh_air.Models.ResponseLatestDust;
+import team.perfect.fresh_air.Models.ResponseUserDust;
 import team.perfect.fresh_air.Repository.AirRepository;
-import team.perfect.fresh_air.Repository.DustRepository;
+import team.perfect.fresh_air.Repository.DustWithLocationRepository;
 import team.perfect.fresh_air.Utils.ChartUtils;
 import team.perfect.fresh_air.Utils.CoachingUtils;
 
@@ -44,14 +45,14 @@ public class DustApiController {
     @Autowired
     private AirRepository airRepository;
     @Autowired
-    private DustRepository dustRepository;
+    private DustWithLocationRepository dustWithLocationRepository;
 
     @PostMapping("1.0/dust")
     public Response postDust(@RequestHeader String userId, @RequestBody JsonObject dustObject) {
-        LatestDust dust = new LatestDust(dustObject);
-        dust.setUserId(userId);
+        DustWithLocationDAO dustWithLocation = new DustWithLocationDAO(dustObject);
+        dustWithLocation.setUserId(userId);
 
-        if (this.dustRepository.save(dust) != null)
+        if (this.dustWithLocationRepository.save(dustWithLocation) != null)
             return new Response(200, "Save dust Success");
         else
             return new Response(500, "Save dust fail");
@@ -59,10 +60,10 @@ public class DustApiController {
 
     @GetMapping("1.0/lastestDust")
     public Response latestDust(@RequestHeader String userId) {
-        Optional<LatestDust> latestDust = this.dustRepository.findFirstByUserIdOrderByTimeDesc(userId);
+        Optional<DustWithLocationDAO> latestDust = this.dustWithLocationRepository.findFirstByUserIdOrderByTimeDesc(userId);
 
         if (latestDust.isPresent())
-            return new ResponseLatestDust(200, "Success", latestDust.get());
+            return new ResponseUserDust(200, "Success", new UserDust(userId, latestDust.get().getPm100(), latestDust.get().getPm25()));
         else
             return new Response(404, "There is no dust data");
     }
@@ -80,16 +81,17 @@ public class DustApiController {
     @PostMapping("1.0/coachingDust")
     public Response air(@RequestHeader String userId, @RequestBody JsonObject address) {
         Air publicAir = queryAirByAddress(new AddressPK(address));
-        Optional<LatestDust> latestDust = this.dustRepository.findFirstByUserIdOrderByTimeDesc(userId);
+        Optional<DustWithLocationDAO> latestDust = this.dustWithLocationRepository.findFirstByUserIdOrderByTimeDesc(userId);
         String coachingMessage = "";
 
         if (latestDust.isPresent()) {
             if (publicAir != null) {
-                coachingMessage = CoachingUtils.makeDiffCoachingMessage(latestDust.get(), publicAir);
-                coachingMessage += CoachingUtils.makeLatestDustCoachingMessage(latestDust.get());
+                coachingMessage = CoachingUtils.makeDiffCoachingMessage(
+                    new Dust(latestDust.get().getPm100(), latestDust.get().getPm25()), publicAir);
+                coachingMessage += CoachingUtils.makeLatestDustCoachingMessage(new Dust(latestDust.get().getPm100(), latestDust.get().getPm25()));
                 return new ResponseCoaching(200, "Success", coachingMessage, latestDust.get(), publicAir);
             } else {
-                coachingMessage = CoachingUtils.makeLatestDustCoachingMessage(latestDust.get());
+                coachingMessage = CoachingUtils.makeLatestDustCoachingMessage(new Dust(latestDust.get().getPm100(), latestDust.get().getPm25()));
                 return new ResponseCoaching(201, "Success, but there is no air data", coachingMessage, latestDust.get(),
                         new Air());
             }
@@ -104,15 +106,14 @@ public class DustApiController {
 
     @GetMapping("1.0/todayDust")
     public Response todayDust(@RequestHeader String userId) {
-        List<LatestDust> dustList = queryTodayDustByUserId(System.currentTimeMillis(), userId);
-
+        List<DustWithLocationDAO> dustList = queryTodayDustByUserId(System.currentTimeMillis(), userId);
         if (dustList != null && dustList.size() > 0) {
             int sumPm100 = 0;
             int countPm100 = 0;
             int sumPm25 = 0;
             int countPm25 = 0;
 
-            for (LatestDust dust : dustList) {
+            for (DustWithLocationDAO dust : dustList) {
                 if (dust.getPm100() >= 0) {
                     sumPm100 += dust.getPm100();
                     countPm100++;
@@ -124,15 +125,15 @@ public class DustApiController {
                 }
             }
 
-            return new ResponseLatestDust(200, "Success",
-                    new LatestDust(userId, 0L, sumPm25 / countPm25, sumPm100 / countPm100));
+            return new ResponseUserDust(200, "Success",
+                    new UserDust(userId, sumPm100 / countPm100, sumPm25 / countPm25));
         } else
             return new Response(404, "There is no dust data");
     }
 
     @GetMapping("1.0/yesterdayDust")
     public Response yesterdayDust(@RequestHeader String userId) {
-        List<LatestDust> dustList = queryDayDustByUserId(System.currentTimeMillis() - TimeContract.A_DAY, userId);
+        List<DustWithLocationDAO> dustList = queryDayDustByUserId(System.currentTimeMillis() - TimeContract.A_DAY, userId);
 
         if (dustList != null && dustList.size() > 0) {
             int sumPm100 = 0;
@@ -140,7 +141,7 @@ public class DustApiController {
             int sumPm25 = 0;
             int countPm25 = 0;
 
-            for (LatestDust dust : dustList) {
+            for (DustWithLocationDAO dust : dustList) {
                 if (dust.getPm100() >= 0) {
                     sumPm100 += dust.getPm100();
                     countPm100++;
@@ -162,7 +163,7 @@ public class DustApiController {
                 avgPm25 = sumPm25 / countPm25;
 
             if (avgPm25 > 0 || avgPm100 > 0) {
-                return new ResponseLatestDust(200, "Success", new LatestDust(userId, 0L, avgPm25, avgPm100));
+                return new ResponseUserDust(200, "Success", new UserDust(userId, avgPm100, avgPm25));
             }
         }
 
@@ -172,7 +173,7 @@ public class DustApiController {
     @GetMapping(path = "1.0/todayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
     public byte[] showTodayDustChart(@PathVariable String userId) {
         long currentTime = System.currentTimeMillis();
-        List<LatestDust> dustList = queryTodayDustByUserId(currentTime, userId);
+        List<DustWithLocationDAO> dustList = queryTodayDustByUserId(currentTime, userId);
 
         List<Integer> pm100List = new ArrayList<>();
         List<Integer> pm25List = new ArrayList<>();
@@ -190,7 +191,7 @@ public class DustApiController {
     @GetMapping(path = "1.0/yesterdayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
     public byte[] showYesterdayChart(@PathVariable String userId) {
         long currentTime = System.currentTimeMillis();
-        List<LatestDust> dustList = queryDayDustByUserId(currentTime - TimeContract.A_DAY, userId);
+        List<DustWithLocationDAO> dustList = queryDayDustByUserId(currentTime - TimeContract.A_DAY, userId);
 
         List<Integer> pm100List = new ArrayList<>();
         List<Integer> pm25List = new ArrayList<>();
@@ -204,13 +205,13 @@ public class DustApiController {
 
     @GetMapping("1.0/syncUserDust")
     public Response syncUserDust(@RequestHeader String userId) {
-        List<LatestDust> userDustList = this.dustRepository.findByUserIdAndTimeGreaterThanEqual(userId,
+        List<DustWithLocationDAO> userDustList = this.dustWithLocationRepository.findByUserIdAndTimeGreaterThanEqual(userId,
                 getDayStartTime(System.currentTimeMillis() - TimeContract.A_DAY));
 
         if (userDustList != null && userDustList.size() > 0) {
             JsonArray dustArray = new JsonArray();
 
-            for (LatestDust exploreDust : userDustList)
+            for (DustWithLocationDAO exploreDust : userDustList)
                 dustArray.add(exploreDust.toJsonObject());
 
             return new ResponseDustList(200, "Success", dustArray);
@@ -219,16 +220,16 @@ public class DustApiController {
         return new Response(404, "There is no dust data");
     }
 
-    private void setChartData(long dayTime, int endHour, List<LatestDust> dustList, List<Integer> pm100List,
+    private void setChartData(long dayTime, int endHour, List<DustWithLocationDAO> dustList, List<Integer> pm100List,
             List<Integer> pm25List, List<Integer> hourXAxis) {
         int sumPm100 = 0;
         int sumPm25 = 0;
         int countPm100 = 0;
         int countPm25 = 0;
-        Iterator<LatestDust> dustIterator = dustList.iterator();
+        Iterator<DustWithLocationDAO> dustIterator = dustList.iterator();
         long exploreTime = getDayStartTime(dayTime) + TimeContract.A_HOUR;
         int exploreHour;
-        LatestDust exploreDust = null;
+        DustWithLocationDAO exploreDust = null;
 
         for (exploreHour = 0; exploreHour <= endHour; exploreHour++, exploreTime += TimeContract.A_HOUR) {
             try {
@@ -319,14 +320,14 @@ public class DustApiController {
         return dayEndDate.getTimeInMillis();
     }
 
-    private List<LatestDust> queryTodayDustByUserId(long todayTime, String userId) {
+    private List<DustWithLocationDAO> queryTodayDustByUserId(long todayTime, String userId) {
         long dayStartTime = getDayStartTime(todayTime);
 
-        return this.dustRepository.findByUserIdAndTimeBetween(userId, dayStartTime, todayTime);
+        return this.dustWithLocationRepository.findByUserIdAndTimeBetween(userId, dayStartTime, todayTime);
     }
 
-    private List<LatestDust> queryDayDustByUserId(long yesterdayTime, String userId) {
-        return this.dustRepository.findByUserIdAndTimeBetween(userId, getDayStartTime(yesterdayTime),
+    private List<DustWithLocationDAO> queryDayDustByUserId(long yesterdayTime, String userId) {
+        return this.dustWithLocationRepository.findByUserIdAndTimeBetween(userId, getDayStartTime(yesterdayTime),
                 getDayEndTime(yesterdayTime));
     }
 }

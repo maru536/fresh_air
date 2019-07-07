@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MeasurementUtils {
+    public static final float includingArea = 100.0f;
+
     public static List<RepresentMeasurement> representMeasurement(List<Measurement> allMeasurement) {
         List<RepresentMeasurement> representMeasurementList = new ArrayList<>();
         if (allMeasurement != null) {
@@ -41,7 +43,7 @@ public class MeasurementUtils {
         representLocation.setLatitude(representMeasurement.getCenterPosition().latitude);
         representLocation.setLongitude(representMeasurement.getCenterPosition().longitude);
         float distance = representLocation.distanceTo(exploreLocation);
-        return distance < representMeasurement.getAverageAccuracy();
+        return distance < includingArea;
     }
 
     public static int indexOfIncludedInRepresentMeasurement(Location exploreLocation, List<RepresentMeasurement> representMeasurementList) {
