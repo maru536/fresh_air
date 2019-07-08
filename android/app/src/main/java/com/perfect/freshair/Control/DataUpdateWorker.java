@@ -1,9 +1,12 @@
 package com.perfect.freshair.Control;
 
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -19,10 +22,13 @@ import com.perfect.freshair.Controller.GpsController;
 import com.perfect.freshair.DB.MeasurementDBHandler;
 import com.perfect.freshair.Model.Measurement;
 import com.perfect.freshair.Model.Dust;
+import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
 import com.perfect.freshair.Utils.MyBLEPacketUtilis;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class DataUpdateWorker extends Worker {
@@ -83,14 +89,13 @@ public class DataUpdateWorker extends Worker {
         super(context, params);
         measurementDBHandler = new MeasurementDBHandler(getApplicationContext());
         gpsController = new GpsController(getApplicationContext());
-        //gpsUtils = new GpsController(getApplicationContext());
     }
 
     @NonNull
     @Override
     public Result doWork() {
         Log.i(this.toString(), "working");
-        /*SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getApplicationContext().getString(R.string.my_preference_ble_file_key), Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getApplicationContext().getString(R.string.my_preference_ble_file_key), Context.MODE_PRIVATE);
         String defaultValue = "none";
         String deviceAddr = sharedPreferences.getString(getApplicationContext().getString(R.string.my_preference_ble_addr_key), defaultValue);
 
@@ -110,13 +115,6 @@ public class DataUpdateWorker extends Worker {
                 Log.i(this.toString(), "bluetooth is not enabled or supported.");
             }
         }
-        */
-
-        init();
-        Random random = new Random();
-        receivedDust = new Dust(random.nextInt(150), random.nextInt(150));
-        isDustReceive = true;
-        gpsController.requestGPS(locationCallback);
 
         return Result.success();
     }

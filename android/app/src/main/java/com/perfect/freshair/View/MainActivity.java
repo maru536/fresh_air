@@ -373,8 +373,9 @@ public class MainActivity extends AppCompatActivity {
         String defaultValue = "none";
         String deviceAddr = sharedPreferences.getString(getApplicationContext().getString(R.string.my_preference_ble_addr_key), defaultValue);
 
-        //if(blueToothUtils.getBLEEnabled() && !deviceAddr.equals(defaultValue))
-        if (true)
+
+        //if (true)
+        if(blueToothUtils.getBLEEnabled() && !deviceAddr.equals(defaultValue))
         {
             OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(DataUpdateWorker.class).build();
             WorkManager.getInstance().enqueueUniqueWork(myUniqueWorkName, ExistingWorkPolicy.KEEP, oneTimeWorkRequest);
@@ -389,8 +390,8 @@ public class MainActivity extends AppCompatActivity {
         String defaultValue = "none";
         String deviceAddr = sharedPreferences.getString(getApplicationContext().getString(R.string.my_preference_ble_addr_key), defaultValue);
 
-        //if (!blueToothUtils.getBLEEnabled() || deviceAddr.equals(defaultValue) && strPublicDustValue.equals("none")) {
-        if (false) {
+        //if (false) {
+        if (!blueToothUtils.getBLEEnabled() || deviceAddr.equals(defaultValue) && strPublicDustValue.equals("none")) {
             textDust.setVisibility(View.INVISIBLE);
             textNoDevice.setVisibility(View.VISIBLE);
             textNoValue.setVisibility(View.INVISIBLE);
