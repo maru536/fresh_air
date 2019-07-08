@@ -236,6 +236,18 @@ public class DustApiController {
 
     }
 
+    @GetMapping("1.0/yesterdayDustMap")
+    public Response yesterdayDustMap(@RequestHeader String userId) {
+        long currentTime = System.currentTimeMillis();
+        List<RepresentDustWithLocation> allRepresentDustLocation = DustWithLocationUtils.representDustWithLocation(queryDayDustByUserId(currentTime - TimeContract.A_DAY, userId));
+
+        if (allRepresentDustLocation.size() > 0) 
+            return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
+        
+        else 
+            return new Response(404, "There is no dust data");
+    }
+
     private void setChartData(long dayTime, int endHour, List<DustWithLocationDAO> dustList, List<Integer> pm100List,
             List<Integer> pm25List, List<Integer> hourXAxis) {
         int sumPm100 = 0;

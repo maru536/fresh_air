@@ -4,14 +4,11 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -35,7 +32,7 @@ import com.perfect.freshair.Utils.PreferencesUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class TodayMapActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     List<RepresentDustWithLocation> mAllRepresentDustWithLocationList;
     private float mZoom = 16.0f;
@@ -44,7 +41,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_app_info);
+        setContentView(R.layout.activity_today_map);
 
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
@@ -116,28 +113,35 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
             });
 
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(37.5281761, 127.0275929)));
+
+
             serverInterface.todayDustMap(PreferencesUtils.getUser(getApplicationContext()), new ResponseDustMapCallback() {
                 @Override
                 public void onResponse(int code, String message, JsonArray representDustWithLocationList) {
-                    mAllRepresentDustWithLocationList = new ArrayList<>();
-                    for (JsonElement exploreElem : representDustWithLocationList) {
-                        JsonObject representDustWithLocation = JsonUtils.getAsJsonObject(exploreElem);
-                        mAllRepresentDustWithLocationList.add(new RepresentDustWithLocation(representDustWithLocation));
-                    }
+                    if (representDustWithLocationList != null) {
+                        mAllRepresentDustWithLocationList = new ArrayList<>();
+                        for (JsonElement exploreElem : representDustWithLocationList) {
+                            JsonObject representDustWithLocation = JsonUtils.getAsJsonObject(exploreElem);
+                            mAllRepresentDustWithLocationList.add(new RepresentDustWithLocation(representDustWithLocation));
+                        }
 
-                    LatLng previousPositon = null;
-                    for (RepresentDustWithLocation representDustWithLocation : mAllRepresentDustWithLocationList) {
-                        addCircle(representDustWithLocation);
+                        LatLng previousPositon = null;
+                        for (RepresentDustWithLocation representDustWithLocation : mAllRepresentDustWithLocationList) {
+                            addCircle(representDustWithLocation);
 
-                        if (previousPositon != null)
-                            addLine(previousPositon, representDustWithLocation.getCenterPosition());
-                        previousPositon = representDustWithLocation.getCenterPosition();
-                    }
+                            if (previousPositon != null)
+                                addLine(previousPositon, representDustWithLocation.getCenterPosition());
+                            previousPositon = representDustWithLocation.getCenterPosition();
+                        }
 
-                    if (mAllRepresentDustWithLocationList.size() > 0) {
-                        RepresentDustWithLocation latestDustWithLocation = mAllRepresentDustWithLocationList.get(mAllRepresentDustWithLocationList.size() - 1);
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latestDustWithLocation.getCenterPosition(), mZoom));
+                        if (mAllRepresentDustWithLocationList.size() > 0) {
+                            RepresentDustWithLocation latestDustWithLocation = mAllRepresentDustWithLocationList.get(mAllRepresentDustWithLocationList.size() - 1);
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latestDustWithLocation.getCenterPosition(), mZoom));
+                        }
                     }
+                    else
+                        Toast.makeText(getApplicationContext(), "미세먼지 데이터가 없습니다.", Toast.LENGTH_LONG).show();
                 }
             });
         }

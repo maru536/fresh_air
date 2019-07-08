@@ -21,12 +21,15 @@ public interface DustApi {
                             @Header("passwd") String passwd);
 
 
-    @POST("1.0/syncUserDust")
-    Call<JsonObject> syncUserDust(@Body JsonObject address);
+    @POST("1.0/publicDust")
+    Call<JsonObject> getPublicDust(@Body JsonObject address);
 
     @GET("1.0/syncUserDust")
     Call<JsonObject> syncUserDust(@Header("userId") String userId);
 
     @GET("1.0/todayDustMap")
     Call<JsonObject> todayDustMap(@Header("userId") String userId);
+
+    @GET("1.0/yesterdayDustMap")
+    Call<JsonObject> yesterdayDustMap(@Header("userId") String userId);
 }

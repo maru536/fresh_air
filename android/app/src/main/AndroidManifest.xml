@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.perfect.freshair">
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality.
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality. 
     -->
     <permission
-        android:name="com.perfect.freshair.View.MapActivity.locationapi.maps.permission.MAPS_RECEIVE"
+        android:name="com.perfect.freshair.View.TodayMapActivity.locationapi.maps.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" /> <!-- bluetooth permission -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -40,8 +38,11 @@
         android:supportsRtl="true"
         android:theme="@style/MyAppTheme"
         android:usesCleartextTraffic="true">
-        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
+        <activity android:name=".View.YesterdayMapActivity"></activity>
 
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -54,7 +55,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".View.MapActivity" />
+        <activity android:name=".View.TodayMapActivity" />
         <activity android:name=".View.DeviceRegisterActivity" />
         <activity android:name=".View.MainActivity" />
         <activity android:name=".View.SignInActivity">

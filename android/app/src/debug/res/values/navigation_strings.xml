@@ -4,6 +4,7 @@
     <string-array name="nav_strings">
         <item>디바이스 등록</item>
         <item>로그아웃</item>
-        <item>지도</item>
+        <item>오늘 미세지도</item>
+        <item>어제 미세지도</item>
     </string-array>
 </resources>

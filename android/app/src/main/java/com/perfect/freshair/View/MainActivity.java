@@ -187,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
         l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
         l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
 
-
         /*
         updateThread = new Thread(new Runnable() {
             @Override
@@ -212,12 +211,10 @@ public class MainActivity extends AppCompatActivity {
         updateThread.start();
         */
 
-
         WorkManager.getInstance().cancelAllWork();
         saveRequest =
                 new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES).addTag(myUniqueWorkName).build();
         WorkManager.getInstance().enqueue(saveRequest);
-
 
         //dust information
         int tempMajor = 30; // have to get the value from local database
@@ -455,9 +452,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         //WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.REPLACE, saveRequest);
-
     }
 
     @Override

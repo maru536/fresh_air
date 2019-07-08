@@ -8,9 +8,10 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.perfect.freshair.Utils.PreferencesUtils;
-import com.perfect.freshair.View.MapActivity;
+import com.perfect.freshair.View.TodayMapActivity;
 import com.perfect.freshair.View.DeviceRegisterActivity;
 import com.perfect.freshair.View.SignInActivity;
+import com.perfect.freshair.View.YesterdayMapActivity;
 
 public class DrawerItemClickListener implements ListView.OnItemClickListener {
 
@@ -32,8 +33,11 @@ public class DrawerItemClickListener implements ListView.OnItemClickListener {
                 activity.finish();
                 activity.startActivity(new Intent(activity.getApplicationContext(), SignInActivity.class));
                 break;
-            case 2://맵
-                activity.startActivity(new Intent(activity.getApplicationContext(), MapActivity.class));
+            case 2://오늘 미세지도
+                activity.startActivity(new Intent(activity.getApplicationContext(), TodayMapActivity.class));
+                break;
+            case 3://어제 미세지도
+                activity.startActivity(new Intent(activity.getApplicationContext(), YesterdayMapActivity.class));
                 break;
         }
     }

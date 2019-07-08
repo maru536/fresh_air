@@ -101,7 +101,7 @@ public class DustServerInterface {
         address.addProperty("levelOne", addressLevelOne);
         address.addProperty("levelTwo", addressLevelTwo);
 
-        Call<JsonObject> request = gpsApi.syncUserDust(address);
+        Call<JsonObject> request = gpsApi.getPublicDust(address);
         request.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
@@ -138,7 +138,32 @@ public class DustServerInterface {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 JsonObject body = response.body();
-                callback.onResponse(body.get("code").getAsInt(), body.get("message").getAsString(), body.get("representDustWithLocationList").getAsJsonArray());
+                try {
+                    callback.onResponse(body.get("code").getAsInt(), body.get("message").getAsString(), body.get("representDustWithLocationList").getAsJsonArray());
+                } catch (Exception e) {
+                    callback.onResponse(404, "", null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> _call, Throwable _t) {
+            }
+        });
+    }
+
+    public void yesterdayDustMap(String userId, final ResponseDustMapCallback callback) {
+        DustApi gpsApi = mRetrofit.create(DustApi.class);
+
+        Call<JsonObject> request = gpsApi.yesterdayDustMap(userId);
+        request.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                JsonObject body = response.body();
+                try {
+                    callback.onResponse(body.get("code").getAsInt(), body.get("message").getAsString(), body.get("representDustWithLocationList").getAsJsonArray());
+                } catch (Exception e) {
+                    callback.onResponse(404, "", null);
+                }
             }
 
             @Override
