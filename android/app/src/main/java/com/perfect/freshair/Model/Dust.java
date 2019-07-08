@@ -4,6 +4,7 @@ import android.content.ContentValues;
 
 import com.google.gson.JsonObject;
 import com.perfect.freshair.DB.MeasurementDBHandler;
+import com.perfect.freshair.Utils.JsonUtils;
 
 public class Dust {
     private int pm25 = 0;
@@ -12,6 +13,11 @@ public class Dust {
     public Dust(int pm25, int pm100) {
         this.pm25 = pm25;
         this.pm100 = pm100;
+    }
+
+    public Dust(JsonObject dust) {
+        this.pm100 = JsonUtils.getAsInt(dust.get(Key.PM100.getKey()), -1);
+        this.pm25 = JsonUtils.getAsInt(dust.get(Key.PM25.getKey()), -1);
     }
 
     public int getPm25() {
@@ -38,9 +44,21 @@ public class Dust {
     public JsonObject toJsonObject() {
         JsonObject jsonObject = new JsonObject();
 
-        jsonObject.addProperty("pm100", this.pm100);
-        jsonObject.addProperty("pm25", this.pm25);
+        jsonObject.addProperty(Key.PM100.getKey(), this.pm100);
+        jsonObject.addProperty(Key.PM25.getKey(), this.pm25);
 
         return jsonObject;
+    }
+
+    public enum Key {
+        PM100("pm100"), PM25("pm25");
+        private String key;
+        Key(String key) {
+            this.key = key;
+        }
+
+        public String getKey() {
+            return key;
+        }
     }
 }

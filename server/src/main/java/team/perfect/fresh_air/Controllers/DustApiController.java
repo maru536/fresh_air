@@ -28,17 +28,20 @@ import team.perfect.fresh_air.DAO.AddressPK;
 import team.perfect.fresh_air.DAO.Air;
 import team.perfect.fresh_air.DAO.Dust;
 import team.perfect.fresh_air.DAO.DustWithLocationDAO;
-import team.perfect.fresh_air.DAO.UserDust;
+import team.perfect.fresh_air.DAO.UserLatestDust;
+import team.perfect.fresh_air.Models.RepresentDustWithLocation;
 import team.perfect.fresh_air.Models.Response;
 import team.perfect.fresh_air.Models.ResponseAir;
 import team.perfect.fresh_air.Models.ResponseCoaching;
 import team.perfect.fresh_air.Models.ResponseDust;
 import team.perfect.fresh_air.Models.ResponseDustList;
-import team.perfect.fresh_air.Models.ResponseUserDust;
+import team.perfect.fresh_air.Models.ResponseRepresentDustWithLocation;
+import team.perfect.fresh_air.Models.ResponseUserLatestDust;
 import team.perfect.fresh_air.Repository.AirRepository;
 import team.perfect.fresh_air.Repository.DustWithLocationRepository;
 import team.perfect.fresh_air.Utils.ChartUtils;
 import team.perfect.fresh_air.Utils.CoachingUtils;
+import team.perfect.fresh_air.Utils.DustWithLocationUtils;
 
 @RestController
 public class DustApiController {
@@ -63,7 +66,7 @@ public class DustApiController {
         Optional<DustWithLocationDAO> latestDust = this.dustWithLocationRepository.findFirstByUserIdOrderByTimeDesc(userId);
 
         if (latestDust.isPresent())
-            return new ResponseUserDust(200, "Success", new UserDust(userId, latestDust.get().getPm100(), latestDust.get().getPm25()));
+            return new ResponseUserLatestDust(200, "Success", new UserLatestDust(userId, latestDust.get().getTime(), latestDust.get().getPm100(), latestDust.get().getPm25()));
         else
             return new Response(404, "There is no dust data");
     }
@@ -125,8 +128,8 @@ public class DustApiController {
                 }
             }
 
-            return new ResponseUserDust(200, "Success",
-                    new UserDust(userId, sumPm100 / countPm100, sumPm25 / countPm25));
+            return new ResponseUserLatestDust(200, "Success",
+                    new UserLatestDust(userId, -1L, sumPm100 / countPm100, sumPm25 / countPm25));
         } else
             return new Response(404, "There is no dust data");
     }
@@ -163,7 +166,7 @@ public class DustApiController {
                 avgPm25 = sumPm25 / countPm25;
 
             if (avgPm25 > 0 || avgPm100 > 0) {
-                return new ResponseUserDust(200, "Success", new UserDust(userId, avgPm100, avgPm25));
+                return new ResponseUserLatestDust(200, "Success", new UserLatestDust(userId, -1L, avgPm100, avgPm25));
             }
         }
 
@@ -218,6 +221,19 @@ public class DustApiController {
         }
 
         return new Response(404, "There is no dust data");
+    }
+
+    @GetMapping("1.0/todayDustMap")
+    public Response todayDustMap(@RequestHeader String userId) {
+        long currentTime = System.currentTimeMillis();
+        List<RepresentDustWithLocation> allRepresentDustLocation = DustWithLocationUtils.representDustWithLocation(queryTodayDustByUserId(currentTime, userId));
+
+        if (allRepresentDustLocation.size() > 0) 
+            return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
+        
+        else 
+            return new Response(404, "There is no dust data");
+
     }
 
     private void setChartData(long dayTime, int endHour, List<DustWithLocationDAO> dustList, List<Integer> pm100List,

@@ -21,64 +21,36 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.perfect.freshair.Control.DrawerItemClickListener;
-import com.perfect.freshair.Control.NavArrayAdapter;
-import com.perfect.freshair.DB.MeasurementDBHandler;
-import com.perfect.freshair.Model.Measurement;
-import com.perfect.freshair.Model.RepresentMeasurement;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.perfect.freshair.API.DustServerInterface;
+import com.perfect.freshair.Callback.ResponseDustMapCallback;
+import com.perfect.freshair.Model.RepresentDustWithLocation;
 import com.perfect.freshair.R;
+import com.perfect.freshair.Utils.JsonUtils;
 import com.perfect.freshair.Utils.MeasurementUtils;
+import com.perfect.freshair.Utils.PreferencesUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class AppInfoActivity extends AppCompatActivity implements OnMapReadyCallback {
-    private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
-    private NavArrayAdapter arrayAdapter;
-    private MeasurementDBHandler measurementDBHandler;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private String[] mNavigationMenu;
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
-    List<RepresentMeasurement> allRepresentMeasurementList;
+    List<RepresentDustWithLocation> mAllRepresentDustWithLocationList;
     private float mZoom = 16.0f;
+    DustServerInterface serverInterface = new DustServerInterface();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_info);
 
+        //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.round_menu_24);
-
-        measurementDBHandler = new MeasurementDBHandler(getApplicationContext());
-
-        //drawer view
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.map_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mNavigationMenu = getResources().getStringArray(R.array.nav_strings);
-        arrayAdapter = new NavArrayAdapter(this);
-        for (String menu : mNavigationMenu) {
-            arrayAdapter.addItem(menu);
-        }
-        mDrawerList.setAdapter(arrayAdapter);
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener(this));
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.nav_drawer_open, R.string.nav_drawer_close) {
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-        };
-
-        mDrawerLayout.addDrawerListener(mDrawerToggle);
+        getSupportActionBar().setTitle(getResources().getStringArray(R.array.nav_strings)[2]);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -86,15 +58,15 @@ public class AppInfoActivity extends AppCompatActivity implements OnMapReadyCall
 
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle.onOptionsItemSelected(item))
-            return true;
-
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
-
 
     /**
      * Manipulates the map once available.
@@ -128,49 +100,58 @@ public class AppInfoActivity extends AppCompatActivity implements OnMapReadyCall
                 return;
             }
 
+
             mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
                 @Override
                 public void onCircleClick(Circle circle) {
                     Location circleLocation = new Location("temp");
                     circleLocation.setLatitude(circle.getCenter().latitude);
                     circleLocation.setLongitude(circle.getCenter().longitude);
-                    int includingIndex = MeasurementUtils.indexOfIncludedInRepresentMeasurement(circleLocation, allRepresentMeasurementList);
+                    int includingIndex = MeasurementUtils.indexOfIncludedInRepresentDustWithLocation(circle.getCenter(), mAllRepresentDustWithLocationList);
 
                     if (includingIndex > 0) {
-                        addLine(allRepresentMeasurementList.get(includingIndex - 1).getCenterPosition(), allRepresentMeasurementList.get(includingIndex).getCenterPosition());
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(allRepresentMeasurementList.get(includingIndex - 1).getCenterPosition(), mZoom));
+                        addLine(mAllRepresentDustWithLocationList.get(includingIndex - 1).getCenterPosition(), mAllRepresentDustWithLocationList.get(includingIndex).getCenterPosition());
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mAllRepresentDustWithLocationList.get(includingIndex - 1).getCenterPosition(), mZoom));
                     }
                 }
             });
 
-            List<Measurement> allMeasurement = this.measurementDBHandler.searchAll();
-            LatLng previousPositon = null;
-            allRepresentMeasurementList = MeasurementUtils.representMeasurement(allMeasurement);
+            serverInterface.todayDustMap(PreferencesUtils.getUser(getApplicationContext()), new ResponseDustMapCallback() {
+                @Override
+                public void onResponse(int code, String message, JsonArray representDustWithLocationList) {
+                    mAllRepresentDustWithLocationList = new ArrayList<>();
+                    for (JsonElement exploreElem : representDustWithLocationList) {
+                        JsonObject representDustWithLocation = JsonUtils.getAsJsonObject(exploreElem);
+                        mAllRepresentDustWithLocationList.add(new RepresentDustWithLocation(representDustWithLocation));
+                    }
 
-            for (RepresentMeasurement exploreRepresentMeasurement : allRepresentMeasurementList) {
-                addCircle(exploreRepresentMeasurement);
+                    LatLng previousPositon = null;
+                    for (RepresentDustWithLocation representDustWithLocation : mAllRepresentDustWithLocationList) {
+                        addCircle(representDustWithLocation);
 
-                if (previousPositon != null)
-                    addLine(previousPositon, exploreRepresentMeasurement.getCenterPosition());
-                previousPositon = exploreRepresentMeasurement.getCenterPosition();
-            }
+                        if (previousPositon != null)
+                            addLine(previousPositon, representDustWithLocation.getCenterPosition());
+                        previousPositon = representDustWithLocation.getCenterPosition();
+                    }
 
-            if (allRepresentMeasurementList.size() > 0) {
-                RepresentMeasurement lastMeasurement = allRepresentMeasurementList.get(allRepresentMeasurementList.size() - 1);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastMeasurement.getCenterPosition(), mZoom));
-            }
+                    if (mAllRepresentDustWithLocationList.size() > 0) {
+                        RepresentDustWithLocation latestDustWithLocation = mAllRepresentDustWithLocationList.get(mAllRepresentDustWithLocationList.size() - 1);
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latestDustWithLocation.getCenterPosition(), mZoom));
+                    }
+                }
+            });
         }
     }
 
-    private void addCircle(RepresentMeasurement representMeasurementmeasurement) {
-        int circleColor = transDustToColor(representMeasurementmeasurement.getAveragePm100());
+    private void addCircle(RepresentDustWithLocation representDustWithLocation) {
+        int circleColor = transDustToColor(representDustWithLocation.getDust().getPm100());
 
         mMap.addCircle(new CircleOptions()
-            .center(representMeasurementmeasurement.getCenterPosition())
-            .radius(MeasurementUtils.includingArea)
-            .strokeColor(circleColor)
-            .fillColor(circleColor)
-            .clickable(true));
+                .center(representDustWithLocation.getCenterPosition())
+                .radius(MeasurementUtils.includingArea)
+                .strokeColor(circleColor)
+                .fillColor(circleColor)
+                .clickable(true));
     }
 
     private void addLine(LatLng start, LatLng end) {

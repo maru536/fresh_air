@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.perfect.freshair.Callback.ResponseBodyCallback;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Callback.ResponseDustCallback;
+import com.perfect.freshair.Callback.ResponseDustMapCallback;
 import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.Model.Measurement;
 
@@ -121,6 +122,23 @@ public class DustServerInterface {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 callback.onResponseBodyCallback(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> _call, Throwable _t) {
+            }
+        });
+    }
+
+    public void todayDustMap(String userId, final ResponseDustMapCallback callback) {
+        DustApi gpsApi = mRetrofit.create(DustApi.class);
+
+        Call<JsonObject> request = gpsApi.todayDustMap(userId);
+        request.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                JsonObject body = response.body();
+                callback.onResponse(body.get("code").getAsInt(), body.get("message").getAsString(), body.get("representDustWithLocationList").getAsJsonArray());
             }
 
             @Override

@@ -55,6 +55,7 @@ public class Measurement {
         jsonObject.addProperty("pm100", this.dust.getPm100());
         jsonObject.addProperty("pm25", this.dust.getPm25());
         jsonObject.addProperty("provider", this.location.getProvider());
+        jsonObject.addProperty("accuracy", this.location.getAccuracy());
         jsonObject.addProperty("latitude", this.location.getLatitude());
         jsonObject.addProperty("longitude", this.location.getLongitude());
 

@@ -26,4 +26,7 @@ public interface DustApi {
 
     @GET("1.0/syncUserDust")
     Call<JsonObject> syncUserDust(@Header("userId") String userId);
+
+    @GET("1.0/todayDustMap")
+    Call<JsonObject> todayDustMap(@Header("userId") String userId);
 }

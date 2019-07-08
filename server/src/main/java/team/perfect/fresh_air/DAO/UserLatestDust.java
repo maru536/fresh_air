@@ -1,13 +1,15 @@
 package team.perfect.fresh_air.DAO;
 
-public class UserDust {
+public class UserLatestDust {
     private String userId; 
+    private long time;
     private int pm100;
     private int pm25;
 
 
-    public UserDust(String userId, int pm100, int pm25) {
+    public UserLatestDust(String userId, long time, int pm100, int pm25) {
         this.userId = userId;
+        this.time = time;
         this.pm100 = pm100;
         this.pm25 = pm25;
     }
@@ -34,5 +36,13 @@ public class UserDust {
 
     public void setPm25(int pm25) {
         this.pm25 = pm25;
+    }
+
+    public long getTime() {
+        return this.time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }
