@@ -20,19 +20,22 @@ public class DustWithLocationDAO {
     private int pm100;
     private int pm25;
     private String provider;
+    private float accuracy;
     private double latitude;
     private double longitude;
 
     public DustWithLocationDAO() {
-        
+
     }
 
-    public DustWithLocationDAO(String userId, long time, int pm100, int pm25, String provider, double latitude, double longitude) {
+    public DustWithLocationDAO(String userId, long time, int pm100, int pm25, String provider, float accuracy,
+            double latitude, double longitude) {
         this.userId = userId;
         this.time = time;
         this.pm100 = pm100;
         this.pm25 = pm25;
         this.provider = provider;
+        this.accuracy = accuracy;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -41,11 +44,12 @@ public class DustWithLocationDAO {
         if (dustWithLocation != null) {
             this.userId = JsonUtils.getAsString(dustWithLocation.get(Key.USER_ID.getKey()), "");
             this.time = JsonUtils.getAsLong(dustWithLocation.get(Key.TIME.getKey()), -1L);
-            
+
             this.pm100 = JsonUtils.getAsInt(dustWithLocation.get(Key.PM100.getKey()), -1);
             this.pm25 = JsonUtils.getAsInt(dustWithLocation.get(Key.PM25.getKey()), -1);
 
             this.provider = JsonUtils.getAsString(dustWithLocation.get(Key.PROVIDER.getKey()), "");
+            this.accuracy = JsonUtils.getAsFloat(dustWithLocation.get(Key.ACCURACY.getKey()), -1.0f);
             this.latitude = JsonUtils.getAsDouble(dustWithLocation.get(Key.LATITUDE.getKey()), 0.0);
             this.longitude = JsonUtils.getAsDouble(dustWithLocation.get(Key.LONGITUDE.getKey()), 0.0);
         }
@@ -107,6 +111,14 @@ public class DustWithLocationDAO {
         this.longitude = longitude;
     }
 
+    public float getAccuracy() {
+        return this.accuracy;
+    }
+
+    public void setAccuracy(float accuracy) {
+        this.accuracy = accuracy;
+    }
+
     public JsonObject toJsonObject() {
         JsonObject dustWithLocation = new JsonObject();
 
@@ -115,6 +127,7 @@ public class DustWithLocationDAO {
         dustWithLocation.addProperty(Key.PM100.getKey(), this.pm100);
         dustWithLocation.addProperty(Key.PM25.getKey(), this.pm25);
         dustWithLocation.addProperty(Key.PROVIDER.getKey(), this.provider);
+        dustWithLocation.addProperty(Key.ACCURACY.getKey(), this.accuracy);
         dustWithLocation.addProperty(Key.LATITUDE.getKey(), this.latitude);
         dustWithLocation.addProperty(Key.LONGITUDE.getKey(), this.longitude);
 
@@ -122,10 +135,11 @@ public class DustWithLocationDAO {
     }
 
     public enum Key {
-        USER_ID("userId"), TIME("time"), DUST("dust"), LOCATION("location"), 
-        PM100("pm100"), PM25("pm25"), PROVIDER("provider"), LATITUDE("latitude"), LONGITUDE("longitude");
+        USER_ID("userId"), TIME("time"), DUST("dust"), LOCATION("location"), PM100("pm100"), PM25("pm25"),
+        PROVIDER("provider"), ACCURACY("accuracy"), LATITUDE("latitude"), LONGITUDE("longitude");
 
         private String key;
+
         Key(String key) {
             this.key = key;
         }

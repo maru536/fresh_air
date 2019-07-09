@@ -18,17 +18,17 @@ import team.perfect.fresh_air.Repository.DustWithLocationRepository;
 @Component
 public class AirSyncController {
     private static final long API_CALL_INTERVAL = 5000;
-    
+
     @Autowired
     private AirRepository airRepository;
     @Autowired
     private DustWithLocationRepository dustWithLocationRepository;
-    
+
     @Scheduled(cron = "0 30 * * * *")
     public void syncLevelTwoAir() {
         AirServerInterface airServer = new AirServerInterface();
 
-        new Thread(new Runnable(){
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
@@ -46,8 +46,8 @@ public class AirSyncController {
     @Scheduled(cron = "0 35 * * * *")
     public void syncLevelOneAir() {
         AirServerInterface airServer = new AirServerInterface();
- 
-        new Thread(new Runnable(){
+
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 for (AirItemCodeContract itemCode : AirItemCodeContract.values()) {
@@ -71,15 +71,15 @@ public class AirSyncController {
         int hourOfDay = currentDate.get(Calendar.HOUR_OF_DAY);
         TestLocationContract location;
 
-        if (hourOfDay < 8) 
+        if (hourOfDay < 8)
             location = TestLocationContract.Home;
         else if (hourOfDay < 16)
             location = TestLocationContract.SCHOOL;
         else
             location = TestLocationContract.WORK;
-        
-        DustWithLocationDAO dust = new DustWithLocationDAO("testuser", currentTime, 
-            random.nextInt(100), random.nextInt(150), "GPS", location.getLatitude(), location.getLongitude());
+
+        DustWithLocationDAO dust = new DustWithLocationDAO("testuser", currentTime, random.nextInt(100),
+                random.nextInt(150), "GPS", 10.0f, location.getLatitude(), location.getLongitude());
         this.dustWithLocationRepository.save(dust);
     }
 }

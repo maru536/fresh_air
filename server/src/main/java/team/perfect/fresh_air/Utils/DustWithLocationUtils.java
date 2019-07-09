@@ -10,37 +10,47 @@ import team.perfect.fresh_air.Models.RepresentDustWithLocation;
 public class DustWithLocationUtils {
     public static final float includingArea = 100.0f;
 
-    public static List<RepresentDustWithLocation> representDustWithLocation(List<DustWithLocationDAO> allDustWithLocation) {
+    public static List<RepresentDustWithLocation> representDustWithLocation(
+            List<DustWithLocationDAO> allDustWithLocation) {
         List<RepresentDustWithLocation> representDustWithLocationList = new ArrayList<>();
         if (allDustWithLocation != null) {
             for (DustWithLocationDAO exploreDustWithLocation : allDustWithLocation) {
-                if (representDustWithLocationList.size() == 0)
-                    representDustWithLocationList.add(new RepresentDustWithLocation());
-                else {
-                    if (!isIncludedInRepresentDustWithLocation(new Position(exploreDustWithLocation), representDustWithLocationList.get(representDustWithLocationList.size()-1))) {
-                        int includingRepresentDustWithLocationIndex = indexOfIncludedInRepresentDustWithLocation(new Position(exploreDustWithLocation), representDustWithLocationList);
-                        if (includingRepresentDustWithLocationIndex >= 0) {
-                            RepresentDustWithLocation includingRepresentDustWithLocation = representDustWithLocationList.get(includingRepresentDustWithLocationIndex);
-                            representDustWithLocationList.remove(includingRepresentDustWithLocation);
-                            representDustWithLocationList.add(includingRepresentDustWithLocation);
+                if (exploreDustWithLocation.getAccuracy() < includingArea) {
+                    if (representDustWithLocationList.size() == 0)
+                        representDustWithLocationList.add(new RepresentDustWithLocation());
+                    else {
+                        if (!isIncludedInRepresentDustWithLocation(new Position(exploreDustWithLocation),
+                                representDustWithLocationList.get(representDustWithLocationList.size() - 1))) {
+                            int includingRepresentDustWithLocationIndex = indexOfIncludedInRepresentDustWithLocation(
+                                    new Position(exploreDustWithLocation), representDustWithLocationList);
+                            if (includingRepresentDustWithLocationIndex >= 0) {
+                                RepresentDustWithLocation includingRepresentDustWithLocation = representDustWithLocationList
+                                        .get(includingRepresentDustWithLocationIndex);
+                                representDustWithLocationList.remove(includingRepresentDustWithLocation);
+                                representDustWithLocationList.add(includingRepresentDustWithLocation);
+                            } else
+                                representDustWithLocationList.add(new RepresentDustWithLocation());
                         }
-                        else
-                            representDustWithLocationList.add(new RepresentDustWithLocation());
                     }
-                }
 
-                representDustWithLocationList.get(representDustWithLocationList.size()-1).addDustWithLocation(exploreDustWithLocation);
+                    representDustWithLocationList.get(representDustWithLocationList.size() - 1)
+                            .addDustWithLocation(exploreDustWithLocation);
+                }
             }
         }
 
         return representDustWithLocationList;
     }
 
-    private static boolean isIncludedInRepresentDustWithLocation(Position explorePosition, RepresentDustWithLocation representDustWithLocation) {
-        return calculateDistance(explorePosition.getLatitude(), explorePosition.getLongitude(), representDustWithLocation.getCenterPosition().getLatitude(), representDustWithLocation.getCenterPosition().getLongitude()) < includingArea;
+    private static boolean isIncludedInRepresentDustWithLocation(Position explorePosition,
+            RepresentDustWithLocation representDustWithLocation) {
+        return calculateDistance(explorePosition.getLatitude(), explorePosition.getLongitude(),
+                representDustWithLocation.getCenterPosition().getLatitude(),
+                representDustWithLocation.getCenterPosition().getLongitude()) < includingArea;
     }
 
-    public static int indexOfIncludedInRepresentDustWithLocation(Position explorePosition, List<RepresentDustWithLocation> representDustWithLocationList) {
+    public static int indexOfIncludedInRepresentDustWithLocation(Position explorePosition,
+            List<RepresentDustWithLocation> representDustWithLocationList) {
         for (int index = 0; index < representDustWithLocationList.size(); index++) {
             RepresentDustWithLocation exploreRepresentDustWithLocation = representDustWithLocationList.get(index);
             if (isIncludedInRepresentDustWithLocation(explorePosition, exploreRepresentDustWithLocation))
@@ -95,35 +105,23 @@ public class DustWithLocationUtils {
             sinSigma = Math.sqrt(sinSqSigma);
             cosSigma = sinU1sinU2 + cosU1cosU2 * cosLambda; // (15)
             sigma = Math.atan2(sinSigma, cosSigma); // (16)
-            double sinAlpha = (sinSigma == 0) ? 0.0 :
-                cosU1cosU2 * sinLambda / sinSigma; // (17)
+            double sinAlpha = (sinSigma == 0) ? 0.0 : cosU1cosU2 * sinLambda / sinSigma; // (17)
             cosSqAlpha = 1.0 - sinAlpha * sinAlpha;
-            cos2SM = (cosSqAlpha == 0) ? 0.0 :
-                cosSigma - 2.0 * sinU1sinU2 / cosSqAlpha; // (18)
+            cos2SM = (cosSqAlpha == 0) ? 0.0 : cosSigma - 2.0 * sinU1sinU2 / cosSqAlpha; // (18)
 
             double uSquared = cosSqAlpha * aSqMinusBSqOverBSq; // defn
             A = 1 + (uSquared / 16384.0) * // (3)
-                (4096.0 + uSquared *
-                 (-768 + uSquared * (320.0 - 175.0 * uSquared)));
+                    (4096.0 + uSquared * (-768 + uSquared * (320.0 - 175.0 * uSquared)));
             double B = (uSquared / 1024.0) * // (4)
-                (256.0 + uSquared *
-                 (-128.0 + uSquared * (74.0 - 47.0 * uSquared)));
-            double C = (f / 16.0) *
-                cosSqAlpha *
-                (4.0 + f * (4.0 - 3.0 * cosSqAlpha)); // (10)
+                    (256.0 + uSquared * (-128.0 + uSquared * (74.0 - 47.0 * uSquared)));
+            double C = (f / 16.0) * cosSqAlpha * (4.0 + f * (4.0 - 3.0 * cosSqAlpha)); // (10)
             double cos2SMSq = cos2SM * cos2SM;
             deltaSigma = B * sinSigma * // (6)
-                (cos2SM + (B / 4.0) *
-                 (cosSigma * (-1.0 + 2.0 * cos2SMSq) -
-                  (B / 6.0) * cos2SM *
-                  (-3.0 + 4.0 * sinSigma * sinSigma) *
-                  (-3.0 + 4.0 * cos2SMSq)));
+                    (cos2SM + (B / 4.0) * (cosSigma * (-1.0 + 2.0 * cos2SMSq)
+                            - (B / 6.0) * cos2SM * (-3.0 + 4.0 * sinSigma * sinSigma) * (-3.0 + 4.0 * cos2SMSq)));
 
-            lambda = L +
-                (1.0 - C) * f * sinAlpha *
-                (sigma + C * sinSigma *
-                 (cos2SM + C * cosSigma *
-                  (-1.0 + 2.0 * cos2SM * cos2SM))); // (11)
+            lambda = L + (1.0 - C) * f * sinAlpha
+                    * (sigma + C * sinSigma * (cos2SM + C * cosSigma * (-1.0 + 2.0 * cos2SM * cos2SM))); // (11)
 
             double delta = (lambda - lambdaOrig) / lambda;
             if (Math.abs(delta) < 1.0e-12) {
