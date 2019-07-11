@@ -10,6 +10,8 @@ import com.perfect.freshair.Callback.ResponseDustMapCallback;
 import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.Model.Measurement;
 
+import java.util.List;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -37,10 +39,12 @@ public class DustServerInterface {
                 .build();
     }
 
-    public void postDust(String _userId, Measurement newMeasurement, final ResponseCallback _callback) {
+    public void postDust(String _userId, Measurement newMeasurement, List<String> address, final ResponseCallback _callback) {
         DustApi dustApi = mRetrofit.create(DustApi.class);
 
         JsonObject requestBody = newMeasurement.toJsonObject();
+        requestBody.addProperty("levelOne", address.get(0));
+        requestBody.addProperty("levelTwo", address.get(1));
 
         Call<JsonObject> request = dustApi.postDust(_userId, requestBody);
         request.enqueue(new Callback<JsonObject>() {

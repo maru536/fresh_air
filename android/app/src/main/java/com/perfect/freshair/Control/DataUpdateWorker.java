@@ -7,6 +7,8 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -27,8 +29,10 @@ import com.perfect.freshair.Utils.BlueToothUtils;
 import com.perfect.freshair.Utils.MyBLEPacketUtilis;
 import com.perfect.freshair.Utils.PreferencesUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class DataUpdateWorker extends Worker {
@@ -111,10 +115,17 @@ public class DataUpdateWorker extends Worker {
                 ScanSettings scanSettings = scanSettingsBuilder.build();
                 init();
                 blueToothUtils.scanLeDevice(true, filters, scanSettings, scanCallback);
+
+                return Result.success();
             } else {
                 Log.i(this.toString(), "bluetooth is not enabled or supported.");
             }
         }
+
+        init();
+        isDustReceive = true;
+        receivedDust = new Dust(-1, -1);
+        gpsController.requestGPS(locationCallback);
 
         return Result.success();
     }
@@ -131,19 +142,63 @@ public class DataUpdateWorker extends Worker {
                     serverInterface = new DustServerInterface();
 
                 Log.i(this.toString(), receivedMeasurement.toString());
-                measurementDBHandler.add(receivedMeasurement);
-                serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), receivedMeasurement, responseCallback);
 
-                Intent intent = new Intent();
-                intent.setAction(CommonEnumeration.dataUpdateAction);
-                intent.putExtra("pm100", receivedMeasurement.getDust().getPm100());
-                intent.putExtra("pm25", receivedMeasurement.getDust().getPm25());
-                getApplicationContext().sendBroadcast(intent);
+                final List<Address> list = getCurrentAddress(receivedLocation.getLatitude(), receivedLocation.getLongitude());
+                final ArrayList<String> sidogun = new ArrayList<String>();
+
+                if(list.get(0).getAdminArea() != null)
+                {
+                    sidogun.add(list.get(0).getAdminArea());
+                }else
+                {
+                    sidogun.add(list.get(0).getSubAdminArea());
+                }
+
+                if(list.get(0).getLocality() != null)
+                {
+                    sidogun.add(list.get(0).getLocality());
+                }else
+                {
+                    sidogun.add(list.get(0).getSubLocality());
+                }
+
+                serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), receivedMeasurement, sidogun, responseCallback);
+
+                if (receivedDust.getPm100() >= 0 && receivedDust.getPm25() >= 0) {
+                    measurementDBHandler.add(receivedMeasurement);
+                    Intent intent = new Intent();
+                    intent.setAction(CommonEnumeration.dataUpdateAction);
+                    intent.putExtra("pm100", receivedMeasurement.getDust().getPm100());
+                    intent.putExtra("pm25", receivedMeasurement.getDust().getPm25());
+                    getApplicationContext().sendBroadcast(intent);
+                }
             }
         }
     };
 
     private boolean isAllReceive() {
         return (isDustReceive && isLocationReceive && receivedDust != null && receivedLocation != null);
+    }
+
+    public List<Address> getCurrentAddress(double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+        List<Address> addresses;
+        boolean res = true;
+        try {
+            addresses = geocoder.getFromLocation(
+                    latitude,
+                    longitude,
+                    7);
+        } catch (IOException ioException) {
+            return null;
+        } catch (IllegalArgumentException illegalArgumentException) {
+            return null;
+        }
+
+        if (addresses == null || addresses.size() == 0) {
+            return null;
+        }
+
+        return addresses;
     }
 }

@@ -10,7 +10,7 @@ import team.perfect.fresh_air.Models.RepresentDustWithLocation;
 public class DustWithLocationUtils {
     public static final float includingArea = 100.0f;
 
-    public static List<RepresentDustWithLocation> representDustWithLocation(
+    public static List<RepresentDustWithLocation> representMeasuredDustWithLocation(
             List<DustWithLocationDAO> allDustWithLocation) {
         List<RepresentDustWithLocation> representDustWithLocationList = new ArrayList<>();
         if (allDustWithLocation != null) {
@@ -35,6 +35,38 @@ public class DustWithLocationUtils {
 
                     representDustWithLocationList.get(representDustWithLocationList.size() - 1)
                             .addDustWithLocation(exploreDustWithLocation);
+                }
+            }
+        }
+
+        return representDustWithLocationList;
+    }
+
+    public static List<RepresentDustWithLocation> representAllDustWithLocation(
+            List<DustWithLocationDAO> allDustWithLocation) {
+        List<RepresentDustWithLocation> representDustWithLocationList = new ArrayList<>();
+        if (allDustWithLocation != null) {
+            for (DustWithLocationDAO exploreDustWithLocation : allDustWithLocation) {
+                if (exploreDustWithLocation.getAccuracy() < includingArea) {
+                    if (representDustWithLocationList.size() == 0)
+                        representDustWithLocationList.add(new RepresentDustWithLocation());
+                    else {
+                        if (!isIncludedInRepresentDustWithLocation(new Position(exploreDustWithLocation),
+                                representDustWithLocationList.get(representDustWithLocationList.size() - 1))) {
+                            int includingRepresentDustWithLocationIndex = indexOfIncludedInRepresentDustWithLocation(
+                                    new Position(exploreDustWithLocation), representDustWithLocationList);
+                            if (includingRepresentDustWithLocationIndex >= 0) {
+                                RepresentDustWithLocation includingRepresentDustWithLocation = representDustWithLocationList
+                                        .get(includingRepresentDustWithLocationIndex);
+                                representDustWithLocationList.remove(includingRepresentDustWithLocation);
+                                representDustWithLocationList.add(includingRepresentDustWithLocation);
+                            } else
+                                representDustWithLocationList.add(new RepresentDustWithLocation());
+                        }
+                    }
+
+                    representDustWithLocationList.get(representDustWithLocationList.size() - 1)
+                            .addPublicDustWithLocation(exploreDustWithLocation);
                 }
             }
         }

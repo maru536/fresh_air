@@ -19,6 +19,8 @@ public class DustWithLocationDAO {
     private long time;
     private int pm100;
     private int pm25;
+    private int publicPm100;
+    private int publicPm25;
     private String provider;
     private float accuracy;
     private double latitude;
@@ -119,6 +121,27 @@ public class DustWithLocationDAO {
         this.accuracy = accuracy;
     }
 
+    public int getPublicPm100() {
+        return this.publicPm100;
+    }
+
+    public void setPublicPm100(int publicPm100) {
+        this.publicPm100 = publicPm100;
+    }
+
+    public int getPublicPm25() {
+        return this.publicPm25;
+    }
+
+    public void setPublicPm25(int publicPm25) {
+        this.publicPm25 = publicPm25;
+    }
+
+    public void setPublicAir(Air publicAir) {
+        this.publicPm100 = publicAir.getPm100();
+        this.publicPm25 = publicAir.getPm25();
+    }
+
     public JsonObject toJsonObject() {
         JsonObject dustWithLocation = new JsonObject();
 
@@ -126,6 +149,8 @@ public class DustWithLocationDAO {
         dustWithLocation.addProperty(Key.TIME.getKey(), this.time);
         dustWithLocation.addProperty(Key.PM100.getKey(), this.pm100);
         dustWithLocation.addProperty(Key.PM25.getKey(), this.pm25);
+        dustWithLocation.addProperty(Key.PUBLIC_PM100.getKey(), this.publicPm100);
+        dustWithLocation.addProperty(Key.PUBLIC_PM25.getKey(), this.publicPm25);
         dustWithLocation.addProperty(Key.PROVIDER.getKey(), this.provider);
         dustWithLocation.addProperty(Key.ACCURACY.getKey(), this.accuracy);
         dustWithLocation.addProperty(Key.LATITUDE.getKey(), this.latitude);
@@ -136,6 +161,7 @@ public class DustWithLocationDAO {
 
     public enum Key {
         USER_ID("userId"), TIME("time"), DUST("dust"), LOCATION("location"), PM100("pm100"), PM25("pm25"),
+        PUBLIC_PM100("public_pm100"), PUBLIC_PM25("public_pm25"), 
         PROVIDER("provider"), ACCURACY("accuracy"), LATITUDE("latitude"), LONGITUDE("longitude");
 
         private String key;

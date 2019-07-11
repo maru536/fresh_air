@@ -27,6 +27,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
@@ -41,6 +42,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.perfect.freshair.API.DustServerInterface;
+import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.Callback.ResponseDustCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.Common.PermissionEnumeration;
@@ -54,6 +56,7 @@ import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
 import com.perfect.freshair.Utils.MicroDustUtils;
+import com.perfect.freshair.Utils.PreferencesUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -211,10 +214,9 @@ public class MainActivity extends AppCompatActivity {
         updateThread.start();
         */
 
-        WorkManager.getInstance().cancelAllWork();
         saveRequest =
                 new PeriodicWorkRequest.Builder(DataUpdateWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES).addTag(myUniqueWorkName).build();
-        WorkManager.getInstance().enqueue(saveRequest);
+        WorkManager.getInstance().enqueueUniquePeriodicWork(getString(R.string.APP_BACKGROUND_WORKER_TAG), ExistingPeriodicWorkPolicy.KEEP, saveRequest);
 
         //dust information
         int tempMajor = 30; // have to get the value from local database
@@ -248,9 +250,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                Log.i("GPSUtils", "requestGPS");
-                gpsController.requestGPS(new com.perfect.freshair.Callback.LocationCallback() {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        Log.i("GPSUtils", "requestGPS");
+                        gpsController.requestGPS(new com.perfect.freshair.Callback.LocationCallback() {
                     @Override
                     public void onLocationChanged(Location location) {
                         Log.i("GPSUtils", "onGpsChanged");
@@ -280,6 +282,14 @@ public class MainActivity extends AppCompatActivity {
                                 sidogun.add(list.get(0).getSubLocality());
                             }
 
+                            serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), new Measurement(System.currentTimeMillis(), new Dust(-1, -1), location),
+                                    sidogun, new ResponseCallback() {
+                                @Override
+                                public void responseCallback(int _resultCode) {
+
+                                }
+                            });
+
                             serverInterface.publicDust(sidogun.get(0), sidogun.get(1), new ResponseDustCallback() {
                                 @Override
                                 public void responseDustCallback(int code, Dust dust) {
@@ -290,7 +300,6 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     if(dust != null)
                                     {
-
                                         Log.i("publicDustApi", "PM10: " +dust.getPm100()+ " / PM2.5: " +dust.getPm25());
                                         strPublicDustValue = getPublicDustString(addr, dust.getPm100(), dust.getPm25());
                                         checkDustDisplay();
@@ -490,7 +499,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public List<Address> getCurrentAddress( double latitude, double longitude) {
-
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         List<Address> addresses;
         boolean res = true;
