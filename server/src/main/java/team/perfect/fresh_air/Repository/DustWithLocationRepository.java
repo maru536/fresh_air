@@ -15,7 +15,7 @@ public interface DustWithLocationRepository extends CrudRepository<DustWithLocat
     Optional<DustWithLocationDAO> findLatestDust(@Param("user_id") String user_id);
 
     @Query(value="SELECT * FROM dust_with_location WHERE user_id = :user_id ORDER BY time DESC LIMIT 10", nativeQuery=true)
-    List<DustWithLocationDAO> findTenLatestDust(String userId);
+    List<DustWithLocationDAO> findTenLatestDust(@Param("user_id") String userId);
 
     @Query(value="SELECT * FROM dust_with_location WHERE user_id = :user_id AND pm25 != -1 AND pm100 != -1 AND time >= :start_time AND time <= :end_time", nativeQuery=true)
     List<DustWithLocationDAO> findMeasuredDust(@Param("user_id") String userId, @Param("start_time") long startTime, @Param("end_time") long endTime);
