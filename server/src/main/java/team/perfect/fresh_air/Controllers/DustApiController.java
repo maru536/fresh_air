@@ -68,8 +68,7 @@ public class DustApiController {
 
     @GetMapping("1.0/lastestDust")
     public Response latestDust(@RequestHeader String userId) {
-        Optional<DustWithLocationDAO> latestDust = this.dustWithLocationRepository
-                .findLatestDust(userId);
+        Optional<DustWithLocationDAO> latestDust = this.dustWithLocationRepository.findLatestDust(userId);
 
         if (latestDust.isPresent())
             return new ResponseUserLatestDust(200, "Success", new UserLatestDust(userId, latestDust.get().getTime(),
@@ -91,8 +90,7 @@ public class DustApiController {
     @PostMapping("1.0/coachingDust")
     public Response air(@RequestHeader String userId, @RequestBody JsonObject address) {
         Air publicAir = queryAirByAddress(new AddressPK(address));
-        Optional<DustWithLocationDAO> latestDust = this.dustWithLocationRepository
-                .findLatestDust(userId);
+        Optional<DustWithLocationDAO> latestDust = this.dustWithLocationRepository.findLatestDust(userId);
         String coachingMessage = "";
 
         if (latestDust.isPresent()) {
@@ -126,7 +124,7 @@ public class DustApiController {
         int countPm25 = 0;
         List<DustWithLocationDAO> dustList;
 
-        if (isDeviceUser) 
+        if (isDeviceUser)
             dustList = queryTodayMeasuredDustByUserId(System.currentTimeMillis(), userId);
         else
             dustList = queryTodayAllDustByUserId(System.currentTimeMillis(), userId);
@@ -138,8 +136,7 @@ public class DustApiController {
                 if (isDeviceUser) {
                     pm100 = dust.getPm100();
                     pm25 = dust.getPm25();
-                }
-                else {
+                } else {
                     pm100 = dust.getPublicPm100();
                     pm25 = dust.getPublicPm25();
                 }
@@ -164,7 +161,7 @@ public class DustApiController {
             if (countPm25 > 0)
                 avgPm25 = sumPm25 / countPm25;
 
-            if (avgPm25 > 0 || avgPm100 > 0) 
+            if (avgPm25 > 0 || avgPm100 > 0)
                 return new ResponseUserLatestDust(200, "Success", new UserLatestDust(userId, -1L, avgPm100, avgPm25));
         }
 
@@ -185,7 +182,6 @@ public class DustApiController {
         else
             dustList = queryDayAllDustByUserId(System.currentTimeMillis() - TimeContract.A_DAY, userId);
 
-
         if (dustList != null && dustList.size() > 0) {
             for (DustWithLocationDAO dust : dustList) {
                 int pm100, pm25;
@@ -193,8 +189,7 @@ public class DustApiController {
                 if (isDeviceUser) {
                     pm100 = dust.getPm100();
                     pm25 = dust.getPm25();
-                }
-                else {
+                } else {
                     pm100 = dust.getPublicPm100();
                     pm25 = dust.getPublicPm25();
                 }
@@ -219,11 +214,11 @@ public class DustApiController {
             if (countPm25 > 0)
                 avgPm25 = sumPm25 / countPm25;
 
-            if (avgPm25 > 0 || avgPm100 > 0) 
+            if (avgPm25 > 0 || avgPm100 > 0)
                 return new ResponseUserLatestDust(200, "Success", new UserLatestDust(userId, -1L, avgPm100, avgPm25));
-            
+
         }
-        
+
         return new Response(404, "There is no dust data");
     }
 
@@ -243,8 +238,7 @@ public class DustApiController {
         if (isDeviceUser) {
             dustList = queryTodayMeasuredDustByUserId(currentTime, userId);
             setMeasuredChartData(currentTime, currentHour, dustList, pm100List, pm25List, hourXAxis);
-        }
-        else {
+        } else {
             dustList = queryTodayAllDustByUserId(currentTime, userId);
             setAllChartData(currentTime, currentHour, dustList, pm100List, pm25List, hourXAxis);
         }
@@ -265,8 +259,7 @@ public class DustApiController {
         if (isDeviceUser) {
             dustList = queryDayMeasuredDustByUserId(currentTime - TimeContract.A_DAY, userId);
             setMeasuredChartData(currentTime - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List, hourXAxis);
-        }
-        else {
+        } else {
             dustList = queryDayAllDustByUserId(currentTime - TimeContract.A_DAY, userId);
             setAllChartData(currentTime - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List, hourXAxis);
         }
@@ -286,7 +279,7 @@ public class DustApiController {
         calendar.setTimeInMillis(currentTime);
         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
 
-        if (isDeviceUser) 
+        if (isDeviceUser)
             dustList = queryTodayMeasuredDustByUserId(currentTime, userId);
         else
             dustList = queryTodayAllDustByUserId(currentTime, userId);
@@ -319,7 +312,7 @@ public class DustApiController {
         List<Integer> hourXAxis = new ArrayList<>();
         List<DustWithLocationDAO> dustList;
         int endHour = 23;
-        
+
         if (isDeviceUser)
             dustList = queryDayMeasuredDustByUserId(currentTime - TimeContract.A_DAY, userId);
         else
@@ -327,7 +320,8 @@ public class DustApiController {
 
         if (dustList != null && dustList.size() > 0) {
             if (isDeviceUser)
-                setMeasuredChartData(currentTime - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List, hourXAxis);
+                setMeasuredChartData(currentTime - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List,
+                        hourXAxis);
             else
                 setAllChartData(currentTime - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List, hourXAxis);
 
@@ -350,9 +344,11 @@ public class DustApiController {
         List<RepresentDustWithLocation> allRepresentDustLocation;
 
         if (isDeviceUser(userId))
-            allRepresentDustLocation = DustWithLocationUtils.representMeasuredDustWithLocation(queryTodayMeasuredDustByUserId(currentTime, userId));
+            allRepresentDustLocation = DustWithLocationUtils
+                    .representMeasuredDustWithLocation(queryTodayMeasuredDustByUserId(currentTime, userId));
         else
-            allRepresentDustLocation = DustWithLocationUtils.representAllDustWithLocation(queryTodayAllDustByUserId(currentTime, userId));
+            allRepresentDustLocation = DustWithLocationUtils
+                    .representAllDustWithLocation(queryTodayAllDustByUserId(currentTime, userId));
 
         if (allRepresentDustLocation.size() > 0)
             return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
@@ -368,9 +364,11 @@ public class DustApiController {
         List<RepresentDustWithLocation> allRepresentDustLocation;
 
         if (isDeviceUser(userId))
-            allRepresentDustLocation = DustWithLocationUtils.representMeasuredDustWithLocation(queryDayMeasuredDustByUserId(currentTime - TimeContract.A_DAY, userId));
+            allRepresentDustLocation = DustWithLocationUtils.representMeasuredDustWithLocation(
+                    queryDayMeasuredDustByUserId(currentTime - TimeContract.A_DAY, userId));
         else
-            allRepresentDustLocation = DustWithLocationUtils.representAllDustWithLocation(queryDayAllDustByUserId(currentTime - TimeContract.A_DAY, userId));
+            allRepresentDustLocation = DustWithLocationUtils
+                    .representAllDustWithLocation(queryDayAllDustByUserId(currentTime - TimeContract.A_DAY, userId));
 
         if (allRepresentDustLocation.size() > 0)
             return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
@@ -378,8 +376,8 @@ public class DustApiController {
             return new Response(404, "There is no dust data");
     }
 
-    private void setMeasuredChartData(long dayTime, int endHour, List<DustWithLocationDAO> dustList, List<Integer> pm100List,
-            List<Integer> pm25List, List<Integer> hourXAxis) {
+    private void setMeasuredChartData(long dayTime, int endHour, List<DustWithLocationDAO> dustList,
+            List<Integer> pm100List, List<Integer> pm25List, List<Integer> hourXAxis) {
         int sumPm100 = 0;
         int sumPm25 = 0;
         int countPm100 = 0;
@@ -542,7 +540,6 @@ public class DustApiController {
         int countPublicDust = 0;
         int countMeasuredDust = 0;
 
-        
         if (latestTenDust != null) {
             for (DustWithLocationDAO dust : latestTenDust) {
                 if (dust.getPm100() >= 0 && dust.getPm25() >= 0)
@@ -551,12 +548,11 @@ public class DustApiController {
                     countPublicDust++;
             }
 
-            if (countMeasuredDust >= countPublicDust) 
+            if (countMeasuredDust >= countPublicDust)
                 return true;
             else
                 return false;
-        }
-        else
+        } else
             return false;
     }
 

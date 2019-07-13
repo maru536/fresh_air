@@ -8,26 +8,36 @@ import com.google.gson.JsonObject;
 @Entity
 public class User {
     @Id
-    String id;
+    String userId;
     String passwd;
+    boolean usingMeasuredDust;
 
-    public User() {}
+    public User() {
+    }
 
-    public User(String id, String passwd) {
-        this.id = id;
+    public User(String userId, String passwd, boolean usingMeasuredDust) {
+        this.userId = userId;
         this.passwd = passwd;
+        this.usingMeasuredDust = usingMeasuredDust;
     }
 
-    public User(JsonObject user) {
-        this(user.get("id").getAsString(), user.get("passwd").getAsString());
+    public User(JsonObject user) throws NullPointerException, ClassCastException, IllegalStateException {
+        this.userId = user.get(Key.USER_ID.getKey()).getAsString();
+        this.passwd = user.get(Key.PASSWORD.getKey()).getAsString();
+
+        try {
+            this.usingMeasuredDust = user.get(Key.USING_MEASURED_DUST.getKey()).getAsBoolean();
+        } catch (NullPointerException | ClassCastException | IllegalStateException e) {
+            this.usingMeasuredDust = false;
+        }
     }
 
-    public String getId() {
-        return this.id;
+    public String getUserId() {
+        return this.userId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getPasswd() {
@@ -36,5 +46,27 @@ public class User {
 
     public void setPasswd(String passwd) {
         this.passwd = passwd;
+    }
+
+    public boolean isUsingMeasuredDust() {
+        return this.usingMeasuredDust;
+    }
+
+    public void setIsUsingMeasuredDust(boolean isUsingMeasuredDust) {
+        this.usingMeasuredDust = isUsingMeasuredDust;
+    }
+
+    public enum Key {
+        USER_ID("userId"), PASSWORD("passwd"), USING_MEASURED_DUST("usingMeasuredDust");
+
+        private String key;
+
+        Key(String key) {
+            this.key = key;
+        }
+
+        public String getKey() {
+            return key;
+        }
     }
 }

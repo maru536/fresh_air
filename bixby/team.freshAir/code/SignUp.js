@@ -2,7 +2,7 @@ var http = require('http')
 var console = require('console')
 var fail = require('fail');
 
-module.exports.function = function signUp (id, passwd) {
+module.exports.function = function signUp (userId, passwd) {
   
   var options = {
     format: 'json', 
@@ -12,7 +12,7 @@ module.exports.function = function signUp (id, passwd) {
   };
   
   var body = {
-    "id": id,
+    "userId": userId,
     "passwd": passwd
   }
   
@@ -21,7 +21,7 @@ module.exports.function = function signUp (id, passwd) {
   console.log(response)
   
   if (response != null && response.code != null && response.code == 201) {
-    return id;
+    return userId;
   }
   else if (response.message != null && response.code == 302) {
     throw fail.checkedError(response.message, 'AlreadyRegistedUser', {})

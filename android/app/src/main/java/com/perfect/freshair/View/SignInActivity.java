@@ -35,7 +35,7 @@ public class SignInActivity extends AppCompatActivity {
     Button mIdSignUpButton;
     public static SignInActivity activity = null;
 
-    private String mId;
+    private String mUserId;
     private String mPasswd;
     private DustServerInterface mServerInterface;
 
@@ -43,9 +43,6 @@ public class SignInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
-
-        if (PreferencesUtils.getUser(this).equals("test1"))
-            PreferencesUtils.clearUser(this);
 
         String userId;
         try {
@@ -72,7 +69,6 @@ public class SignInActivity extends AppCompatActivity {
         mFailText = findViewById(R.id.fail_text);
         mIdSignInButton = findViewById(R.id.sign_in_button);
         mIdSignUpButton = findViewById(R.id.sign_up_button);
-
 
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -112,13 +108,13 @@ public class SignInActivity extends AppCompatActivity {
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        mId = mIdView.getText().toString();
+        mUserId = mIdView.getText().toString();
         mPasswd = mPasswordView.getText().toString();
 
         boolean isInvalid = false;
         View focusView = null;
 
-        if (!isIdValid(mId)) {
+        if (!isIdValid(mUserId)) {
             mIdView.setError(getString(R.string.error_invalid_id));
             focusView = mIdView;
             isInvalid = true;
@@ -139,11 +135,11 @@ public class SignInActivity extends AppCompatActivity {
                 mServerInterface = new DustServerInterface();
 
             //request Id
-            mServerInterface.signIn(mId, mPasswd, new ResponseCallback() {
+            mServerInterface.signIn(mUserId, mPasswd, new ResponseCallback() {
                 @Override
                 public void responseCallback(int _resultCode) {
                     if (_resultCode == 200) {
-                        PreferencesUtils.saveUser(SignInActivity.this.getApplicationContext(), mId);
+                        PreferencesUtils.saveUser(SignInActivity.this.getApplicationContext(), mUserId);
                         startMainActivity();
                     } else
                         mFailText.setVisibility(TextView.VISIBLE);

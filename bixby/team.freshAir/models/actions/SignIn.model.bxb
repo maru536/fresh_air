@@ -1,7 +1,7 @@
 action (SignIn) {
   description (User Sign In)
   collect {
-    input (id) {
+    input (userId) {
       type (idConcept)
       min (Required) max (One)
     }

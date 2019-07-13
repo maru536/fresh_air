@@ -16,12 +16,12 @@ endpoints {
     }
     
     action-endpoint (SignIn) {
-      accepted-inputs (id, passwd, $vivContext)
+      accepted-inputs (userId, passwd)
       local-endpoint ("SignIn.js")
     }
     
     action-endpoint (SignUp) {
-      accepted-inputs (id, passwd)
+      accepted-inputs (userId, passwd)
       local-endpoint ("SignUp.js")
     }
     

@@ -60,12 +60,12 @@ public class DustServerInterface {
         });
     }
 
-    public void signUp(String _userId, String _passwd, final ResponseCallback _callback) {
+    public void signUp(String userId, String passwd, final ResponseCallback _callback) {
         DustApi gpsApi = mRetrofit.create(DustApi.class);
 
         JsonObject userInfo = new JsonObject();
-        userInfo.addProperty("id", _userId);
-        userInfo.addProperty("passwd", _passwd);
+        userInfo.addProperty("userId", userId);
+        userInfo.addProperty("passwd", passwd);
 
         Call<JsonObject> request = gpsApi.signUp(userInfo);
         request.enqueue(new Callback<JsonObject>() {

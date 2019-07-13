@@ -17,7 +17,7 @@ public interface DustApi {
     Call<JsonObject> signUp(@Body JsonObject body);
 
     @GET("1.0/signIn")
-    Call<JsonObject> signIn(@Header("id") String userId,
+    Call<JsonObject> signIn(@Header("userId") String userId,
                             @Header("passwd") String passwd);
 
 
