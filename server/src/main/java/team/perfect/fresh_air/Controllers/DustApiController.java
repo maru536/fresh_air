@@ -29,6 +29,7 @@ import team.perfect.fresh_air.DAO.Air;
 import team.perfect.fresh_air.DAO.Dust;
 import team.perfect.fresh_air.DAO.DustWithLocationDAO;
 import team.perfect.fresh_air.DAO.UserLatestDust;
+import team.perfect.fresh_air.Models.Position;
 import team.perfect.fresh_air.Models.RepresentDustWithLocation;
 import team.perfect.fresh_air.Models.Response;
 import team.perfect.fresh_air.Models.ResponseAir;
@@ -43,6 +44,7 @@ import team.perfect.fresh_air.Utils.ChartUtils;
 import team.perfect.fresh_air.Utils.CoachingUtils;
 import team.perfect.fresh_air.Utils.DustWithLocationUtils;
 import team.perfect.fresh_air.Utils.JsonUtils;
+import team.perfect.fresh_air.Utils.ReverseGeocodingUtils;
 
 @RestController
 public class DustApiController {
@@ -54,6 +56,8 @@ public class DustApiController {
     @PostMapping("1.0/dust")
     public Response postDust(@RequestHeader String userId, @RequestBody JsonObject dustObject) {
         DustWithLocationDAO dustWithLocation = new DustWithLocationDAO(dustObject);
+        AddressPK address = ReverseGeocodingUtils
+                .getAddressFromPosition(new Position(dustWithLocation.getLatitude(), dustWithLocation.getLongitude()));
         dustWithLocation.setUserId(userId);
         String levelOneAddress = JsonUtils.getAsString(dustObject.get("levelOne"), "");
         String levelTwoAddress = JsonUtils.getAsString(dustObject.get("levelTwo"), "");
