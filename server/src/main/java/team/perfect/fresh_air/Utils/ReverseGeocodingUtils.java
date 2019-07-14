@@ -2,9 +2,11 @@ package team.perfect.fresh_air.Utils;
 
 import java.util.regex.PatternSyntaxException;
 
-import eu.bitm.NominatimReverseGeocoding.Address;
-import eu.bitm.NominatimReverseGeocoding.NominatimReverseGeocodingJAPI;
+import org.apache.commons.lang3.StringUtils;
+
 import team.perfect.fresh_air.DAO.AddressPK;
+import team.perfect.fresh_air.Geocoding.Address;
+import team.perfect.fresh_air.Geocoding.NominatimReverseGeocodingJAPI;
 import team.perfect.fresh_air.Models.Position;
 
 public class ReverseGeocodingUtils {
@@ -12,8 +14,7 @@ public class ReverseGeocodingUtils {
         NominatimReverseGeocodingJAPI reverseGeocoding = new NominatimReverseGeocodingJAPI();
 
         Address address = reverseGeocoding.getAdress(position.getLatitude(), position.getLongitude());
-        String test = "";
-        return new AddressPK("", "");
+        return getAddressPKFromDisplayName(address.getDisplayName());
     }
 
     private static AddressPK getAddressPKFromDisplayName(String displayName) {
@@ -25,7 +26,7 @@ public class ReverseGeocodingUtils {
             return null;
         }
 
-        if (addressLevel.length >= 4 && getCountry(addressLevel).equals("대한민국"))
+        if (addressLevel.length >= 3 && getCountry(addressLevel).equals("대한민국"))
             return getAddressPK(addressLevel);
         else
             return null;
@@ -40,10 +41,17 @@ public class ReverseGeocodingUtils {
     }
 
     private static String getAddressLevelOne(String[] addressLevel) {
-        return addressLevel[addressLevel.length - 3];
+        if (StringUtils.isNumeric(addressLevel[addressLevel.length - 2]))
+            return addressLevel[addressLevel.length - 3];
+        else
+            return addressLevel[addressLevel.length - 2];
     }
 
     private static String getAddressLevelTwo(String[] addressLevel) {
-        return addressLevel[addressLevel.length - 4];
+        if (StringUtils.isNumeric(addressLevel[addressLevel.length - 2]))
+            return addressLevel[addressLevel.length - 4];
+        else
+            return addressLevel[addressLevel.length - 3];
     }
+
 }

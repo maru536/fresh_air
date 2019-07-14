@@ -2,12 +2,10 @@ package team.perfect.fresh_air.Controllers;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Random;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -21,53 +19,50 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import team.perfect.fresh_air.Api.AirServerInterface;
-import team.perfect.fresh_air.Contract.AddressLevelOneContract;
 import team.perfect.fresh_air.Contract.TimeContract;
 import team.perfect.fresh_air.DAO.AddressPK;
-import team.perfect.fresh_air.DAO.Air;
+import team.perfect.fresh_air.DAO.PublicDust;
 import team.perfect.fresh_air.DAO.Dust;
 import team.perfect.fresh_air.DAO.DustWithLocationDAO;
 import team.perfect.fresh_air.DAO.UserLatestDust;
 import team.perfect.fresh_air.Models.Position;
 import team.perfect.fresh_air.Models.RepresentDustWithLocation;
 import team.perfect.fresh_air.Models.Response;
-import team.perfect.fresh_air.Models.ResponseAir;
 import team.perfect.fresh_air.Models.ResponseCoaching;
-import team.perfect.fresh_air.Models.ResponseDust;
+import team.perfect.fresh_air.Models.ResponsePublicDust;
 import team.perfect.fresh_air.Models.ResponseDustList;
 import team.perfect.fresh_air.Models.ResponseRepresentDustWithLocation;
 import team.perfect.fresh_air.Models.ResponseUserLatestDust;
-import team.perfect.fresh_air.Repository.AirRepository;
+import team.perfect.fresh_air.Repository.PublicDustRepository;
 import team.perfect.fresh_air.Repository.DustWithLocationRepository;
 import team.perfect.fresh_air.Utils.ChartUtils;
 import team.perfect.fresh_air.Utils.CoachingUtils;
 import team.perfect.fresh_air.Utils.DustWithLocationUtils;
-import team.perfect.fresh_air.Utils.JsonUtils;
 import team.perfect.fresh_air.Utils.ReverseGeocodingUtils;
 
 @RestController
 public class DustApiController {
     @Autowired
-    private AirRepository airRepository;
+    private PublicDustRepository publicDustRepository;
     @Autowired
     private DustWithLocationRepository dustWithLocationRepository;
 
     @PostMapping("1.0/dust")
     public Response postDust(@RequestHeader String userId, @RequestBody JsonObject dustObject) {
+        try {
         DustWithLocationDAO dustWithLocation = new DustWithLocationDAO(dustObject);
-        AddressPK address = ReverseGeocodingUtils
-                .getAddressFromPosition(new Position(dustWithLocation.getLatitude(), dustWithLocation.getLongitude()));
+        PublicDust publicDust = queryPublicDustByPosition(new Position(dustWithLocation));
+
         dustWithLocation.setUserId(userId);
-        String levelOneAddress = JsonUtils.getAsString(dustObject.get("levelOne"), "");
-        String levelTwoAddress = JsonUtils.getAsString(dustObject.get("levelTwo"), "");
-        Air publicAir = queryAirByAddress(new AddressPK(levelOneAddress, levelTwoAddress));
-        dustWithLocation.setPublicAir(publicAir);
+        dustWithLocation.setPublicDust(publicDust);
 
         if (this.dustWithLocationRepository.save(dustWithLocation) != null)
             return new Response(200, "Save dust Success");
         else
             return new Response(500, "Save dust fail");
+        } catch (NullPointerException | ClassCastException | IllegalStateException e) {
+            return new Response(400, "Malfrom request body");
+        }
     }
 
     @GetMapping("1.0/lastestDust")
@@ -82,37 +77,41 @@ public class DustApiController {
     }
 
     @PostMapping("1.0/publicDust")
-    public Response publicDust(@RequestBody JsonObject address) {
-        Air publicAir = queryAirByAddress(new AddressPK(address));
+    public Response publicDust(@RequestBody JsonObject position) {
+        try {
+            PublicDust publicDust = queryPublicDustByPosition(new Position(position));
 
-        if (publicAir != null)
-            return new ResponseDust(200, "Success", new Dust(publicAir.getPm100(), publicAir.getPm25()));
-        else
-            return new Response(404, "There is no public dust data");
+            if (publicDust != null)
+                return new ResponsePublicDust(200, "Success", publicDust);
+            else
+                return new Response(404, "There is no public dust data");
+        } catch (NullPointerException | ClassCastException | IllegalStateException e) {
+            return new Response(400, "Malform request body");
+        }
     }
 
     @PostMapping("1.0/coachingDust")
-    public Response air(@RequestHeader String userId, @RequestBody JsonObject address) {
-        Air publicAir = queryAirByAddress(new AddressPK(address));
+    public Response coachingDust(@RequestHeader String userId, @RequestBody JsonObject position) {
+        PublicDust publicDust = queryPublicDustByPosition(new Position(position));
         Optional<DustWithLocationDAO> latestDust = this.dustWithLocationRepository.findLatestDust(userId);
         String coachingMessage = "";
 
         if (latestDust.isPresent()) {
-            if (publicAir != null) {
+            if (publicDust != null) {
                 coachingMessage = CoachingUtils.makeDiffCoachingMessage(
-                        new Dust(latestDust.get().getPm100(), latestDust.get().getPm25()), publicAir);
+                        new Dust(latestDust.get().getPm100(), latestDust.get().getPm25()), publicDust);
                 coachingMessage += CoachingUtils.makeLatestDustCoachingMessage(
                         new Dust(latestDust.get().getPm100(), latestDust.get().getPm25()));
-                return new ResponseCoaching(200, "Success", coachingMessage, latestDust.get(), publicAir);
+                return new ResponseCoaching(200, "Success", coachingMessage, latestDust.get(), publicDust);
             } else {
                 coachingMessage = CoachingUtils.makeLatestDustCoachingMessage(
                         new Dust(latestDust.get().getPm100(), latestDust.get().getPm25()));
-                return new ResponseCoaching(201, "Success, but there is no air data", coachingMessage, latestDust.get(),
-                        new Air());
+                return new ResponseCoaching(201, "Success, but there is no public dust", coachingMessage, latestDust.get(),
+                        new PublicDust());
             }
         } else {
-            if (publicAir != null) {
-                return new ResponseAir(202, "Only air data", publicAir);
+            if (publicDust != null) {
+                return new ResponsePublicDust(202, "Only public dust", publicDust);
             } else {
                 return new Response(404, "There is no data");
             }
@@ -498,16 +497,17 @@ public class DustApiController {
         }
     }
 
-    private Air queryAirByAddress(AddressPK address) {
-        Optional<Air> publicAir = this.airRepository.findById(address);
+    private PublicDust queryPublicDustByPosition(Position position) {
+        AddressPK address = ReverseGeocodingUtils.getAddressFromPosition(position);
+        Optional<PublicDust> publicDust = this.publicDustRepository.findById(address);
 
-        if (publicAir.isPresent())
-            return publicAir.get();
+        if (publicDust.isPresent())
+            return publicDust.get();
         else {
-            publicAir = this.airRepository.findById(new AddressPK(address.getAddressLevelOne(), ""));
+            publicDust = this.publicDustRepository.findById(new AddressPK(address.getAddressLevelOne(), ""));
 
-            if (publicAir.isPresent())
-                return publicAir.get();
+            if (publicDust.isPresent())
+                return publicDust.get();
             else
                 return null;
         }
@@ -521,7 +521,6 @@ public class DustApiController {
         dayStartDate.set(Calendar.MINUTE, 0);
         dayStartDate.set(Calendar.SECOND, 0);
         dayStartDate.set(Calendar.MILLISECOND, 0);
-        long time = dayStartDate.getTimeInMillis();
 
         return dayStartDate.getTimeInMillis();
     }
@@ -534,7 +533,6 @@ public class DustApiController {
         dayEndDate.set(Calendar.MINUTE, 59);
         dayEndDate.set(Calendar.SECOND, 59);
         dayEndDate.set(Calendar.MILLISECOND, 999);
-        long time = dayEndDate.getTimeInMillis();
 
         return dayEndDate.getTimeInMillis();
     }

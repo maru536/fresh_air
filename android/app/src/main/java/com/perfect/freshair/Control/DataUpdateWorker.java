@@ -142,27 +142,7 @@ public class DataUpdateWorker extends Worker {
                     serverInterface = new DustServerInterface();
 
                 Log.i(this.toString(), receivedMeasurement.toString());
-
-                final List<Address> list = getCurrentAddress(receivedLocation.getLatitude(), receivedLocation.getLongitude());
-                final ArrayList<String> sidogun = new ArrayList<String>();
-
-                if(list.get(0).getAdminArea() != null)
-                {
-                    sidogun.add(list.get(0).getAdminArea());
-                }else
-                {
-                    sidogun.add(list.get(0).getSubAdminArea());
-                }
-
-                if(list.get(0).getLocality() != null)
-                {
-                    sidogun.add(list.get(0).getLocality());
-                }else
-                {
-                    sidogun.add(list.get(0).getSubLocality());
-                }
-
-                serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), receivedMeasurement, sidogun, responseCallback);
+                serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), receivedMeasurement, responseCallback);
 
                 if (receivedDust.getPm100() >= 0 && receivedDust.getPm25() >= 0) {
                     measurementDBHandler.add(receivedMeasurement);
@@ -178,27 +158,5 @@ public class DataUpdateWorker extends Worker {
 
     private boolean isAllReceive() {
         return (isDustReceive && isLocationReceive && receivedDust != null && receivedLocation != null);
-    }
-
-    public List<Address> getCurrentAddress(double latitude, double longitude) {
-        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-        List<Address> addresses;
-        boolean res = true;
-        try {
-            addresses = geocoder.getFromLocation(
-                    latitude,
-                    longitude,
-                    7);
-        } catch (IOException ioException) {
-            return null;
-        } catch (IllegalArgumentException illegalArgumentException) {
-            return null;
-        }
-
-        if (addresses == null || addresses.size() == 0) {
-            return null;
-        }
-
-        return addresses;
     }
 }

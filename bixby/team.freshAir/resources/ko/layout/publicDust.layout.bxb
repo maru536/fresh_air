@@ -101,9 +101,17 @@ layout-macro-def(publicDustResult) {
         }
         
         single-line {
-          text {
-            style (Detail_M)
-            value (" - 위치: #{value(publicDust.address.levelOne)} #{value(publicDust.address.levelTwo)}")
+          if (exists(publicDust.address.levelTwo)) {
+            text {
+              style (Detail_M)
+              value (" - 위치: #{value(publicDust.address.levelOne)} #{value(publicDust.address.levelTwo)}")
+            }
+          }
+          else {
+            text {
+              style (Detail_M)
+              value (" - 위치: #{value(publicDust.address.levelOne)}")
+            }
           }
         }
       }

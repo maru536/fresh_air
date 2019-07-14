@@ -1,6 +1,5 @@
 package team.perfect.fresh_air.DAO;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import team.perfect.fresh_air.Utils.JsonUtils;

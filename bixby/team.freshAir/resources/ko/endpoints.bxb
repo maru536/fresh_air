@@ -26,12 +26,12 @@ endpoints {
     }
     
     action-endpoint (CoachingDust) {
-      accepted-inputs (address, userId)
+      accepted-inputs (currentPosition, userId)
       local-endpoint ("CoachingDust.js")
     }
     
     action-endpoint (ShowPublicDust) {
-      accepted-inputs (address)
+      accepted-inputs (currentPosition)
       local-endpoint ("ShowPublicDust.js")
     }
   }

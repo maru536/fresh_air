@@ -38,6 +38,7 @@ dependencies {
 	implementation 'org.knowm.xchart:xchart:3.5.4'
 	implementation 'org.knowm.xchart:xchart-parent:3.5.4'
 	implementation 'org.knowm.xchart:xchart-demo:3.5.4'
+	implementation 'org.apache.commons:commons-lang3:3.9'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'mysql:mysql-connector-java'
 	annotationProcessor 'org.projectlombok:lombok'

@@ -34,27 +34,28 @@ public class DustWithLocationDAO {
             double latitude, double longitude) {
         this.userId = userId;
         this.time = time;
+        
         this.pm100 = pm100;
         this.pm25 = pm25;
+
         this.provider = provider;
         this.accuracy = accuracy;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public DustWithLocationDAO(JsonObject dustWithLocation) {
-        if (dustWithLocation != null) {
-            this.userId = JsonUtils.getAsString(dustWithLocation.get(Key.USER_ID.getKey()), "");
-            this.time = JsonUtils.getAsLong(dustWithLocation.get(Key.TIME.getKey()), -1L);
+    public DustWithLocationDAO(JsonObject dustWithLocation)
+            throws NullPointerException, ClassCastException, IllegalStateException {
+        this.userId = JsonUtils.getAsString(dustWithLocation.get(Key.USER_ID.getKey()), "");
+        this.time = JsonUtils.getAsLong(dustWithLocation.get(Key.TIME.getKey()), -1L);
 
-            this.pm100 = JsonUtils.getAsInt(dustWithLocation.get(Key.PM100.getKey()), -1);
-            this.pm25 = JsonUtils.getAsInt(dustWithLocation.get(Key.PM25.getKey()), -1);
+        this.pm100 = JsonUtils.getAsInt(dustWithLocation.get(Key.PM100.getKey()), -1);
+        this.pm25 = JsonUtils.getAsInt(dustWithLocation.get(Key.PM25.getKey()), -1);
 
-            this.provider = JsonUtils.getAsString(dustWithLocation.get(Key.PROVIDER.getKey()), "");
-            this.accuracy = JsonUtils.getAsFloat(dustWithLocation.get(Key.ACCURACY.getKey()), -1.0f);
-            this.latitude = JsonUtils.getAsDouble(dustWithLocation.get(Key.LATITUDE.getKey()), 0.0);
-            this.longitude = JsonUtils.getAsDouble(dustWithLocation.get(Key.LONGITUDE.getKey()), 0.0);
-        }
+        this.provider = JsonUtils.getAsString(dustWithLocation.get(Key.PROVIDER.getKey()), "");
+        this.accuracy = JsonUtils.getAsFloat(dustWithLocation.get(Key.ACCURACY.getKey()), -1.0f);
+        this.latitude = JsonUtils.getAsDouble(dustWithLocation.get(Key.LATITUDE.getKey()), 0.0);
+        this.longitude = JsonUtils.getAsDouble(dustWithLocation.get(Key.LONGITUDE.getKey()), 0.0);
     }
 
     public String getUserId() {
@@ -137,7 +138,7 @@ public class DustWithLocationDAO {
         this.publicPm25 = publicPm25;
     }
 
-    public void setPublicAir(Air publicAir) {
+    public void setPublicDust(PublicDust publicAir) {
         this.publicPm100 = publicAir.getPm100();
         this.publicPm25 = publicAir.getPm25();
     }

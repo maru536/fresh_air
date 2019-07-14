@@ -1,20 +1,20 @@
 package team.perfect.fresh_air.Models;
 
-import team.perfect.fresh_air.DAO.Air;
+import team.perfect.fresh_air.DAO.PublicDust;
 
 public class ResponseAir extends Response {
-    private Air airData;
+    private PublicDust airData;
 
-    public ResponseAir(int code, String message, Air airData) {
+    public ResponseAir(int code, String message, PublicDust airData) {
         super(code, message);
         this.airData = airData;
     }
 
-    public Air getAirData() {
+    public PublicDust getAirData() {
         return this.airData;
     }
 
-    public void setAirData(Air airData) {
+    public void setAirData(PublicDust airData) {
         this.airData = airData;
     }
 }

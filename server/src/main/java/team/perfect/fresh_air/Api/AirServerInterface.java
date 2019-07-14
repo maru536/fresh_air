@@ -1,8 +1,6 @@
 package team.perfect.fresh_air.Api;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonArray;
@@ -12,17 +10,14 @@ import com.google.gson.JsonObject;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import team.perfect.fresh_air.Contract.AddressLevelOneContract;
 import team.perfect.fresh_air.Contract.AirContract;
 import team.perfect.fresh_air.Contract.AirItemCodeContract;
 import team.perfect.fresh_air.Contract.ApiContract;
-import team.perfect.fresh_air.DAO.AddressPK;
-import team.perfect.fresh_air.DAO.Air;
-import team.perfect.fresh_air.Repository.AirRepository;
+import team.perfect.fresh_air.DAO.PublicDust;
+import team.perfect.fresh_air.Repository.PublicDustRepository;
 
 public class AirServerInterface {
     private Retrofit retrofit;
@@ -38,19 +33,18 @@ public class AirServerInterface {
                 .addConverterFactory(GsonConverterFactory.create()).build();
     }
 
-    public void getLevelTwoAirData(AddressLevelOneContract address, AirRepository airRepository) {
+    public void getLevelTwoAirData(AddressLevelOneContract address, PublicDustRepository airRepository) {
         if (address != null) {
             AirApi airApi = retrofit.create(AirApi.class);
 
-            Call<JsonObject> request = airApi.getLevelTwoAirData(address.getServerKey());
+            Call<JsonObject> request = airApi.getLevelTwoAirData(address.getAirKoreaKey());
 
             try {
                 JsonArray airDataList = request.execute().body().get(AirContract.LIST).getAsJsonArray();
 
                 for (JsonElement curElem : airDataList) {
-                    Air curAir = new Air(address.getBixbyKey(), curElem.getAsJsonObject());
-                    airRepository.delete(curAir);
-                    airRepository.save(curAir);
+                    PublicDust curAir = new PublicDust(address.getAddressLevelOneKey(), curElem.getAsJsonObject());
+                    airRepository.upsertAir(curAir.getAddressLevelOne(), curAir.getAddressLevelTwo(), curAir.getDateTime(), curAir.getPm100(), curAir.getPm25());
                 }
             } catch (IOException | RuntimeException e) {
 
@@ -58,7 +52,7 @@ public class AirServerInterface {
         }
     }
 
-    public void getLevelOneAirData(AirItemCodeContract itemCode, AirRepository airRepository) {
+    public void getLevelOneAirData(AirItemCodeContract itemCode, PublicDustRepository airRepository) {
         AirApi airApi = retrofit.create(AirApi.class);
 
         Call<JsonObject> request = airApi.getLevelOneAirData(itemCode.name().toLowerCase());
@@ -71,21 +65,10 @@ public class AirServerInterface {
                 if (airData.get(lowerAddress) != null) {
                     int value = airData.get(lowerAddress).getAsInt();
 
-                    if (airRepository.existsById(new AddressPK(address.getBixbyKey(), ""))) {
-                        if (itemCode.equals(AirItemCodeContract.PM10))
-                            airRepository.updatePM100(address.getBixbyKey(), dataTime, value);
-                        else if (itemCode.equals(AirItemCodeContract.PM25))
-                            airRepository.updatePM25(address.getBixbyKey(), dataTime, value);
-                    } else {
-                        Air air = new Air(address.getBixbyKey(), "", dataTime);
-
-                        if (itemCode.equals(AirItemCodeContract.PM10))
-                            air.setPm100(value);
-                        else if (itemCode.equals(AirItemCodeContract.PM25))
-                            air.setPm25(value);
-
-                        airRepository.save(air);
-                    }
+                    if (itemCode.equals(AirItemCodeContract.PM10))
+                        airRepository.upsertPM100(address.getAddressLevelOneKey(), dataTime, value);
+                    else if (itemCode.equals(AirItemCodeContract.PM25))
+                        airRepository.upsertPM25(address.getAddressLevelOneKey(), dataTime, value);
                 }
             }
         } catch (IOException | RuntimeException e) {

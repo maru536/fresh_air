@@ -1,16 +1,14 @@
 package com.perfect.freshair.API;
 
+import android.location.Location;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
-import com.perfect.freshair.Callback.ResponseBodyCallback;
 import com.perfect.freshair.Callback.ResponseCallback;
-import com.perfect.freshair.Callback.ResponseDustCallback;
+import com.perfect.freshair.Callback.ResponsePublicDustCallback;
 import com.perfect.freshair.Callback.ResponseDustMapCallback;
-import com.perfect.freshair.Model.Dust;
 import com.perfect.freshair.Model.Measurement;
-
-import java.util.List;
+import com.perfect.freshair.Model.PublicDust;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -39,13 +37,9 @@ public class DustServerInterface {
                 .build();
     }
 
-    public void postDust(String _userId, Measurement newMeasurement, List<String> address, final ResponseCallback _callback) {
+    public void postDust(String _userId, Measurement newMeasurement, final ResponseCallback _callback) {
         DustApi dustApi = mRetrofit.create(DustApi.class);
-
         JsonObject requestBody = newMeasurement.toJsonObject();
-        requestBody.addProperty("levelOne", address.get(0));
-        requestBody.addProperty("levelTwo", address.get(1));
-
         Call<JsonObject> request = dustApi.postDust(_userId, requestBody);
         request.enqueue(new Callback<JsonObject>() {
             @Override
@@ -98,34 +92,23 @@ public class DustServerInterface {
         });
     }
 
-    public void publicDust(String addressLevelOne, String addressLevelTwo, final ResponseDustCallback _callback) {
+    public void publicDust(Location location, final ResponsePublicDustCallback callback) {
         DustApi gpsApi = mRetrofit.create(DustApi.class);
 
-        JsonObject address = new JsonObject();
-        address.addProperty("levelOne", addressLevelOne);
-        address.addProperty("levelTwo", addressLevelTwo);
+        JsonObject position = new JsonObject();
+        position.addProperty("latitude", location.getLatitude());
+        position.addProperty("longitude", location.getLongitude());
 
-        Call<JsonObject> request = gpsApi.getPublicDust(address);
+        Call<JsonObject> request = gpsApi.getPublicDust(position);
         request.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> _call, Response<JsonObject> _response) {
-                responseDustHandler(_response.body(), _callback);
-            }
-
-            @Override
-            public void onFailure(Call<JsonObject> _call, Throwable _t) {
-            }
-        });
-    }
-
-    public void syncUserDust(String userId, final ResponseBodyCallback callback) {
-        DustApi gpsApi = mRetrofit.create(DustApi.class);
-
-        Call<JsonObject> request = gpsApi.syncUserDust(userId);
-        request.enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                callback.onResponseBodyCallback(response.body());
+                JsonObject responseBody = _response.body();
+                try {
+                    callback.responsePublicDustCallback(responseBody.get("code").getAsInt(), new PublicDust(responseBody.get("publicDust").getAsJsonObject()));
+                } catch (NullPointerException | ClassCastException | IllegalStateException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -184,33 +167,6 @@ public class DustServerInterface {
             Log.e(TAG, RESPONSE_FAIL_MESSAGE);
             _callback.responseCallback(FAIL_CODE);
         }
-    }
-
-    private void responseDustHandler(JsonObject response, final ResponseDustCallback callback) {
-        Dust dust = null;
-        int code = 404;
-        if (response != null && response.get("dust") != null && response.get("dust").isJsonObject()) {
-            JsonObject dustObject = response.get("dust").getAsJsonObject();
-
-            if (dustObject.get("pm100") != null && dustObject.get("pm100").isJsonPrimitive() && dustObject.get("pm25") != null && dustObject.get("pm25").isJsonPrimitive()) {
-                try {
-                    dust = new Dust(dustObject.get("pm100").getAsInt(), dustObject.get("pm25").getAsInt());
-                } catch (IllegalStateException ise) {
-
-                }
-            }
-        }
-
-        if(response!= null && response.get("code") != null)
-        {
-            code = response.get("code").getAsInt();
-            if(code == 404)
-            {
-                Log.e("code", "404");
-            }
-        }
-
-        callback.responseDustCallback(code, dust);
     }
 
     private void apiFailHandler(Throwable _t, final ResponseCallback _callback) {

@@ -1,12 +1,15 @@
 action (ShowPublicDust) {
   description (Show public dust data)
   collect {
-    input (address) {
-      type (addressConcept)
-      min (Optional) max (One)
+    input (currentPosition) {
+      type (positionConcept)
+      min (Required) max (One)
       default-init {
+        // Note: To enable current location access, in your capsule.bxb,
+        // add 'user-profile-access' to capsule.permissions
         intent {
-          goal: GetCurrentLocation
+          goal: positionConcept
+          route: geo.CurrentLocation
         }
       }
     }

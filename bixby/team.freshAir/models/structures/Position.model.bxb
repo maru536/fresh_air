@@ -1,0 +1,4 @@
+structure (positionConcept) {
+  description (geo position)
+  role-of (geo.NamedPoint)
+}

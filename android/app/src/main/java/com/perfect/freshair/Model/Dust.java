@@ -15,9 +15,9 @@ public class Dust {
         this.pm100 = pm100;
     }
 
-    public Dust(JsonObject dust) {
-        this.pm100 = JsonUtils.getAsInt(dust.get(Key.PM100.getKey()), -1);
-        this.pm25 = JsonUtils.getAsInt(dust.get(Key.PM25.getKey()), -1);
+    public Dust(JsonObject dust) throws NullPointerException, ClassCastException, IllegalStateException {
+        this.pm100 = dust.get(Key.PM100.getKey()).getAsInt();
+        this.pm25 = dust.get(Key.PM25.getKey()).getAsInt();
     }
 
     public int getPm25() {

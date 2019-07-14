@@ -1,7 +1,7 @@
 package team.perfect.fresh_air.Utils;
 
 import team.perfect.fresh_air.Contract.DustStandardContract;
-import team.perfect.fresh_air.DAO.Air;
+import team.perfect.fresh_air.DAO.PublicDust;
 import team.perfect.fresh_air.DAO.Dust;
 
 public class CoachingUtils {
@@ -32,12 +32,12 @@ public class CoachingUtils {
         return message;
     }
 
-    public static String makeDiffCoachingMessage(Dust dust, Air air) {
+    public static String makeDiffCoachingMessage(Dust dust, PublicDust publicDust) {
         String message = "";
-        int diffPm100 = dust.getPm100() - air.getPm100();
-        int diffPm25 = dust.getPm25() - air.getPm25();
+        int diffPm100 = dust.getPm100() - publicDust.getPm100();
+        int diffPm25 = dust.getPm25() - publicDust.getPm25();
 
-        if (air.getPm100() > 0 && Math.abs(diffPm100) > PM100_DIFF_THRESHOLD) {
+        if (publicDust.getPm100() > 0 && Math.abs(diffPm100) > PM100_DIFF_THRESHOLD) {
             if (diffPm100 > 0) {
                 message += "여기는 주변보다 미세먼지 농도가 높아요.\n";
             } else {
@@ -45,7 +45,7 @@ public class CoachingUtils {
             }
         }
 
-        if (air.getPm25() > 0 && Math.abs(diffPm25) > PM25_DIFF_THRESHOLD) {
+        if (publicDust.getPm25() > 0 && Math.abs(diffPm25) > PM25_DIFF_THRESHOLD) {
             if (diffPm25 > 0) {
                 message += "여기는 주변보다 초미세먼지 농도가 높아요.\n";
             } else {

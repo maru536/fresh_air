@@ -12,7 +12,7 @@ import team.perfect.fresh_air.Contract.AddressLevelOneContract;
 import team.perfect.fresh_air.Contract.AirItemCodeContract;
 import team.perfect.fresh_air.Contract.TestLocationContract;
 import team.perfect.fresh_air.DAO.DustWithLocationDAO;
-import team.perfect.fresh_air.Repository.AirRepository;
+import team.perfect.fresh_air.Repository.PublicDustRepository;
 import team.perfect.fresh_air.Repository.DustWithLocationRepository;
 
 @Component
@@ -20,7 +20,7 @@ public class AirSyncController {
     private static final long API_CALL_INTERVAL = 5000;
 
     @Autowired
-    private AirRepository airRepository;
+    private PublicDustRepository airRepository;
     @Autowired
     private DustWithLocationRepository dustWithLocationRepository;
 

@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.support.annotation.Nullable;
@@ -43,7 +42,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.perfect.freshair.API.DustServerInterface;
 import com.perfect.freshair.Callback.ResponseCallback;
-import com.perfect.freshair.Callback.ResponseDustCallback;
+import com.perfect.freshair.Callback.ResponsePublicDustCallback;
 import com.perfect.freshair.Common.CommonEnumeration;
 import com.perfect.freshair.Common.PermissionEnumeration;
 import com.perfect.freshair.Control.DataUpdateWorker;
@@ -51,8 +50,10 @@ import com.perfect.freshair.Control.DrawerItemClickListener;
 import com.perfect.freshair.Control.NavArrayAdapter;
 import com.perfect.freshair.Controller.GpsController;
 import com.perfect.freshair.DB.MeasurementDBHandler;
+import com.perfect.freshair.Model.Address;
 import com.perfect.freshair.Model.Measurement;
 import com.perfect.freshair.Model.Dust;
+import com.perfect.freshair.Model.PublicDust;
 import com.perfect.freshair.R;
 import com.perfect.freshair.Utils.BlueToothUtils;
 import com.perfect.freshair.Utils.MicroDustUtils;
@@ -257,57 +258,30 @@ public class MainActivity extends AppCompatActivity {
                     public void onLocationChanged(Location location) {
                         Log.i("GPSUtils", "onGpsChanged");
                         String res = "latitude : " + location.getLatitude() + " attitude : " + location.getLongitude();
-                        final List<Address> list = getCurrentAddress(location.getLatitude(), location.getLongitude());
-                        if(list != null && list.size() > 0)
-                        {
-                            Log.i(getApplicationContext().toString(), list.get(0).getAdminArea()+" ,"+ list.get(0).getLocality() + " ," + list.get(0).getAddressLine(0).toString());
-                            if (serverInterface == null)
-                                serverInterface = new DustServerInterface();
 
-                            final ArrayList<String> sidogun = new ArrayList<String>();
+                        if (serverInterface == null)
+                            serverInterface = new DustServerInterface();
 
-                            if(list.get(0).getAdminArea() != null)
-                            {
-                                sidogun.add(list.get(0).getAdminArea());
-                            }else
-                            {
-                                sidogun.add(list.get(0).getSubAdminArea());
+                        serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), new Measurement(System.currentTimeMillis(),
+                                new Dust(-1, -1), location), new ResponseCallback() {
+                            @Override
+                            public void responseCallback(int _resultCode) {
+
                             }
+                        });
 
-                            if(list.get(0).getLocality() != null)
-                            {
-                                sidogun.add(list.get(0).getLocality());
-                            }else
-                            {
-                                sidogun.add(list.get(0).getSubLocality());
+                        serverInterface.publicDust(location, new ResponsePublicDustCallback() {
+                            @Override
+                            public void responsePublicDustCallback(int code, PublicDust publicDust) {
+                                if (code == 200) {
+                                    strPublicDustValue = getPublicDustString(publicDust);
+                                    checkDustDisplay();
+                                }
+                                else {
+                                    Toast.makeText(getApplicationContext(),code + " 서버에서 "+publicDust.getAddress().toString()+" 미세먼지 값을 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
+                                }
                             }
-
-                            serverInterface.postDust(PreferencesUtils.getUser(getApplicationContext()), new Measurement(System.currentTimeMillis(), new Dust(-1, -1), location),
-                                    sidogun, new ResponseCallback() {
-                                @Override
-                                public void responseCallback(int _resultCode) {
-
-                                }
-                            });
-
-                            serverInterface.publicDust(sidogun.get(0), sidogun.get(1), new ResponseDustCallback() {
-                                @Override
-                                public void responseDustCallback(int code, Dust dust) {
-                                    String addr = sidogun.get(0) + " " +sidogun.get(1);
-                                    if(code == 404)
-                                    {
-                                        Toast.makeText(getApplicationContext(),code + " 서버에서 "+addr+" 미세먼지 값을 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
-                                    }
-                                    if(dust != null)
-                                    {
-                                        Log.i("publicDustApi", "PM10: " +dust.getPm100()+ " / PM2.5: " +dust.getPm25());
-                                        strPublicDustValue = getPublicDustString(addr, dust.getPm100(), dust.getPm25());
-                                        checkDustDisplay();
-                                    }
-
-                                }
-                            });
-                        }
+                        });
                     }
                 });
             }
@@ -318,15 +292,18 @@ public class MainActivity extends AppCompatActivity {
         return String.format("현재 미세먼지 농도는 %d㎍/㎥" + "\r\n" +"초미세먼지 농도는 %d㎍/㎥"+"\r\n"+" \"%s\"입니다.", pm10, pm2dot5,  MicroDustUtils.parsePM10Value(pm10));
     }
 
-    private String getPublicDustString(String addr, int pm2dot5, int pm10) {
-        if (pm2dot5 < 0 && pm10 < 0)
-            return String.format("현재 %s\r\n미세먼지 및 초미세먼지 농도 측정값이 없습니다.", addr);
+    private String getPublicDustString(PublicDust publicDust) {
+        int pm100 = publicDust.getDust().getPm100();
+        int pm25 = publicDust.getDust().getPm25();
+
+        if (pm25 < 0 && pm100 < 0)
+            return String.format("현재 %s\r\n미세먼지 및 초미세먼지 농도 측정값이 없습니다.", publicDust.getAddress().toString());
         else {
-            String message = "현재 " + addr + "\n";
-            if (pm10 >= 0)
-                message += "미세먼지 농도는 " + pm10 + "㎍/㎥으로 " +MicroDustUtils.parsePM10Value(pm10)+ "입니다.\n";
-            if (pm2dot5 >= 0)
-                message += "초미세먼지 농도는 " + pm2dot5 + "㎍/㎥으로 " +MicroDustUtils.parsePM25Value(pm2dot5)+ "입니다.\n";
+            String message = "현재 " +publicDust.getAddress().toString()+ "\n";
+            if (pm100 >= 0)
+                message += "미세먼지 농도는 " + pm100 + "㎍/㎥으로 " +MicroDustUtils.parsePM10Value(pm100)+ "입니다.\n";
+            if (pm25 >= 0)
+                message += "초미세먼지 농도는 " + pm25 + "㎍/㎥으로 " +MicroDustUtils.parsePM25Value(pm25)+ "입니다.\n";
 
             return message;
         }
@@ -496,27 +473,5 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
-    }
-
-    public List<Address> getCurrentAddress( double latitude, double longitude) {
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        List<Address> addresses;
-        boolean res = true;
-        try {
-            addresses = geocoder.getFromLocation(
-                    latitude,
-                    longitude,
-                    7);
-        } catch (IOException ioException) {
-            return null;
-        } catch (IllegalArgumentException illegalArgumentException) {
-            return null;
-        }
-
-        if (addresses == null || addresses.size() == 0) {
-            return null;
-        }
-
-        return addresses;
     }
 }

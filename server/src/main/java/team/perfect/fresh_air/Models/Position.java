@@ -1,5 +1,7 @@
 package team.perfect.fresh_air.Models;
 
+import com.google.gson.JsonObject;
+
 import team.perfect.fresh_air.DAO.DustWithLocationDAO;
 
 public class Position {
@@ -19,6 +21,11 @@ public class Position {
         this.longitude = dustWithLocation.getLongitude();
     }
 
+    public Position(JsonObject position) throws NullPointerException, ClassCastException, IllegalStateException {
+        this.latitude = position.get("latitude").getAsDouble();
+        this.longitude = position.get("longitude").getAsDouble();;
+    }
+
     public double getLatitude() {
         return this.latitude;
     }
@@ -33,15 +40,5 @@ public class Position {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
-    }
-
-    public Position latitude(double latitude) {
-        this.latitude = latitude;
-        return this;
-    }
-
-    public Position longitude(double longitude) {
-        this.longitude = longitude;
-        return this;
     }
 }

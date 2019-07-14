@@ -3,8 +3,8 @@ var console = require('console');
 var dates = require('dates');
 var fail = require('fail');
 
-module.exports.function = function showPublicDust (address) {
-  if (address != null && address.levelOne != null) {
+module.exports.function = function showPublicDust (currentPosition) {
+  if (currentPosition != null) {
     var options = {
       format: 'json', 
       headers: {
@@ -12,32 +12,26 @@ module.exports.function = function showPublicDust (address) {
       }
     };
 
-    var body;
-    if (address.levelTwo != null) {
-      body = {
-        "levelOne": address.levelOne,
-        "levelTwo": address.levelTwo
-      }
-    }
-    else {
-      body = {
-        "levelOne": address.levelOne,
-        "levelTwo": ''
-      }
-    }
+    var body = {
+      "latitude": currentPosition.point.latitude,
+      "longitude": currentPosition.point.longitude
+    };
 
     var response = http.postUrl('http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/1.0/publicDust', body, options);
-
     console.log(response);
+
     if (response != null && response.code != null) {
       if (response.code == 200) {
-        if (response.dust != null && response.dust.pm100 != null && response.dust.pm25 != null) {
+        if (response.publicDust != null && response.publicDust.pm100 != null && response.publicDust.pm25 != null) {
           return {
             dust: {
-              pm100: response.dust.pm100,
-              pm25: response.dust.pm25
+              pm100: response.publicDust.pm100,
+              pm25: response.publicDust.pm25
             },
-            address: address
+            address: {
+              levelOne: response.publicDust.addressLevelOne,
+              levelTwo: response.publicDust.addressLevelTwo
+            }
           }
         }
         else {

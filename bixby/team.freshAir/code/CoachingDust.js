@@ -3,8 +3,8 @@ var console = require('console');
 var dates = require('dates');
 var fail = require('fail');
 
-module.exports.function = function coachingDust (address, userId) {
-  if (address != null) {
+module.exports.function = function coachingDust (currentPosition, userId) {
+  if (currentPosition != null) {
     var options = {
       format: 'json', 
       headers: {
@@ -14,12 +14,11 @@ module.exports.function = function coachingDust (address, userId) {
     };
 
     var body = {
-      "levelOne": address.levelOne,
-      "levelTwo": address.levelTwo
+      "latitude": currentPosition.point.latitude,
+      "longitude": currentPosition.point.longitude
     }
 
     var response = http.postUrl('http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/1.0/coachingDust', body, options);
-
 
     const oneSecond = 1000;
     const oneMinute = 60*oneSecond;
@@ -50,7 +49,7 @@ module.exports.function = function coachingDust (address, userId) {
             time = Math.round(diffTime/oneDay);
           }
 
-          if (response.airData != null) {
+          if (response.publicDust != null) {
             return {
               coachingMessage: response.coachingMessage,
               latestDust: {
@@ -63,10 +62,13 @@ module.exports.function = function coachingDust (address, userId) {
               },
               publicDust: {
                 dust: {
-                  pm100: response.airData.pm100,
-                  pm25: response.airData.pm25
+                  pm100: response.publicDust.pm100,
+                  pm25: response.publicDust.pm25
                 },
-                address: address
+                address: {
+                  levelOne: response.publicDust.addressLevelOne,
+                  levelTwo: response.publicDust.addressLevelTwo
+                }
               }
             }
           }
@@ -85,15 +87,18 @@ module.exports.function = function coachingDust (address, userId) {
           }
         }
         else {
-          if (response.airData != null) {
+          if (response.publicDust != null) {
             return {
               coachingMessage: response.coachingMessage,
               publicDust: {
                 dust: {
-                  pm100: response.airData.pm100,
-                  pm25: response.airData.pm25
+                  pm100: response.publicDust.pm100,
+                  pm25: response.publicDust.pm25
                 },
-                address: address
+                address: {
+                  levelOne: response.publicDust.addressLevelOne,
+                  levelTwo: response.publicDust.addressLevelTwo
+                }
               }
             }
           }
@@ -105,14 +110,17 @@ module.exports.function = function coachingDust (address, userId) {
         }
       }
       else {
-        if (response.airData != null) {
+        if (response.publicDust != null) {
           return {
             publicDust: {
                 dust: {
-                  pm100: response.airData.pm100,
-                  pm25: response.airData.pm25
+                  pm100: response.publicDust.pm100,
+                  pm25: response.publicDust.pm25
                 },
-              address: address
+                address: {
+                  levelOne: response.publicDust.addressLevelOne,
+                  levelTwo: response.publicDust.addressLevelTwo
+                }
             }
           }
         }
