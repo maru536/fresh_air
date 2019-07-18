@@ -120,7 +120,7 @@ public class DustServerInterface {
     public void todayDustMap(String userId, final ResponseDustMapCallback callback) {
         DustApi gpsApi = mRetrofit.create(DustApi.class);
 
-        Call<JsonObject> request = gpsApi.todayDustMap(userId);
+        Call<JsonObject> request = gpsApi.todayPublicDustMap(userId);
         request.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
@@ -141,7 +141,7 @@ public class DustServerInterface {
     public void yesterdayDustMap(String userId, final ResponseDustMapCallback callback) {
         DustApi gpsApi = mRetrofit.create(DustApi.class);
 
-        Call<JsonObject> request = gpsApi.yesterdayDustMap(userId);
+        Call<JsonObject> request = gpsApi.yesterdayPublicDustMap(userId);
         request.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {

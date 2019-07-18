@@ -33,33 +33,30 @@ import team.perfect.fresh_air.Models.ResponsePublicDust;
 import team.perfect.fresh_air.Models.ResponseDustList;
 import team.perfect.fresh_air.Models.ResponseRepresentDustWithLocation;
 import team.perfect.fresh_air.Models.ResponseUserLatestDust;
-import team.perfect.fresh_air.Repository.PublicDustRepository;
 import team.perfect.fresh_air.Repository.DustWithLocationRepository;
 import team.perfect.fresh_air.Utils.ChartUtils;
 import team.perfect.fresh_air.Utils.CoachingUtils;
 import team.perfect.fresh_air.Utils.DustWithLocationUtils;
-import team.perfect.fresh_air.Utils.ReverseGeocodingUtils;
+import team.perfect.fresh_air.Utils.QueryUtils;
 
 @RestController
 public class DustApiController {
-    @Autowired
-    private PublicDustRepository publicDustRepository;
     @Autowired
     private DustWithLocationRepository dustWithLocationRepository;
 
     @PostMapping("1.0/dust")
     public Response postDust(@RequestHeader String userId, @RequestBody JsonObject dustObject) {
         try {
-        DustWithLocationDAO dustWithLocation = new DustWithLocationDAO(dustObject);
-        PublicDust publicDust = queryPublicDustByPosition(new Position(dustWithLocation));
+            DustWithLocationDAO dustWithLocation = new DustWithLocationDAO(dustObject);
+            PublicDust publicDust = QueryUtils.queryPublicDustByPosition(new Position(dustWithLocation));
 
-        dustWithLocation.setUserId(userId);
-        dustWithLocation.setPublicDust(publicDust);
+            dustWithLocation.setUserId(userId);
+            dustWithLocation.setPublicDust(publicDust);
 
-        if (this.dustWithLocationRepository.save(dustWithLocation) != null)
-            return new Response(200, "Save dust Success");
-        else
-            return new Response(500, "Save dust fail");
+            if (this.dustWithLocationRepository.save(dustWithLocation) != null)
+                return new Response(200, "Save dust Success");
+            else
+                return new Response(500, "Save dust fail");
         } catch (NullPointerException | ClassCastException | IllegalStateException e) {
             return new Response(400, "Malfrom request body");
         }
@@ -79,7 +76,7 @@ public class DustApiController {
     @PostMapping("1.0/publicDust")
     public Response publicDust(@RequestBody JsonObject position) {
         try {
-            PublicDust publicDust = queryPublicDustByPosition(new Position(position));
+            PublicDust publicDust = QueryUtils.queryPublicDustByPosition(new Position(position));
 
             if (publicDust != null)
                 return new ResponsePublicDust(200, "Success", publicDust);
@@ -92,7 +89,7 @@ public class DustApiController {
 
     @PostMapping("1.0/coachingDust")
     public Response coachingDust(@RequestHeader String userId, @RequestBody JsonObject position) {
-        PublicDust publicDust = queryPublicDustByPosition(new Position(position));
+        PublicDust publicDust = QueryUtils.queryPublicDustByPosition(new Position(position));
         Optional<DustWithLocationDAO> latestDust = this.dustWithLocationRepository.findLatestDust(userId);
         String coachingMessage = "";
 
@@ -106,8 +103,8 @@ public class DustApiController {
             } else {
                 coachingMessage = CoachingUtils.makeLatestDustCoachingMessage(
                         new Dust(latestDust.get().getPm100(), latestDust.get().getPm25()));
-                return new ResponseCoaching(201, "Success, but there is no public dust", coachingMessage, latestDust.get(),
-                        new PublicDust());
+                return new ResponseCoaching(201, "Success, but there is no public dust", coachingMessage,
+                        latestDust.get(), new PublicDust());
             }
         } else {
             if (publicDust != null) {
@@ -118,31 +115,54 @@ public class DustApiController {
         }
     }
 
-    @GetMapping("1.0/todayDust")
-    public Response todayDust(@RequestHeader String userId) {
-        boolean isDeviceUser = isDeviceUser(userId);
+    @GetMapping("public/todayDust")
+    public Response todayPulbicDust(@RequestHeader String userId) {
+        List<DustWithLocationDAO> dustList = queryTodayAllDustByUserId(System.currentTimeMillis(), userId);
+        Dust avgPublicDust = calculateAvgPublicDust(dustList);
+
+        return responseDust(userId, avgPublicDust);
+    }
+
+    @GetMapping("measure/todayDust")
+    public Response todayMeasuredDust(@RequestHeader String userId) {
+        List<DustWithLocationDAO> dustList = queryTodayMeasuredDustByUserId(System.currentTimeMillis(), userId);
+        Dust avgMeasuredDust = calculateAvgMeasuredDust(dustList);
+
+        return responseDust(userId, avgMeasuredDust);
+    }
+
+    @GetMapping("public/yesterdayDust")
+    public Response yesterdayPublicDust(@RequestHeader String userId) {
+        List<DustWithLocationDAO> dustList = queryDayAllDustByUserId(System.currentTimeMillis() - TimeContract.A_DAY,
+                userId);
+        Dust avgPublicDust = calculateAvgPublicDust(dustList);
+
+        return responseDust(userId, avgPublicDust);
+    }
+
+    @GetMapping("measure/yesterdayDust")
+    public Response yesterdayMeasuredDust(@RequestHeader String userId) {
+        List<DustWithLocationDAO> dustList = queryDayMeasuredDustByUserId(
+                System.currentTimeMillis() - TimeContract.A_DAY, userId);
+        Dust avgMeasuredDust = calculateAvgPublicDust(dustList);
+
+        return responseDust(userId, avgMeasuredDust);
+    }
+
+    private Dust calculateAvgPublicDust(List<DustWithLocationDAO> dustList) {
         int sumPm100 = 0;
         int countPm100 = 0;
         int sumPm25 = 0;
         int countPm25 = 0;
-        List<DustWithLocationDAO> dustList;
-
-        if (isDeviceUser)
-            dustList = queryTodayMeasuredDustByUserId(System.currentTimeMillis(), userId);
-        else
-            dustList = queryTodayAllDustByUserId(System.currentTimeMillis(), userId);
+        int avgPm25 = -1;
+        int avgPm100 = -1;
 
         if (dustList != null && dustList.size() > 0) {
             for (DustWithLocationDAO dust : dustList) {
                 int pm100, pm25;
 
-                if (isDeviceUser) {
-                    pm100 = dust.getPm100();
-                    pm25 = dust.getPm25();
-                } else {
-                    pm100 = dust.getPublicPm100();
-                    pm25 = dust.getPublicPm25();
-                }
+                pm100 = dust.getPublicPm100();
+                pm25 = dust.getPublicPm25();
 
                 if (pm100 >= 0) {
                     sumPm100 += pm100;
@@ -155,47 +175,30 @@ public class DustApiController {
                 }
             }
 
-            int avgPm25 = -1;
-            int avgPm100 = -1;
-
             if (countPm100 > 0)
                 avgPm100 = sumPm100 / countPm100;
 
             if (countPm25 > 0)
                 avgPm25 = sumPm25 / countPm25;
-
-            if (avgPm25 > 0 || avgPm100 > 0)
-                return new ResponseUserLatestDust(200, "Success", new UserLatestDust(userId, -1L, avgPm100, avgPm25));
         }
 
-        return new Response(404, "There is no dust data");
+        return new Dust(avgPm100, avgPm25);
     }
 
-    @GetMapping("1.0/yesterdayDust")
-    public Response yesterdayDust(@RequestHeader String userId) {
-        boolean isDeviceUser = isDeviceUser(userId);
+    private Dust calculateAvgMeasuredDust(List<DustWithLocationDAO> dustList) {
         int sumPm100 = 0;
         int countPm100 = 0;
         int sumPm25 = 0;
         int countPm25 = 0;
-        List<DustWithLocationDAO> dustList;
-
-        if (isDeviceUser)
-            dustList = queryDayMeasuredDustByUserId(System.currentTimeMillis() - TimeContract.A_DAY, userId);
-        else
-            dustList = queryDayAllDustByUserId(System.currentTimeMillis() - TimeContract.A_DAY, userId);
+        int avgPm25 = -1;
+        int avgPm100 = -1;
 
         if (dustList != null && dustList.size() > 0) {
             for (DustWithLocationDAO dust : dustList) {
                 int pm100, pm25;
 
-                if (isDeviceUser) {
-                    pm100 = dust.getPm100();
-                    pm25 = dust.getPm25();
-                } else {
-                    pm100 = dust.getPublicPm100();
-                    pm25 = dust.getPublicPm25();
-                }
+                pm100 = dust.getPm100();
+                pm25 = dust.getPm25();
 
                 if (pm100 >= 0) {
                     sumPm100 += pm100;
@@ -208,170 +211,223 @@ public class DustApiController {
                 }
             }
 
-            int avgPm25 = -1;
-            int avgPm100 = -1;
-
             if (countPm100 > 0)
                 avgPm100 = sumPm100 / countPm100;
 
             if (countPm25 > 0)
                 avgPm25 = sumPm25 / countPm25;
-
-            if (avgPm25 > 0 || avgPm100 > 0)
-                return new ResponseUserLatestDust(200, "Success", new UserLatestDust(userId, -1L, avgPm100, avgPm25));
-
         }
 
-        return new Response(404, "There is no dust data");
+        return new Dust(avgPm100, avgPm25);
     }
 
-    @GetMapping(path = "1.0/todayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
-    public byte[] showTodayDustChart(@PathVariable String userId) {
-        long currentTime = System.currentTimeMillis();
-        boolean isDeviceUser = isDeviceUser(userId);
+    private Response responseDust(String userId, Dust avgDust) {
+        if (avgDust.getPm100() >= 0 || avgDust.getPm25() >= 0)
+            return new ResponseUserLatestDust(200, "Success",
+                    new UserLatestDust(userId, -1L, avgDust.getPm100(), avgDust.getPm25()));
+        else
+            return new Response(404, "There is no dust data");
+    }
+
+    @GetMapping(path = "public/todayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
+    public byte[] showTodayPublicDustChart(@PathVariable String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<DustWithLocationDAO> dustList = queryTodayAllDustByUserId(currentTimeMillis, userId);
+
+        return makeTodayPublicDustLineChart(currentTimeMillis, dustList);
+    }
+
+    @GetMapping(path = "measure/todayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
+    public byte[] showTodayMeasuredDustChart(@PathVariable String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<DustWithLocationDAO> dustList = queryTodayMeasuredDustByUserId(currentTimeMillis, userId);
+
+        return makeTodayMeasuredDustLineChart(currentTimeMillis, dustList);
+    }
+
+    private byte[] makeTodayPublicDustLineChart(long currentTimeMillis, List<DustWithLocationDAO> dustList) {
         List<Integer> pm100List = new ArrayList<>();
         List<Integer> pm25List = new ArrayList<>();
         List<Integer> hourXAxis = new ArrayList<>();
-        List<DustWithLocationDAO> dustList;
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(currentTime);
-        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+        int currentHour = getCurrentHour(currentTimeMillis);
 
-        if (isDeviceUser) {
-            dustList = queryTodayMeasuredDustByUserId(currentTime, userId);
-            setMeasuredChartData(currentTime, currentHour, dustList, pm100List, pm25List, hourXAxis);
-        } else {
-            dustList = queryTodayAllDustByUserId(currentTime, userId);
-            setAllChartData(currentTime, currentHour, dustList, pm100List, pm25List, hourXAxis);
-        }
+        setAllChartData(currentTimeMillis, currentHour, dustList, pm100List, pm25List, hourXAxis);
 
         return ChartUtils.lineChart(pm100List, pm25List, hourXAxis);
     }
 
-    @GetMapping(path = "1.0/yesterdayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
-    public byte[] showYesterdayChart(@PathVariable String userId) {
-        long currentTime = System.currentTimeMillis();
-        boolean isDeviceUser = isDeviceUser(userId);
+    private byte[] makeTodayMeasuredDustLineChart(long currentTimeMillis, List<DustWithLocationDAO> dustList) {
         List<Integer> pm100List = new ArrayList<>();
         List<Integer> pm25List = new ArrayList<>();
         List<Integer> hourXAxis = new ArrayList<>();
-        List<DustWithLocationDAO> dustList;
-        int endHour = 23;
 
-        if (isDeviceUser) {
-            dustList = queryDayMeasuredDustByUserId(currentTime - TimeContract.A_DAY, userId);
-            setMeasuredChartData(currentTime - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List, hourXAxis);
-        } else {
-            dustList = queryDayAllDustByUserId(currentTime - TimeContract.A_DAY, userId);
-            setAllChartData(currentTime - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List, hourXAxis);
-        }
+        int currentHour = getCurrentHour(currentTimeMillis);
+
+        setMeasuredChartData(currentTimeMillis, currentHour, dustList, pm100List, pm25List, hourXAxis);
 
         return ChartUtils.lineChart(pm100List, pm25List, hourXAxis);
     }
 
-    @GetMapping("1.0/todayDust/hour")
-    public Response showTodayDustByHour(@RequestHeader String userId) {
-        long currentTime = System.currentTimeMillis();
-        boolean isDeviceUser = isDeviceUser(userId);
-        List<Integer> pm100List = new ArrayList<>();
-        List<Integer> pm25List = new ArrayList<>();
-        List<Integer> hourXAxis = new ArrayList<>();
-        List<DustWithLocationDAO> dustList;
+    private int getCurrentHour(long currentTimeMillis) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(currentTime);
-        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-
-        if (isDeviceUser)
-            dustList = queryTodayMeasuredDustByUserId(currentTime, userId);
-        else
-            dustList = queryTodayAllDustByUserId(currentTime, userId);
-
-        if (dustList != null && dustList.size() > 0) {
-            if (isDeviceUser)
-                setMeasuredChartData(currentTime, currentHour, dustList, pm100List, pm25List, hourXAxis);
-            else
-                setAllChartData(currentTime, currentHour, dustList, pm100List, pm25List, hourXAxis);
-
-            JsonArray pm100Array = new JsonArray();
-            for (int pm100 : pm100List)
-                pm100Array.add(pm100);
-
-            JsonArray pm25Array = new JsonArray();
-            for (int pm25 : pm25List)
-                pm25Array.add(pm25);
-
-            return new ResponseDustList(200, "Success", pm100Array, pm25Array);
-        } else
-            return new Response(404, "There is no dust data");
+        calendar.setTimeInMillis(currentTimeMillis);
+        return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
-    @GetMapping("1.0/yesterdayDust/hour")
-    public Response showYesterdayDustByHour(@RequestHeader String userId) {
-        long currentTime = System.currentTimeMillis();
-        boolean isDeviceUser = isDeviceUser(userId);
+    @GetMapping(path = "public/yesterdayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
+    public byte[] showYesterdayPublicDustChart(@PathVariable String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<DustWithLocationDAO> dustList = queryDayAllDustByUserId(currentTimeMillis - TimeContract.A_DAY, userId);
         List<Integer> pm100List = new ArrayList<>();
         List<Integer> pm25List = new ArrayList<>();
         List<Integer> hourXAxis = new ArrayList<>();
-        List<DustWithLocationDAO> dustList;
         int endHour = 23;
 
-        if (isDeviceUser)
-            dustList = queryDayMeasuredDustByUserId(currentTime - TimeContract.A_DAY, userId);
-        else
-            dustList = queryDayAllDustByUserId(currentTime - TimeContract.A_DAY, userId);
+        setAllChartData(currentTimeMillis - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List, hourXAxis);
+
+        return ChartUtils.lineChart(pm100List, pm25List, hourXAxis);
+    }
+
+    @GetMapping(path = "measure/yesterdayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
+    public byte[] showYesterdayMeasuredDustChart(@PathVariable String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<DustWithLocationDAO> dustList = queryDayMeasuredDustByUserId(currentTimeMillis - TimeContract.A_DAY,
+                userId);
+        List<Integer> pm100List = new ArrayList<>();
+        List<Integer> pm25List = new ArrayList<>();
+        List<Integer> hourXAxis = new ArrayList<>();
+        int endHour = 23;
+
+        setMeasuredChartData(currentTimeMillis - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List, hourXAxis);
+
+        return ChartUtils.lineChart(pm100List, pm25List, hourXAxis);
+    }
+
+    @GetMapping("public/todayDust/hour")
+    public Response showTodayPublicDustByHour(@RequestHeader String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<Integer> pm100List = new ArrayList<>();
+        List<Integer> pm25List = new ArrayList<>();
+        List<Integer> hourXAxis = new ArrayList<>();
+        List<DustWithLocationDAO> dustList = queryTodayAllDustByUserId(currentTimeMillis, userId);
+
+        int currentHour = getCurrentHour(currentTimeMillis);
 
         if (dustList != null && dustList.size() > 0) {
-            if (isDeviceUser)
-                setMeasuredChartData(currentTime - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List,
-                        hourXAxis);
-            else
-                setAllChartData(currentTime - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List, hourXAxis);
-
-            JsonArray pm100Array = new JsonArray();
-            for (int pm100 : pm100List)
-                pm100Array.add(pm100);
-
-            JsonArray pm25Array = new JsonArray();
-            for (int pm25 : pm25List)
-                pm25Array.add(pm25);
-
-            return new ResponseDustList(200, "Success", pm100Array, pm25Array);
+            setAllChartData(currentTimeMillis, currentHour, dustList, pm100List, pm25List, hourXAxis);
+            return makeResponseDustListFromDustList(pm100List, pm25List);
         } else
             return new Response(404, "There is no dust data");
     }
 
-    @GetMapping("1.0/todayDustMap")
-    public Response todayDustMap(@RequestHeader String userId) {
-        long currentTime = System.currentTimeMillis();
-        List<RepresentDustWithLocation> allRepresentDustLocation;
+    @GetMapping("measure/todayDust/hour")
+    public Response showTodayMeasureDustByHour(@RequestHeader String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<Integer> pm100List = new ArrayList<>();
+        List<Integer> pm25List = new ArrayList<>();
+        List<Integer> hourXAxis = new ArrayList<>();
+        List<DustWithLocationDAO> dustList = queryTodayMeasuredDustByUserId(currentTimeMillis, userId);
 
-        if (isDeviceUser(userId))
-            allRepresentDustLocation = DustWithLocationUtils
-                    .representMeasuredDustWithLocation(queryTodayMeasuredDustByUserId(currentTime, userId));
-        else
-            allRepresentDustLocation = DustWithLocationUtils
-                    .representAllDustWithLocation(queryTodayAllDustByUserId(currentTime, userId));
+        int currentHour = getCurrentHour(currentTimeMillis);
+
+        if (dustList != null && dustList.size() > 0) {
+            setMeasuredChartData(currentTimeMillis, currentHour, dustList, pm100List, pm25List, hourXAxis);
+            return makeResponseDustListFromDustList(pm100List, pm25List);
+        } else
+            return new Response(404, "There is no dust data");
+    }
+
+    @GetMapping("public/yesterdayDust/hour")
+    public Response showYesterdayPublicDustByHour(@RequestHeader String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<Integer> pm100List = new ArrayList<>();
+        List<Integer> pm25List = new ArrayList<>();
+        List<Integer> hourXAxis = new ArrayList<>();
+        List<DustWithLocationDAO> dustList = queryDayAllDustByUserId(currentTimeMillis - TimeContract.A_DAY, userId);
+        int endHour = 23;
+
+        if (dustList != null && dustList.size() > 0) {
+            setAllChartData(currentTimeMillis - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List, hourXAxis);
+            return makeResponseDustListFromDustList(pm100List, pm25List);
+        } else
+            return new Response(404, "There is no dust data");
+    }
+
+    @GetMapping("measure/yesterdayDust/hour")
+    public Response showYesterdayMeasuredDustByHour(@RequestHeader String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<Integer> pm100List = new ArrayList<>();
+        List<Integer> pm25List = new ArrayList<>();
+        List<Integer> hourXAxis = new ArrayList<>();
+        List<DustWithLocationDAO> dustList = queryDayMeasuredDustByUserId(currentTimeMillis - TimeContract.A_DAY,
+                userId);
+        int endHour = 23;
+
+        if (dustList != null && dustList.size() > 0) {
+            setMeasuredChartData(currentTimeMillis - TimeContract.A_DAY, endHour, dustList, pm100List, pm25List,
+                    hourXAxis);
+            return makeResponseDustListFromDustList(pm100List, pm25List);
+        } else
+            return new Response(404, "There is no dust data");
+    }
+
+    private ResponseDustList makeResponseDustListFromDustList(List<Integer> pm100List, List<Integer> pm25List) {
+        JsonArray pm100Array = new JsonArray();
+        for (int pm100 : pm100List)
+            pm100Array.add(pm100);
+
+        JsonArray pm25Array = new JsonArray();
+        for (int pm25 : pm25List)
+            pm25Array.add(pm25);
+
+        return new ResponseDustList(200, "Success", pm100Array, pm25Array);
+    }
+
+    @GetMapping("public/todayDustMap")
+    public Response todayPublicDustMap(@RequestHeader String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<RepresentDustWithLocation> allRepresentDustLocation = DustWithLocationUtils
+                .representAllDustWithLocation(queryTodayAllDustByUserId(currentTimeMillis, userId));
 
         if (allRepresentDustLocation.size() > 0)
             return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
 
         else
             return new Response(404, "There is no dust data");
-
     }
 
-    @GetMapping("1.0/yesterdayDustMap")
-    public Response yesterdayDustMap(@RequestHeader String userId) {
-        long currentTime = System.currentTimeMillis();
-        List<RepresentDustWithLocation> allRepresentDustLocation;
+    @GetMapping("measure/todayDustMap")
+    public Response todayMeasuredDustMap(@RequestHeader String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<RepresentDustWithLocation> allRepresentDustLocation = DustWithLocationUtils
+                .representMeasuredDustWithLocation(queryTodayMeasuredDustByUserId(currentTimeMillis, userId));
 
-        if (isDeviceUser(userId))
-            allRepresentDustLocation = DustWithLocationUtils.representMeasuredDustWithLocation(
-                    queryDayMeasuredDustByUserId(currentTime - TimeContract.A_DAY, userId));
+        if (allRepresentDustLocation.size() > 0)
+            return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
+
         else
-            allRepresentDustLocation = DustWithLocationUtils
-                    .representAllDustWithLocation(queryDayAllDustByUserId(currentTime - TimeContract.A_DAY, userId));
+            return new Response(404, "There is no dust data");
+    }
+
+    @GetMapping("public/yesterdayDustMap")
+    public Response yesterdayPublicDustMap(@RequestHeader String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<RepresentDustWithLocation> allRepresentDustLocation = DustWithLocationUtils
+                .representAllDustWithLocation(queryDayAllDustByUserId(currentTimeMillis - TimeContract.A_DAY, userId));
+
+        if (allRepresentDustLocation.size() > 0)
+            return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
+        else
+            return new Response(404, "There is no dust data");
+    }
+
+    @GetMapping("measure/yesterdayDustMap")
+    public Response yesterdayMeasuredDustMap(@RequestHeader String userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<RepresentDustWithLocation> allRepresentDustLocation = DustWithLocationUtils
+                .representMeasuredDustWithLocation(
+                        queryDayMeasuredDustByUserId(currentTimeMillis - TimeContract.A_DAY, userId));
 
         if (allRepresentDustLocation.size() > 0)
             return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
@@ -494,22 +550,6 @@ public class DustApiController {
                 }
             }
             exploreDust = null;
-        }
-    }
-
-    private PublicDust queryPublicDustByPosition(Position position) {
-        AddressPK address = ReverseGeocodingUtils.getAddressFromPosition(position);
-        Optional<PublicDust> publicDust = this.publicDustRepository.findById(address);
-
-        if (publicDust.isPresent())
-            return publicDust.get();
-        else {
-            publicDust = this.publicDustRepository.findById(new AddressPK(address.getAddressLevelOne(), ""));
-
-            if (publicDust.isPresent())
-                return publicDust.get();
-            else
-                return null;
         }
     }
 

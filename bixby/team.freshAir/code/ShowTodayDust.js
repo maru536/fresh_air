@@ -6,7 +6,7 @@ var fail = require('fail');
 module.exports.function = function showTodayDust (userId) {
   // RollResult
   console.log(userId);
-  var response = http.getUrl('http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/1.0/todayDust', {
+  var response = http.getUrl('http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/public/todayDust', {
     format: 'json', 
     headers: {
       userId: userId
