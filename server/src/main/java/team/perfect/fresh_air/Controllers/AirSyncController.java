@@ -1,6 +1,7 @@
 package team.perfect.fresh_air.Controllers;
 
 import java.util.Calendar;
+import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,12 @@ import team.perfect.fresh_air.Api.AirServerInterface;
 import team.perfect.fresh_air.Contract.AddressLevelOneContract;
 import team.perfect.fresh_air.Contract.AirItemCodeContract;
 import team.perfect.fresh_air.Contract.TestLocationContract;
+import team.perfect.fresh_air.DAO.AddressPK;
 import team.perfect.fresh_air.DAO.DustWithLocationDAO;
+import team.perfect.fresh_air.DAO.PublicDust;
 import team.perfect.fresh_air.Models.Position;
 import team.perfect.fresh_air.Repository.PublicDustRepository;
-import team.perfect.fresh_air.Utils.QueryUtils;
+import team.perfect.fresh_air.Utils.ReverseGeocodingUtils;
 import team.perfect.fresh_air.Repository.DustWithLocationRepository;
 
 @Component
@@ -25,6 +28,8 @@ public class AirSyncController {
     private PublicDustRepository airRepository;
     @Autowired
     private DustWithLocationRepository dustWithLocationRepository;
+    @Autowired
+    private PublicDustRepository publicDustRepository;
 
     @Scheduled(cron = "0 30 * * * *")
     public void syncLevelTwoAir() {
@@ -83,7 +88,23 @@ public class AirSyncController {
         DustWithLocationDAO dust = new DustWithLocationDAO("testuser", currentTime, random.nextInt(100),
                 random.nextInt(150), "GPS", 10.0f, location.getLatitude(), location.getLongitude());
         dust.setPublicDust(
-                QueryUtils.queryPublicDustByPosition(new Position(location.getLatitude(), location.getLongitude())));
+                queryPublicDustByPosition(new Position(location.getLatitude(), location.getLongitude())));
         this.dustWithLocationRepository.save(dust);
+    }
+
+    private PublicDust queryPublicDustByPosition(Position position) {
+        AddressPK address = ReverseGeocodingUtils.getAddressFromPosition(position);
+        Optional<PublicDust> publicDust = publicDustRepository.findById(address);
+
+        if (publicDust.isPresent())
+            return publicDust.get();
+        else {
+            publicDust = publicDustRepository.findById(new AddressPK(address.getAddressLevelOne(), ""));
+
+            if (publicDust.isPresent())
+                return publicDust.get();
+            else
+                return null;
+        }
     }
 }

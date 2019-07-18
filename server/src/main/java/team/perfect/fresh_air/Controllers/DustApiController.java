@@ -34,13 +34,16 @@ import team.perfect.fresh_air.Models.ResponseDustList;
 import team.perfect.fresh_air.Models.ResponseRepresentDustWithLocation;
 import team.perfect.fresh_air.Models.ResponseUserLatestDust;
 import team.perfect.fresh_air.Repository.DustWithLocationRepository;
+import team.perfect.fresh_air.Repository.PublicDustRepository;
 import team.perfect.fresh_air.Utils.ChartUtils;
 import team.perfect.fresh_air.Utils.CoachingUtils;
 import team.perfect.fresh_air.Utils.DustWithLocationUtils;
-import team.perfect.fresh_air.Utils.QueryUtils;
+import team.perfect.fresh_air.Utils.ReverseGeocodingUtils;
 
 @RestController
 public class DustApiController {
+    @Autowired
+    private PublicDustRepository publicDustRepository;
     @Autowired
     private DustWithLocationRepository dustWithLocationRepository;
 
@@ -48,7 +51,7 @@ public class DustApiController {
     public Response postDust(@RequestHeader String userId, @RequestBody JsonObject dustObject) {
         try {
             DustWithLocationDAO dustWithLocation = new DustWithLocationDAO(dustObject);
-            PublicDust publicDust = QueryUtils.queryPublicDustByPosition(new Position(dustWithLocation));
+            PublicDust publicDust = queryPublicDustByPosition(new Position(dustWithLocation));
 
             dustWithLocation.setUserId(userId);
             dustWithLocation.setPublicDust(publicDust);
@@ -76,7 +79,7 @@ public class DustApiController {
     @PostMapping("1.0/publicDust")
     public Response publicDust(@RequestBody JsonObject position) {
         try {
-            PublicDust publicDust = QueryUtils.queryPublicDustByPosition(new Position(position));
+            PublicDust publicDust = queryPublicDustByPosition(new Position(position));
 
             if (publicDust != null)
                 return new ResponsePublicDust(200, "Success", publicDust);
@@ -89,7 +92,7 @@ public class DustApiController {
 
     @PostMapping("1.0/coachingDust")
     public Response coachingDust(@RequestHeader String userId, @RequestBody JsonObject position) {
-        PublicDust publicDust = QueryUtils.queryPublicDustByPosition(new Position(position));
+        PublicDust publicDust = queryPublicDustByPosition(new Position(position));
         Optional<DustWithLocationDAO> latestDust = this.dustWithLocationRepository.findLatestDust(userId);
         String coachingMessage = "";
 
@@ -480,6 +483,19 @@ public class DustApiController {
             countPm25 = 0;
 
             if (exploreDust != null) {
+                int hour;
+                for (hour = 1; hour < 24; hour++) {
+                    if (exploreDust.getTime() >= exploreTime + hour*TimeContract.A_HOUR) {
+                        hourXAxis.add(exploreHour + hour);
+                        pm100List.add(0);
+                        pm25List.add(0);
+                    }
+                    else
+                        break; 
+                }
+
+                exploreHour += hour - 1;
+                exploreTime += (hour - 1) * TimeContract.A_HOUR;
                 if (exploreDust.getPm100() >= 0) {
                     sumPm100 += exploreDust.getPm100();
                     countPm100++;
@@ -539,6 +555,19 @@ public class DustApiController {
             countPm25 = 0;
 
             if (exploreDust != null) {
+                int hour;
+                for (hour = 1; hour < 24; hour++) {
+                    if (exploreDust.getTime() >= exploreTime + hour*TimeContract.A_HOUR) {
+                        hourXAxis.add(exploreHour + hour);
+                        pm100List.add(0);
+                        pm25List.add(0);
+                    }
+                    else
+                        break; 
+                }
+
+                exploreHour += hour - 1;
+                exploreTime += (hour - 1) * TimeContract.A_HOUR;
                 if (exploreDust.getPublicPm100() >= 0) {
                     sumPm100 += exploreDust.getPublicPm100();
                     countPm100++;
@@ -550,6 +579,22 @@ public class DustApiController {
                 }
             }
             exploreDust = null;
+        }
+    }
+
+    private PublicDust queryPublicDustByPosition(Position position) {
+        AddressPK address = ReverseGeocodingUtils.getAddressFromPosition(position);
+        Optional<PublicDust> publicDust = publicDustRepository.findById(address);
+
+        if (publicDust.isPresent())
+            return publicDust.get();
+        else {
+            publicDust = publicDustRepository.findById(new AddressPK(address.getAddressLevelOne(), ""));
+
+            if (publicDust.isPresent())
+                return publicDust.get();
+            else
+                return null;
         }
     }
 
@@ -575,27 +620,6 @@ public class DustApiController {
         dayEndDate.set(Calendar.MILLISECOND, 999);
 
         return dayEndDate.getTimeInMillis();
-    }
-
-    private boolean isDeviceUser(String userId) {
-        List<DustWithLocationDAO> latestTenDust = this.dustWithLocationRepository.findTenLatestDust(userId);
-        int countPublicDust = 0;
-        int countMeasuredDust = 0;
-
-        if (latestTenDust != null) {
-            for (DustWithLocationDAO dust : latestTenDust) {
-                if (dust.getPm100() >= 0 && dust.getPm25() >= 0)
-                    countMeasuredDust++;
-                else
-                    countPublicDust++;
-            }
-
-            if (countMeasuredDust >= countPublicDust)
-                return true;
-            else
-                return false;
-        } else
-            return false;
     }
 
     private List<DustWithLocationDAO> queryTodayMeasuredDustByUserId(long todayTime, String userId) {
