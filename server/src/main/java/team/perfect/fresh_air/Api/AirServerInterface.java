@@ -44,6 +44,7 @@ public class AirServerInterface {
 
                 for (JsonElement curElem : airDataList) {
                     PublicDust curAir = new PublicDust(address.getAddressLevelOneKey(), curElem.getAsJsonObject());
+                    
                     airRepository.upsertAir(curAir.getAddressLevelOne(), curAir.getAddressLevelTwo(), curAir.getDateTime(), curAir.getPm100(), curAir.getPm25());
                 }
             } catch (IOException | RuntimeException e) {

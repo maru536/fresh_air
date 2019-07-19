@@ -24,7 +24,7 @@ public class JsonUtils {
         if (src != null) {
             try {
                 value = src.getAsFloat();
-            } catch (ClassCastException | IllegalStateException e) {
+            } catch (ClassCastException | IllegalStateException | NumberFormatException e) {
                 
             }
         }
@@ -38,7 +38,7 @@ public class JsonUtils {
         if (src != null) {
             try {
                 value = src.getAsFloat();
-            } catch (ClassCastException | IllegalStateException e) {
+            } catch (ClassCastException | IllegalStateException | NumberFormatException e) {
                 
             }
         }
@@ -52,7 +52,7 @@ public class JsonUtils {
         if (src != null) {
             try {
                 value = src.getAsInt();
-            } catch (ClassCastException | IllegalStateException e) {
+            } catch (ClassCastException | IllegalStateException | NumberFormatException e) {
                 
             }
         }
@@ -66,7 +66,7 @@ public class JsonUtils {
         if (src != null) {
             try {
                 value = src.getAsLong();
-            } catch (ClassCastException | IllegalStateException e) {
+            } catch (ClassCastException | IllegalStateException | NumberFormatException e) {
                 
             }
         }

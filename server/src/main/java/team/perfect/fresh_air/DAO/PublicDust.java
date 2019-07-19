@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.Table;
 
 import com.google.gson.JsonObject;
 
@@ -13,7 +12,6 @@ import team.perfect.fresh_air.Utils.JsonUtils;
 
 @Entity
 @IdClass(AddressPK.class)
-@Table(name = "airTest")
 public class PublicDust {
     @Id
     private String addressLevelOne = "";
