@@ -1,0 +1,18 @@
+structure (positionDustConcept) {
+  description (positionDustConcept)
+  
+  property (latestTime) {
+    type (timeConcept)
+    min (Required) max (One)
+  }
+  
+  property (dust) {
+    type (dustConcept)
+    min (Required) max (One)
+  }
+  
+  property (centerPosition) {
+    type (positionConcept)
+    min (Required) max (One)
+  }
+}

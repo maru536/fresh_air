@@ -1,7 +1,7 @@
 train (t-c6gymlhe730cbojbn1udmbnbf) {
   utterance ([g:ShowYesterdayDust] 어제 미세먼지 보여줘)
-  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
-  last-modified (1561897559890)
+  plan (Y2BmUC5ILUpLTC7RSytKLc5wzCzSSyktLgkuzc1NLKp0zs9LTi0oYVDCUBSckV8emVpcklqUkljpAtTBIIehprQ4tcgzBWYGEwMjEDMASUYGBhgNAA==)
+  last-modified (1563613629296)
 }
 train (t-ci27731lde5r6fbg6pwaqc02y) {
   utterance ([g:coachingDustResponseConcept] 미세먼지 농도 코칭해줘)
@@ -10,6 +10,6 @@ train (t-ci27731lde5r6fbg6pwaqc02y) {
 }
 train (t-cz6sd3sfzjzwzk747k5ufwpub) {
   utterance ([g:ShowTodayDust] 오늘 초미세먼지 보여줘)
-  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYZDDUBGckV8ekp+SWAlShkUeZIJnCkw/EwMjEDMASUYGBhgNAA==)
-  last-modified (1561903835859)
+  plan (Y2BmUC5ILUpLTC7RSytKLc5wzCzSSyktLgkuzc1NLKp0zs9LTi0oYZDDUBSckV8ekp+SWOkCVI1FvrQ4tcgzBaafiYERiBmAJCMDA4wGAA==)
+  last-modified (1563619363591)
 }

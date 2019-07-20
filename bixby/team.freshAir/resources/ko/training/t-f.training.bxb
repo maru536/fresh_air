@@ -5,13 +5,13 @@ train (t-f6alwbqsn50h7ayf8r6p7v7v4) {
 }
 train (t-f6zgo4191h2mrp28ccftform7) {
   utterance ([g:ShowYesterdayDust] 어제 미세먼지 알려줘)
-  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
-  last-modified (1561903890332)
+  plan (Y2BmUC5ILUpLTC7RSytKLc5wzCzSSyktLgkuzc1NLKp0zs9LTi0oYVDCUBSckV8emVpcklqUkljpAtTBIIehprQ4tcgzBWYGEwMjEDMASUYGBhgNAA==)
+  last-modified (1563613618788)
 }
 train (t-flqhddv906aebw2b6t007a2fg) {
   utterance ([g:ShowTodayDust] 오늘의 초미세먼지 알려줘)
-  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYZDDUBGckV8ekp+SWAlShkUeZIJnCkw/EwMjEDMASUYGBhgNAA==)
-  last-modified (1561903862646)
+  plan (Y2BmUC5ILUpLTC7RSytKLc5wzCzSSyktLgkuzc1NLKp0zs9LTi0oYZDDUBSckV8ekp+SWOkCVI1FvrQ4tcgzBaafiYERiBmAJCMDA4wGAA==)
+  last-modified (1563619350893)
 }
 train (t-fpt27nmxmc0mtwy0f7b3brabd) {
   utterance ([g:coachingDustResponseConcept] 초미세먼지 코치 해줘)

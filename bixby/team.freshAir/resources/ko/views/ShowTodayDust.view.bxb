@@ -1,28 +1,14 @@
 result-view {
-  match: userDustConcept(userDust) {
+  match: dustSummaryConcept (dustSummary) {
     from-output: ShowTodayDust
   }
   
   render {
     layout {
-      section {
-        content {
-          single-line {
-            text {
-              style (Detail_L)
-              value ("미세먼지 평균: #{value(userDust.dust.pm100)}㎍/㎥")
-            }
-          }
-          
-          single-line {
-            text {
-              style (Detail_L)
-              value ("초미세먼지 평균: #{value(userDust.dust.pm25)}㎍/㎥")
-            }
-          }
-          
-          image {
-            url ("http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/public/todayChart/#{value(userDust.userId)}")
+      if (exists(dustSummary)) {
+        layout-macro (dustSummaryLayout) {
+          param (dustSummary) {
+            expression (dustSummary)
           }
         }
       }

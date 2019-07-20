@@ -33,13 +33,13 @@ public class AirSyncController {
 
     @Scheduled(cron = "0 30 * * * *")
     public void syncLevelTwoAir() {
-        AirServerInterface airServer = new AirServerInterface();
+        AirServerInterface airServer = new AirServerInterface(airRepository);
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 for (AddressLevelOneContract address : AddressLevelOneContract.values()) {
-                    airServer.getLevelTwoAirData(address, airRepository);
+                    airServer.getLevelTwoAirData(address);
                     try {
                         Thread.sleep(API_CALL_INTERVAL);
                     } catch (InterruptedException e) {
@@ -52,13 +52,13 @@ public class AirSyncController {
 
     @Scheduled(cron = "0 35 * * * *")
     public void syncLevelOneAir() {
-        AirServerInterface airServer = new AirServerInterface();
+        AirServerInterface airServer = new AirServerInterface(airRepository);
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 for (AirItemCodeContract itemCode : AirItemCodeContract.values()) {
-                    airServer.getLevelOneAirData(itemCode, airRepository);
+                    airServer.getLevelOneAirData(itemCode);
                     try {
                         Thread.sleep(API_CALL_INTERVAL);
                     } catch (InterruptedException e) {

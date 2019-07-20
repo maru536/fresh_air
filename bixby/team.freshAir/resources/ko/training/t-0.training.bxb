@@ -10,8 +10,8 @@ train (t-02m0wzh6m2g1z5mnu0fp9a8ib) {
 }
 train (t-08xr7gimuc25rzc71keobmagq) {
   utterance ([g:ShowYesterdayDust] 어제 미세 수치 알려줘)
-  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
-  last-modified (1561907164085)
+  plan (Y2BmUC5ILUpLTC7RSytKLc5wzCzSSyktLgkuzc1NLKp0zs9LTi0oYVDCUBSckV8emVpcklqUkljpAtTBIIehprQ4tcgzBWYGEwMjEDMASUYGBhgNAA==)
+  last-modified (1563613410394)
 }
 train (t-0hx3uh4hy6iaqlhemb8pev0w8) {
   utterance ([g:publicDustConcept] 여기 미세먼지 알려줘)

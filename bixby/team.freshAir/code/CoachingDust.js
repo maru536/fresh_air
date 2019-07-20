@@ -14,8 +14,8 @@ module.exports.function = function coachingDust (currentPosition, userId) {
     };
 
     var body = {
-      "latitude": currentPosition.point.latitude,
-      "longitude": currentPosition.point.longitude
+      "latitude": currentPosition.latitude,
+      "longitude": currentPosition.longitude
     }
 
     var response = http.postUrl('http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/1.0/coachingDust', body, options);

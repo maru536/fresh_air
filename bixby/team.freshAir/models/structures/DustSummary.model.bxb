@@ -1,0 +1,21 @@
+structure (dustSummaryConcept) {
+  description (Dust Summary Concept)
+  
+  property (userId) {
+    type (userIdConcept)
+    min (Required)
+    max (One)
+  }
+  
+  property (avgDust) {
+    type (dustConcept)
+    min (Optional) 
+    max (One)
+  }
+  
+  property (positionDustList) {
+    type (positionDustConcept)
+    min (Optional)
+    max (Many)
+  }
+}

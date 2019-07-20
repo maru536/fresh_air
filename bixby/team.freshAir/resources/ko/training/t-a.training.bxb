@@ -5,6 +5,6 @@ train (t-a5k65xxsszjnifhsgya9ecqfv) {
 }
 train (t-angw6htvk2809bq5neprvyg1h) {
   utterance ([g:ShowYesterdayDust] 어제의 미세먼지 보여줘)
-  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
-  last-modified (1561903919620)
+  plan (Y2BmUC5ILUpLTC7RSytKLc5wzCzSSyktLgkuzc1NLKp0zs9LTi0oYVDCUBSckV8emVpcklqUkljpAtTBIIehprQ4tcgzBWYGEwMjEDMASUYGBhgNAA==)
+  last-modified (1563613572273)
 }

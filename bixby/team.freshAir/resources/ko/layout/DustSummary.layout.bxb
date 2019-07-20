@@ -1,0 +1,113 @@
+layout-macro-def(dustSummaryLayout) {
+  params {
+    param (dustSummary) {
+      type (dustSummaryConcept)
+      min (Required)
+      max (One)
+    }
+  }
+
+  content {
+    section {  // this macro returns a "section"
+      content {
+        if (exists(dustSummary.avgDust)) {
+          single-line {
+            text {
+              style (Detail_L)
+              value ("미세먼지 평균: #{value(dustSummary.avgDust.pm100)}㎍/㎥")
+            }
+          }
+          
+          single-line {
+            text {
+              style (Detail_L)
+              value ("초미세먼지 평균: #{value(dustSummary.avgDust.pm25)}㎍/㎥")
+            }
+          }
+        }
+          
+        image {
+          url ("http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/public/todayChart/#{value(dustSummary.userId)}")
+        }
+          
+        if (exists(dustSummary.positionDustList)) {
+          for-each (dustSummary.positionDustList) {
+            as (positionDust) {
+              map-card {
+                aspect-ratio(16:9)
+                title-area {
+                  slot1 {
+                    text {
+                      style (Detail_M)
+                      value ("시간: #{integer((((positionDust.latestTime % 86400000) / 3600000) + 9) % 24)}시")
+                    }
+                  }
+                  slot2 {
+                    if (positionDust.dust.pm100 >= 0) {
+                      single-line {
+                        text {
+                          style (Detail_M)
+                          value ("평균 미세먼지: #{integer(positionDust.dust.pm100)}㎍/㎥")
+                        }
+                      }
+                    } else {
+                      single-line {
+                        text {
+                          style (Detail_M)
+                          value ("")
+                        }
+                      }
+                    }
+                  }
+                  slot3 {
+                    if (positionDust.dust.pm25 >= 0) {
+                      single-line {
+                        text {
+                          style (Detail_M)
+                          value ("평균 미세먼지: #{integer(positionDust.dust.pm100)}㎍/㎥")
+                        }
+                      }
+                    } else {
+                      single-line {
+                        text {
+                          style (Detail_M)
+                          value ("")
+                        }
+                      }
+                    }
+                  }
+                }
+                markers {
+                  if (positionDust.dust.pm100 < 30) {
+                    marker {
+                      geo (positionDust.centerPosition)
+                      icon("images/transparent_blue_circle.png")
+                    }
+                  }
+                  else-if (positionDust.dust.pm100 < 80) {
+                    marker {
+                      geo (positionDust.centerPosition)
+                      icon("images/transparent_green_circle.png")
+                    }
+                  }
+                  else-if (positionDust.dust.pm100 < 150) {
+                    marker {
+                      geo (positionDust.centerPosition)
+                      icon("images/transparent_orange_circle.png")
+                    }
+                  }
+                  else {
+                    marker {
+                      geo (positionDust.centerPosition)
+                      icon("images/transparent_red_circle.png")
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

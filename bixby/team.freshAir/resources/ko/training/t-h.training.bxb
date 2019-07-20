@@ -15,8 +15,8 @@ train (t-hemexzpbtrmfknnsnofzdsuhe) {
 }
 train (t-hlmx0j92peu0z2iu8w8p2tg1f) {
   utterance ([g:ShowYesterdayDust] 어제의 미세먼지 리포트해줘)
-  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYVDCUBGckV8emVpcklqUklgJUsogh9UUzxSYGUwMjEDMACQZGRhgNAA=)
-  last-modified (1561903964499)
+  plan (Y2BmUC5ILUpLTC7RSytKLc5wzCzSSyktLgkuzc1NLKp0zs9LTi0oYVDCUBSckV8emVpcklqUkljpAtTBIIehprQ4tcgzBWYGEwMjEDMASUYGBhgNAA==)
+  last-modified (1563613533041)
 }
 train (t-hz1rnbxliou004634vey1xnfy) {
   utterance ([g:coachingDustResponseConcept] 미세먼지 비교해줘)

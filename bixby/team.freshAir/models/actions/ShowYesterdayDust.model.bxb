@@ -23,7 +23,7 @@ action (ShowYesterdayDust) {
   }
   
   type (Constructor)
-  output (userDustConcept) {
+  output (dustSummaryConcept) {
     throws {
       error (FailApiCall) {
         on-catch {

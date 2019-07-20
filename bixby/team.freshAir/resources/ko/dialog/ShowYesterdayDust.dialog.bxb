@@ -1,11 +1,11 @@
 dialog (Result) {
   match {
-    userDustConcept (userDust) {
+    dustSummaryConcept (dustSummary) {
       from-output: ShowYesterdayDust
     }
   }
   
-  template("#{value(userDust.userId)}님의 어제 미세먼지 리포트입니다.") {
+  template("#{value(dustSummary.userId)}님의 어제 미세먼지 리포트입니다.") {
     speech ("어제의 미세먼지 리포트입니다.")
   }
 }

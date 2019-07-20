@@ -15,6 +15,6 @@ train (t-mpx9qow8485y8btsx6gzqq9vk) {
 }
 train (t-mzmsew4ip5kq3iq65mhdozr51) {
   utterance ([g:ShowTodayDust] 오늘 미세먼지 보여줘)
-  plan (Y2BmUChILUpLTC7RSytKLc5wzCzSKy1OLXIpLS5xzs9LTi0oYZDDUBGckV8ekp+SWAlShkUeZIJnCkw/EwMjEDMASUYGBhgNAA==)
-  last-modified (1561897537539)
+  plan (Y2BmUC5ILUpLTC7RSytKLc5wzCzSSyktLgkuzc1NLKp0zs9LTi0oYZDDUBSckV8ekp+SWOkCVI1FvrQ4tcgzBaafiYERiBmAJCMDA4wGAA==)
+  last-modified (1563619372773)
 }
