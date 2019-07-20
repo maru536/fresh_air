@@ -1,6 +1,0 @@
-dialog (Concept) {
-  match {
-    PM25Concept
-  }
-  template("초미세먼지")
-}

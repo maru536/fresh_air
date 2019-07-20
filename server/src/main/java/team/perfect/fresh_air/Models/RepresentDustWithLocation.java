@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.google.gson.JsonObject;
 
+import team.perfect.fresh_air.DAO.AddressPK;
 import team.perfect.fresh_air.DAO.DustWithLocationDAO;
+import team.perfect.fresh_air.Utils.ReverseGeocodingUtils;
 
 public class RepresentDustWithLocation {
     List<DustWithLocationDAO> DustWithLocationList;
@@ -88,11 +90,12 @@ public class RepresentDustWithLocation {
         dust.addProperty("pm100", getAveragePm100());
         dust.addProperty("pm25", getAveragePm25());
 
-        JsonObject object = new JsonObject();
-        object.addProperty("latestTime", this.latestTime);
-        object.add("dust", dust);
-        object.add("centerPosition", centerPosition);
+        JsonObject representDustWithLocation = new JsonObject();
+        representDustWithLocation.addProperty("latestTime", this.latestTime);
+        representDustWithLocation.add("dust", dust);
+        representDustWithLocation.add("centerPosition", centerPosition);
+        representDustWithLocation.add("address", ReverseGeocodingUtils.getAddressFromPosition(this.centerPosition).toJsonObject());
 
-        return object;
+        return representDustWithLocation;
     }
 }

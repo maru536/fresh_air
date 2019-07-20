@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 
+import com.google.gson.JsonObject;
+
 public class DustPK implements Serializable {
     private static final long serialVersionUID = 1L;
 	@Column(nullable=false)
@@ -33,5 +35,5 @@ public class DustPK implements Serializable {
 
     public void setTime(long time) {
         this.time = time;
-    }    
+    }
 }

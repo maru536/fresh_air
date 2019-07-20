@@ -31,7 +31,7 @@ import javax.net.ssl.HttpsURLConnection;
  * @version 0.2
  *
  */
-public class NominatimReverseGeocodingJAPI {
+public class NominatimReverseGeocodingAPI {
 	private final String NominatimInstance = "https://nominatim.openstreetmap.org"; 
 
 	private int zoomLevel = 18;
@@ -112,7 +112,7 @@ public class NominatimReverseGeocodingJAPI {
 			}
 			
 			if(latSet && lonSet){
-				NominatimReverseGeocodingJAPI nominatim = new NominatimReverseGeocodingJAPI(zoom);
+				NominatimReverseGeocodingAPI nominatim = new NominatimReverseGeocodingAPI(zoom);
 				Address address = nominatim.getAdress(lat, lon);
 				System.out.println(address);
 				if(osm){
@@ -125,9 +125,9 @@ public class NominatimReverseGeocodingJAPI {
 		}				
 	}
 	
-	public NominatimReverseGeocodingJAPI(){}
+	public NominatimReverseGeocodingAPI(){}
 	
-	public NominatimReverseGeocodingJAPI(int zoomLevel){
+	public NominatimReverseGeocodingAPI(int zoomLevel){
 		if(zoomLevel < 0 || zoomLevel > 18){
 			System.err.println("invalid zoom level, using default value");
 			zoomLevel = 18;

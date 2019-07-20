@@ -56,5 +56,13 @@ public class AddressPK implements Serializable {
     public void setAddressLevelTwo(String addressLevelTwo) {
         this.addressLevelTwo = addressLevelTwo;
     }
+    
+    public JsonObject toJsonObject() {
+        JsonObject address = new JsonObject();
 
+        address.addProperty("levelOne", addressLevelOne);
+        address.addProperty("levelTwo", addressLevelTwo);
+
+        return address;
+    }
 }

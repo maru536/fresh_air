@@ -11,8 +11,13 @@ structure (positionDustConcept) {
     min (Required) max (One)
   }
   
-  property (centerPosition) {
+  property (position) {
     type (positionConcept)
     min (Required) max (One)
+  }
+  
+  property (address) {
+    type (addressConcept)
+    min (Optional) max (One)
   }
 }

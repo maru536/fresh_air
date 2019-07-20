@@ -6,12 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import team.perfect.fresh_air.DAO.AddressPK;
 import team.perfect.fresh_air.Geocoding.Address;
-import team.perfect.fresh_air.Geocoding.NominatimReverseGeocodingJAPI;
+import team.perfect.fresh_air.Geocoding.NominatimReverseGeocodingAPI;
 import team.perfect.fresh_air.Models.Position;
 
 public class ReverseGeocodingUtils {
     public static AddressPK getAddressFromPosition(Position position) {
-        NominatimReverseGeocodingJAPI reverseGeocoding = new NominatimReverseGeocodingJAPI();
+        NominatimReverseGeocodingAPI reverseGeocoding = new NominatimReverseGeocodingAPI();
 
         Address address = reverseGeocoding.getAdress(position.getLatitude(), position.getLongitude());
         return getAddressPKFromDisplayName(address.getDisplayName());
@@ -53,5 +53,4 @@ public class ReverseGeocodingUtils {
         else
             return addressLevel[addressLevel.length - 3];
     }
-
 }

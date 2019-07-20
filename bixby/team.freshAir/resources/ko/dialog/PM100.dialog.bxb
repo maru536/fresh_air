@@ -1,6 +1,0 @@
-dialog (Concept) {
-  match {
-    PM100Concept
-  }
-  template("미세먼지")
-}

@@ -5,29 +5,38 @@ layout-macro-def(dustSummaryLayout) {
       min (Required)
       max (One)
     }
+    param (urlBase) {
+      type (urlConcept)
+      min (Required)
+      max (One)
+    }
   }
 
   content {
     section {  // this macro returns a "section"
       content {
         if (exists(dustSummary.avgDust)) {
-          single-line {
-            text {
-              style (Detail_L)
-              value ("미세먼지 평균: #{value(dustSummary.avgDust.pm100)}㎍/㎥")
+          if (dustSummary.avgDust.pm100 >= 0) {
+            single-line {
+              text {
+                style (Detail_L)
+                value ("미세먼지 평균: #{value(dustSummary.avgDust.pm100)}㎍/㎥")
+              }
             }
           }
           
-          single-line {
-            text {
-              style (Detail_L)
-              value ("초미세먼지 평균: #{value(dustSummary.avgDust.pm25)}㎍/㎥")
+          if (dustSummary.avgDust.pm25 >= 0) {
+            single-line {
+              text {
+                style (Detail_L)
+                value ("초미세먼지 평균: #{value(dustSummary.avgDust.pm25)}㎍/㎥")
+              }
             }
           }
         }
           
         image {
-          url ("http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/public/todayChart/#{value(dustSummary.userId)}")
+          url ("#{value(urlBase)}/#{value(dustSummary.userId)}")
         }
           
         if (exists(dustSummary.positionDustList)) {
@@ -37,9 +46,25 @@ layout-macro-def(dustSummaryLayout) {
                 aspect-ratio(16:9)
                 title-area {
                   slot1 {
-                    text {
-                      style (Detail_M)
-                      value ("시간: #{integer((((positionDust.latestTime % 86400000) / 3600000) + 9) % 24)}시")
+                    if (exists(positionDust.address)) {
+                      if (exists(positionDust.address.levelTwo)) {
+                        text {
+                          style (Detail_M)
+                          value ("위치: #{value(positionDust.address.levelOne)} #{value(positionDust.address.levelTwo)}")
+                        }
+                      }
+                      else {
+                        text {
+                          style (Detail_M)
+                          value ("위치: #{value(positionDust.address.levelOne)}")
+                        }
+                      }
+                    }
+                    else {
+                      text {
+                        style (Detail_M)
+                        value ("")
+                      }
                     }
                   }
                   slot2 {
@@ -51,28 +76,29 @@ layout-macro-def(dustSummaryLayout) {
                         }
                       }
                     } else {
-                      single-line {
-                        text {
-                          style (Detail_M)
-                          value ("")
+                      if (positionDust.dust.pm25 >= 0) {
+                        single-line {
+                          text {
+                            style (Detail_M)
+                            value ("평균 초미세먼지: #{integer(positionDust.dust.pm25)}㎍/㎥")
+                          }
+                        }
+                      } 
+                      else {
+                        single-line {
+                          text {
+                            style (Detail_M)
+                            value ("")
+                          }
                         }
                       }
                     }
                   }
                   slot3 {
-                    if (positionDust.dust.pm25 >= 0) {
-                      single-line {
-                        text {
-                          style (Detail_M)
-                          value ("평균 미세먼지: #{integer(positionDust.dust.pm100)}㎍/㎥")
-                        }
-                      }
-                    } else {
-                      single-line {
-                        text {
-                          style (Detail_M)
-                          value ("")
-                        }
+                    single-line {
+                      text {
+                        style (Detail_M)
+                        value ("마지막 측정 시간: #{integer((((positionDust.latestTime % 86400000) / 3600000) + 9) % 24)}시")
                       }
                     }
                   }
@@ -80,25 +106,25 @@ layout-macro-def(dustSummaryLayout) {
                 markers {
                   if (positionDust.dust.pm100 < 30) {
                     marker {
-                      geo (positionDust.centerPosition)
+                      geo (positionDust.position)
                       icon("images/transparent_blue_circle.png")
                     }
                   }
                   else-if (positionDust.dust.pm100 < 80) {
                     marker {
-                      geo (positionDust.centerPosition)
+                      geo (positionDust.position)
                       icon("images/transparent_green_circle.png")
                     }
                   }
                   else-if (positionDust.dust.pm100 < 150) {
                     marker {
-                      geo (positionDust.centerPosition)
+                      geo (positionDust.position)
                       icon("images/transparent_orange_circle.png")
                     }
                   }
                   else {
                     marker {
-                      geo (positionDust.centerPosition)
+                      geo (positionDust.position)
                       icon("images/transparent_red_circle.png")
                     }
                   }

@@ -10,6 +10,9 @@ result-view {
           param (dustSummary) {
             expression (dustSummary)
           }
+          param (urlBase) {
+            literal ("http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/public/todayChart")
+          }
         }
       }
     }
