@@ -11,7 +11,7 @@ import team.perfect.fresh_air.Utils.ReverseGeocodingUtils;
 
 public class RepresentDustWithLocation {
     List<DustWithLocationDAO> DustWithLocationList;
-    Position centerPosition;
+    Position position;
     int sumPm100 = 0;
     int countPm100 = 0;
     int sumPm25 = 0;
@@ -20,14 +20,14 @@ public class RepresentDustWithLocation {
 
     public RepresentDustWithLocation() {
         DustWithLocationList = new ArrayList<>();
-        centerPosition = new Position(0.0, 0.0);
+        position = new Position(0.0, 0.0);
     }
 
     public void addDustWithLocation(DustWithLocationDAO newDustWithLocation) {
-        double sumLatitude = centerPosition.getLatitude()*DustWithLocationList.size() + newDustWithLocation.getLatitude();
-        double sumLongitude = centerPosition.getLongitude()*DustWithLocationList.size() + newDustWithLocation.getLongitude();
+        double sumLatitude = position.getLatitude()*DustWithLocationList.size() + newDustWithLocation.getLatitude();
+        double sumLongitude = position.getLongitude()*DustWithLocationList.size() + newDustWithLocation.getLongitude();
         DustWithLocationList.add(newDustWithLocation);
-        centerPosition = new Position(sumLatitude / DustWithLocationList.size(), sumLongitude / DustWithLocationList.size());
+        position = new Position(sumLatitude / DustWithLocationList.size(), sumLongitude / DustWithLocationList.size());
         latestTime = newDustWithLocation.getTime();
 
         if (newDustWithLocation.getPm100() >= 0) {
@@ -42,10 +42,10 @@ public class RepresentDustWithLocation {
     }
 
     public void addPublicDustWithLocation(DustWithLocationDAO newDustWithLocation) {
-        double sumLatitude = centerPosition.getLatitude()*DustWithLocationList.size() + newDustWithLocation.getLatitude();
-        double sumLongitude = centerPosition.getLongitude()*DustWithLocationList.size() + newDustWithLocation.getLongitude();
+        double sumLatitude = position.getLatitude()*DustWithLocationList.size() + newDustWithLocation.getLatitude();
+        double sumLongitude = position.getLongitude()*DustWithLocationList.size() + newDustWithLocation.getLongitude();
         DustWithLocationList.add(newDustWithLocation);
-        centerPosition = new Position(sumLatitude / DustWithLocationList.size(), sumLongitude / DustWithLocationList.size());
+        position = new Position(sumLatitude / DustWithLocationList.size(), sumLongitude / DustWithLocationList.size());
         latestTime = newDustWithLocation.getTime();
 
         if (newDustWithLocation.getPublicPm100() >= 0) {
@@ -63,8 +63,8 @@ public class RepresentDustWithLocation {
         return DustWithLocationList;
     }
 
-    public Position getCenterPosition() {
-        return centerPosition;
+    public Position getPosition() {
+        return position;
     }
 
     public int getAveragePm100() {
@@ -82,9 +82,9 @@ public class RepresentDustWithLocation {
     }
 
     public JsonObject toJsonObject() {
-        JsonObject centerPosition = new JsonObject();
-        centerPosition.addProperty("latitude", this.centerPosition.getLatitude());
-        centerPosition.addProperty("longitude", this.centerPosition.getLongitude());
+        JsonObject position = new JsonObject();
+        position.addProperty("latitude", this.position.getLatitude());
+        position.addProperty("longitude", this.position.getLongitude());
 
         JsonObject dust = new JsonObject();
         dust.addProperty("pm100", getAveragePm100());
@@ -93,8 +93,8 @@ public class RepresentDustWithLocation {
         JsonObject representDustWithLocation = new JsonObject();
         representDustWithLocation.addProperty("latestTime", this.latestTime);
         representDustWithLocation.add("dust", dust);
-        representDustWithLocation.add("centerPosition", centerPosition);
-        representDustWithLocation.add("address", ReverseGeocodingUtils.getAddressFromPosition(this.centerPosition).toJsonObject());
+        representDustWithLocation.add("position", position);
+        representDustWithLocation.add("address", ReverseGeocodingUtils.getAddressFromPosition(this.position).toJsonObject());
 
         return representDustWithLocation;
     }

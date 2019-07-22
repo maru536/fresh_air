@@ -13,8 +13,8 @@ structure (dustSummaryConcept) {
     max (One)
   }
   
-  property (positionDustList) {
-    type (positionDustConcept)
+  property (representativeDustPositionList) {
+    type (representativeDustPositionConcept)
     min (Optional)
     max (Many)
   }

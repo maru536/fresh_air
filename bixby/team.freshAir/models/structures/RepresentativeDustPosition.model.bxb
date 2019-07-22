@@ -1,5 +1,5 @@
-structure (positionDustConcept) {
-  description (positionDustConcept)
+structure (representativeDustPositionConcept) {
+  description (Representative Dust Position)
   
   property (latestTime) {
     type (timeConcept)

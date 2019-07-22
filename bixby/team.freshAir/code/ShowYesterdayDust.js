@@ -6,33 +6,22 @@ var fail = require('fail');
 module.exports.function = function showYesterdayDust (userId) {
   // RollResult
   console.log(userId);
-  var responseAvg = http.getUrl('http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/public/yesterdayDust', {
-    format: 'json', 
+  
+  var apiResponse = http.getUrl('http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/public/yesterdayDustMap', {
+    format: 'json',
     headers: {
       userId: userId
     }
   });
   
-  var responseDustMap = http.getUrl('http://ec2-15-164-164-86.ap-northeast-2.compute.amazonaws.com:8080/public/yesterdayDustMap', {
-    format: 'json', 
-    headers: {
-      userId: userId
-    }
-  });
-  
-  console.log(responseDustMap.representDustWithLocationList);
-  
-  if (responseAvg != null && responseDustMap != null && responseDustMap.code == 200 && responseAvg.code == 200) {
+  if (apiResponse != null && apiResponse.code == 200) {
     return {
-      userId: responseAvg.dust.userId,
-      avgDust: {
-        pm100: responseAvg.dust.pm100,
-        pm25: responseAvg.dust.pm25
-      }, 
-      positionDustList: responseDustMap.representDustWithLocationList
+      userId: apiResponse.userId,
+      avgDust: apiResponse.avgDust, 
+      representativeDustPositionList: apiResponse.representDustWithLocationList
     }
   }
-  else if (responseAvg.code == 404 && responseDustMap.code == 404) {
+  else if (apiResponse.code == 404) {
     throw fail.checkedError('There is no Dust data', 'NoDustData', {})
   }
   else {

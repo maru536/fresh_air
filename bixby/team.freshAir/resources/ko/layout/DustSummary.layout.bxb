@@ -24,7 +24,7 @@ layout-macro-def(dustSummaryLayout) {
               }
             }
           }
-          
+
           if (dustSummary.avgDust.pm25 >= 0) {
             single-line {
               text {
@@ -39,95 +39,12 @@ layout-macro-def(dustSummaryLayout) {
           url ("#{value(urlBase)}/#{value(dustSummary.userId)}")
         }
           
-        if (exists(dustSummary.positionDustList)) {
-          for-each (dustSummary.positionDustList) {
-            as (positionDust) {
-              map-card {
-                aspect-ratio(16:9)
-                title-area {
-                  slot1 {
-                    if (exists(positionDust.address)) {
-                      if (exists(positionDust.address.levelTwo)) {
-                        text {
-                          style (Detail_M)
-                          value ("위치: #{value(positionDust.address.levelOne)} #{value(positionDust.address.levelTwo)}")
-                        }
-                      }
-                      else {
-                        text {
-                          style (Detail_M)
-                          value ("위치: #{value(positionDust.address.levelOne)}")
-                        }
-                      }
-                    }
-                    else {
-                      text {
-                        style (Detail_M)
-                        value ("")
-                      }
-                    }
-                  }
-                  slot2 {
-                    if (positionDust.dust.pm100 >= 0) {
-                      single-line {
-                        text {
-                          style (Detail_M)
-                          value ("평균 미세먼지: #{integer(positionDust.dust.pm100)}㎍/㎥")
-                        }
-                      }
-                    } else {
-                      if (positionDust.dust.pm25 >= 0) {
-                        single-line {
-                          text {
-                            style (Detail_M)
-                            value ("평균 초미세먼지: #{integer(positionDust.dust.pm25)}㎍/㎥")
-                          }
-                        }
-                      } 
-                      else {
-                        single-line {
-                          text {
-                            style (Detail_M)
-                            value ("")
-                          }
-                        }
-                      }
-                    }
-                  }
-                  slot3 {
-                    single-line {
-                      text {
-                        style (Detail_M)
-                        value ("마지막 측정 시간: #{integer((((positionDust.latestTime % 86400000) / 3600000) + 9) % 24)}시")
-                      }
-                    }
-                  }
-                }
-                markers {
-                  if (positionDust.dust.pm100 < 30) {
-                    marker {
-                      geo (positionDust.position)
-                      icon("images/transparent_blue_circle.png")
-                    }
-                  }
-                  else-if (positionDust.dust.pm100 < 80) {
-                    marker {
-                      geo (positionDust.position)
-                      icon("images/transparent_green_circle.png")
-                    }
-                  }
-                  else-if (positionDust.dust.pm100 < 150) {
-                    marker {
-                      geo (positionDust.position)
-                      icon("images/transparent_orange_circle.png")
-                    }
-                  }
-                  else {
-                    marker {
-                      geo (positionDust.position)
-                      icon("images/transparent_red_circle.png")
-                    }
-                  }
+        if (exists(dustSummary.representativeDustPositionList)) {
+          for-each (dustSummary.representativeDustPositionList) {
+            as (representativeDustPosition) {
+              layout-macro (representativeDustPositionLayout) {
+                param (representativeDustPosition) {
+                  expression (representativeDustPosition)
                 }
               }
             }

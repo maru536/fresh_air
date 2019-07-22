@@ -77,8 +77,8 @@ public class DustWithLocationUtils {
     private static boolean isIncludedInRepresentDustWithLocation(Position explorePosition,
             RepresentDustWithLocation representDustWithLocation) {
         return calculateDistance(explorePosition.getLatitude(), explorePosition.getLongitude(),
-                representDustWithLocation.getCenterPosition().getLatitude(),
-                representDustWithLocation.getCenterPosition().getLongitude()) < includingArea;
+                representDustWithLocation.getPosition().getLatitude(),
+                representDustWithLocation.getPosition().getLongitude()) < includingArea;
     }
 
     public static int indexOfIncludedInRepresentDustWithLocation(Position explorePosition,

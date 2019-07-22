@@ -118,40 +118,6 @@ public class DustApiController {
         }
     }
 
-    @GetMapping("public/todayDust")
-    public Response todayPulbicDust(@RequestHeader String userId) {
-        List<DustWithLocationDAO> dustList = queryTodayAllDustByUserId(System.currentTimeMillis(), userId);
-        Dust avgPublicDust = calculateAvgPublicDust(dustList);
-
-        return responseDust(userId, avgPublicDust);
-    }
-
-    @GetMapping("measure/todayDust")
-    public Response todayMeasuredDust(@RequestHeader String userId) {
-        List<DustWithLocationDAO> dustList = queryTodayMeasuredDustByUserId(System.currentTimeMillis(), userId);
-        Dust avgMeasuredDust = calculateAvgMeasuredDust(dustList);
-
-        return responseDust(userId, avgMeasuredDust);
-    }
-
-    @GetMapping("public/yesterdayDust")
-    public Response yesterdayPublicDust(@RequestHeader String userId) {
-        List<DustWithLocationDAO> dustList = queryDayAllDustByUserId(System.currentTimeMillis() - TimeContract.A_DAY,
-                userId);
-        Dust avgPublicDust = calculateAvgPublicDust(dustList);
-
-        return responseDust(userId, avgPublicDust);
-    }
-
-    @GetMapping("measure/yesterdayDust")
-    public Response yesterdayMeasuredDust(@RequestHeader String userId) {
-        List<DustWithLocationDAO> dustList = queryDayMeasuredDustByUserId(
-                System.currentTimeMillis() - TimeContract.A_DAY, userId);
-        Dust avgMeasuredDust = calculateAvgPublicDust(dustList);
-
-        return responseDust(userId, avgMeasuredDust);
-    }
-
     private Dust calculateAvgPublicDust(List<DustWithLocationDAO> dustList) {
         int sumPm100 = 0;
         int countPm100 = 0;
@@ -222,14 +188,6 @@ public class DustApiController {
         }
 
         return new Dust(avgPm100, avgPm25);
-    }
-
-    private Response responseDust(String userId, Dust avgDust) {
-        if (avgDust.getPm100() >= 0 || avgDust.getPm25() >= 0)
-            return new ResponseUserLatestDust(200, "Success",
-                    new UserLatestDust(userId, -1L, avgDust.getPm100(), avgDust.getPm25()));
-        else
-            return new Response(404, "There is no dust data");
     }
 
     @GetMapping(path = "public/todayChart/{userId}", produces = MediaType.IMAGE_PNG_VALUE)
@@ -390,11 +348,13 @@ public class DustApiController {
     @GetMapping("public/todayDustMap")
     public Response todayPublicDustMap(@RequestHeader String userId) {
         long currentTimeMillis = System.currentTimeMillis();
+        List<DustWithLocationDAO> dustLocationList = queryTodayAllDustByUserId(currentTimeMillis, userId);
         List<RepresentDustWithLocation> allRepresentDustLocation = DustWithLocationUtils
-                .representAllDustWithLocation(queryTodayAllDustByUserId(currentTimeMillis, userId));
+                .representAllDustWithLocation(dustLocationList);
 
         if (allRepresentDustLocation.size() > 0)
-            return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
+            return new ResponseRepresentDustWithLocation(200, "Success", 
+                    userId, calculateAvgPublicDust(dustLocationList), allRepresentDustLocation);
 
         else
             return new Response(404, "There is no dust data");
@@ -403,11 +363,13 @@ public class DustApiController {
     @GetMapping("measure/todayDustMap")
     public Response todayMeasuredDustMap(@RequestHeader String userId) {
         long currentTimeMillis = System.currentTimeMillis();
+        List<DustWithLocationDAO> dustLocationList = queryTodayMeasuredDustByUserId(currentTimeMillis, userId);
         List<RepresentDustWithLocation> allRepresentDustLocation = DustWithLocationUtils
-                .representMeasuredDustWithLocation(queryTodayMeasuredDustByUserId(currentTimeMillis, userId));
+                .representMeasuredDustWithLocation(dustLocationList);
 
         if (allRepresentDustLocation.size() > 0)
-            return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
+            return new ResponseRepresentDustWithLocation(200, "Success", 
+                    userId, calculateAvgMeasuredDust(dustLocationList), allRepresentDustLocation);
 
         else
             return new Response(404, "There is no dust data");
@@ -416,11 +378,13 @@ public class DustApiController {
     @GetMapping("public/yesterdayDustMap")
     public Response yesterdayPublicDustMap(@RequestHeader String userId) {
         long currentTimeMillis = System.currentTimeMillis();
+        List<DustWithLocationDAO> dustLocationList = queryDayAllDustByUserId(currentTimeMillis - TimeContract.A_DAY, userId);
         List<RepresentDustWithLocation> allRepresentDustLocation = DustWithLocationUtils
-                .representAllDustWithLocation(queryDayAllDustByUserId(currentTimeMillis - TimeContract.A_DAY, userId));
+                .representAllDustWithLocation(dustLocationList);
 
         if (allRepresentDustLocation.size() > 0)
-            return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
+            return new ResponseRepresentDustWithLocation(200, "Success", 
+                    userId, calculateAvgPublicDust(dustLocationList), allRepresentDustLocation);
         else
             return new Response(404, "There is no dust data");
     }
@@ -428,12 +392,13 @@ public class DustApiController {
     @GetMapping("measure/yesterdayDustMap")
     public Response yesterdayMeasuredDustMap(@RequestHeader String userId) {
         long currentTimeMillis = System.currentTimeMillis();
+        List<DustWithLocationDAO> dustLocationList = queryDayMeasuredDustByUserId(currentTimeMillis - TimeContract.A_DAY, userId);
         List<RepresentDustWithLocation> allRepresentDustLocation = DustWithLocationUtils
-                .representMeasuredDustWithLocation(
-                        queryDayMeasuredDustByUserId(currentTimeMillis - TimeContract.A_DAY, userId));
+                .representMeasuredDustWithLocation(dustLocationList);
 
         if (allRepresentDustLocation.size() > 0)
-            return new ResponseRepresentDustWithLocation(200, "Success", allRepresentDustLocation);
+            return new ResponseRepresentDustWithLocation(200, "Success", 
+                    userId, calculateAvgMeasuredDust(dustLocationList), allRepresentDustLocation);
         else
             return new Response(404, "There is no dust data");
     }
@@ -463,7 +428,7 @@ public class DustApiController {
                     }
                 }
             } catch (NoSuchElementException e) {
-
+                exploreDust = null;
             }
 
             hourXAxis.add(exploreHour);
@@ -535,7 +500,7 @@ public class DustApiController {
                     }
                 }
             } catch (NoSuchElementException e) {
-
+                exploreDust = null;
             }
 
             hourXAxis.add(exploreHour);

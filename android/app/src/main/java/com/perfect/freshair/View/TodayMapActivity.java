@@ -115,7 +115,6 @@ public class TodayMapActivity extends AppCompatActivity implements OnMapReadyCal
 
             mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(37.5281761, 127.0275929)));
 
-
             serverInterface.todayDustMap(PreferencesUtils.getUser(getApplicationContext()), new ResponseDustMapCallback() {
                 @Override
                 public void onResponse(int code, String message, JsonArray representDustWithLocationList) {

@@ -1,0 +1,100 @@
+layout-macro-def(representativeDustPositionLayout) {
+  params {
+    param (representativeDustPosition) {
+      type (representativeDustPositionConcept)
+      min (Required)
+      max (One)
+    }
+  }
+
+  content {
+    map-card {
+      aspect-ratio(16:9)
+      title-area {
+        slot1 {
+          if (exists(representativeDustPosition.address)) {
+            if (exists(representativeDustPosition.address.levelTwo)) {
+              text {
+                style (Detail_M)
+                value ("위치: #{value(representativeDustPosition.address.levelOne)} #{value(representativeDustPosition.address.levelTwo)}")
+              }
+            }
+            else {
+              text {
+                style (Detail_M)
+                value ("위치: #{value(representativeDustPosition.address.levelOne)}")
+              }
+            }
+          }
+          else {
+            text {
+              style (Detail_M)
+              value ("")
+            }
+          }
+        }
+        slot2 {
+          if (representativeDustPosition.dust.pm100 >= 0) {
+            single-line {
+              text {
+                style (Detail_M)
+                value ("평균 미세먼지: #{integer(representativeDustPosition.dust.pm100)}㎍/㎥")
+              }
+            }
+          } else {
+            if (representativeDustPosition.dust.pm25 >= 0) {
+              single-line {
+                text {
+                  style (Detail_M)
+                  value ("평균 초미세먼지: #{integer(representativeDustPosition.dust.pm25)}㎍/㎥")
+                }
+              }
+            } 
+            else {
+              single-line {
+                text {
+                  style (Detail_M)
+                  value ("")
+                }
+              }
+            }
+          }
+        }
+        slot3 {
+          single-line {
+            text {
+              style (Detail_M)
+              value ("마지막 측정 시간: #{integer((((representativeDustPosition.latestTime % 86400000) / 3600000) + 9) % 24)}시")
+            }
+          }
+        }
+      }
+      markers {
+        if (representativeDustPosition.dust.pm100 < 30) {
+          marker {
+            geo (representativeDustPosition.position)
+            icon("images/transparent_blue_circle.png")
+          }
+        }
+        else-if (representativeDustPosition.dust.pm100 < 80) {
+          marker {
+            geo (representativeDustPosition.position)
+            icon("images/transparent_green_circle.png")
+          }
+        }
+        else-if (representativeDustPosition.dust.pm100 < 150) {
+          marker {
+            geo (representativeDustPosition.position)
+            icon("images/transparent_orange_circle.png")
+          }
+        }
+        else {
+          marker {
+            geo (representativeDustPosition.position)
+            icon("images/transparent_red_circle.png")
+          }
+        }
+      }
+    }
+  }
+}
