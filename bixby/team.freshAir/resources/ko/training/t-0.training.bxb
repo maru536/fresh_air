@@ -3,11 +3,6 @@ train (t-024x0vku9a50x0u9u8ks36smz) {
   plan (Y2BkUCpILUpLTC7RSytKLc5wzCzSKyhNyslMdiktLnHOz0tOLShhAAFGEAEA)
   last-modified (1561906826355)
 }
-train (t-02m0wzh6m2g1z5mnu0fp9a8ib) {
-  utterance ([g:SignUp] 가입 해줘)
-  plan (Y2BhkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzPCy1gkMKQyIRrwjS0ILG4uBwuz8zAyMAEJBmANAhCAJgFAA==)
-  last-modified (1561544591813)
-}
 train (t-08xr7gimuc25rzc71keobmagq) {
   utterance ([g:ShowYesterdayDust] 어제 미세 수치 알려줘)
   plan (Y2BmUC5ILUpLTC7RSytKLc5wzCzSSyktLgkuzc1NLKp0zs9LTi0oYVDCUBSckV8emVpcklqUkljpAtTBIIehprQ4tcgzBWYGEwMjEDMASUYGBhgNAA==)

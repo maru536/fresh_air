@@ -1,6 +1,20 @@
 action (SignOut) {
-  description (__DESCRIPTION__)
+  description (User Sign Out)
   collect {
+    input (userId) {
+      type (userIdConcept)
+      min (Optional) max (One)
+      
+      validate {
+        if (userId == '') {
+          halt {
+            dialog {
+              template ("아직 로그인 되지 않았습니다.")
+            }
+          }
+        }
+      }
+    }
   }
   
   type (Constructor)

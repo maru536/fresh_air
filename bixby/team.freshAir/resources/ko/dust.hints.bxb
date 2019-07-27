@@ -7,7 +7,6 @@ hints {
     utterance (미세 코치에서 주변 미세먼지 알려줘)
     utterance (미세 코치에서 앱 실행해)
     utterance (미세 코치에서 로그인 해줘)
-    utterance (미세 코치에서 가입해줘)
     utterance (미세 코치에서 로그아웃 해줘)
   }
 }

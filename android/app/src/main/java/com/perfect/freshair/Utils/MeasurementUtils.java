@@ -1,20 +1,15 @@
 package com.perfect.freshair.Utils;
 
-import android.location.Location;
-
 import com.google.android.gms.maps.model.LatLng;
-import com.perfect.freshair.Model.Measurement;
 import com.perfect.freshair.Model.RepresentDustWithLocation;
-import com.perfect.freshair.Model.RepresentMeasurement;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MeasurementUtils {
     public static final float includingArea = 100.0f;
 
     private static boolean isIncludedInRepresentDustWithLocation(LatLng explorePosition, RepresentDustWithLocation representDustWithLocation) {
-        return calculateDistance(explorePosition.latitude, explorePosition.longitude, representDustWithLocation.getCenterPosition().latitude, representDustWithLocation.getCenterPosition().longitude) < includingArea;
+        return calculateDistance(explorePosition.latitude, explorePosition.longitude, representDustWithLocation.getPosition().latitude, representDustWithLocation.getPosition().longitude) < includingArea;
     }
 
     public static int indexOfIncludedInRepresentDustWithLocation(LatLng explorePosition, List<RepresentDustWithLocation> representDustWithLocationList) {

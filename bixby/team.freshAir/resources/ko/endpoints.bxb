@@ -16,13 +16,9 @@ endpoints {
     }
     
     action-endpoint (SignIn) {
-      accepted-inputs (userId, passwd)
+      accepted-inputs ($vivContext)
       local-endpoint ("SignIn.js")
-    }
-    
-    action-endpoint (SignUp) {
-      accepted-inputs (userId, passwd)
-      local-endpoint ("SignUp.js")
+      authorization (User)
     }
     
     action-endpoint (CoachingDust) {

@@ -10,8 +10,8 @@ train (t-h4oalyzgjn2vo49zxjomwy92q) {
 }
 train (t-hemexzpbtrmfknnsnofzdsuhe) {
   utterance ([g:SignIn] 로그인 해줘)
-  plan (Y2BhkCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzP88xjkMKQyIRrwjS0ILG4uBwuz8zAyMAEJBmANAhCAJgFAA==)
-  last-modified (1561369321075)
+  plan (Y2BikCtILUpLTC7RSytKLc5wzCzSKy1OLfJMcc7PS04tKGEQx5APzkzP88xjYARCBigGkgA=)
+  last-modified (1564221467752)
 }
 train (t-hlmx0j92peu0z2iu8w8p2tg1f) {
   utterance ([g:ShowYesterdayDust] 어제의 미세먼지 리포트해줘)

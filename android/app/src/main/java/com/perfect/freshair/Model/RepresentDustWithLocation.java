@@ -7,19 +7,19 @@ import com.perfect.freshair.Utils.JsonUtils;
 public class RepresentDustWithLocation {
     private long latestTime;
     private Dust dust;
-    private LatLng centerPosition;
+    private LatLng position;
 
-    public RepresentDustWithLocation(long latestTime, Dust dust, LatLng centerPosition) {
+    public RepresentDustWithLocation(long latestTime, Dust dust, LatLng position) {
         this.latestTime = latestTime;
         this.dust = dust;
-        this.centerPosition = centerPosition;
+        this.position = position;
     }
 
     public RepresentDustWithLocation(JsonObject representDustWithLocation) {
         latestTime = JsonUtils.getAsLong(representDustWithLocation.get(Key.LATEST_TIME.getKey()), -1L);
         dust = new Dust(JsonUtils.getAsJsonObject(representDustWithLocation.get(Key.DUST.getKey())));
-        JsonObject center = JsonUtils.getAsJsonObject(representDustWithLocation.get(Key.CENTER_POSITION.getKey()));
-        centerPosition = new LatLng(JsonUtils.getAsDouble(center.get(Key.LATITUDE.getKey()), 0.0),
+        JsonObject center = JsonUtils.getAsJsonObject(representDustWithLocation.get(Key.POSITION.getKey()));
+        position = new LatLng(JsonUtils.getAsDouble(center.get(Key.LATITUDE.getKey()), 0.0),
                     JsonUtils.getAsDouble(center.get(Key.LONGITUDE.getKey()), 0.0));
     }
 
@@ -39,16 +39,16 @@ public class RepresentDustWithLocation {
         this.dust = dust;
     }
 
-    public LatLng getCenterPosition() {
-        return centerPosition;
+    public LatLng getPosition() {
+        return position;
     }
 
-    public void setCenterPosition(LatLng centerPosition) {
-        this.centerPosition = centerPosition;
+    public void setPosition(LatLng position) {
+        this.position = position;
     }
 
     public enum Key {
-        LATEST_TIME("latestTime"), DUST("dust"), CENTER_POSITION("centerPosition"), LATITUDE("latitude"), LONGITUDE("longitude");
+        LATEST_TIME("latestTime"), DUST("dust"), POSITION("position"), LATITUDE("latitude"), LONGITUDE("longitude");
 
         private String key;
 

@@ -107,8 +107,8 @@ public class YesterdayMapActivity extends AppCompatActivity implements OnMapRead
                     int includingIndex = MeasurementUtils.indexOfIncludedInRepresentDustWithLocation(circle.getCenter(), mAllRepresentDustWithLocationList);
 
                     if (includingIndex > 0) {
-                        addLine(mAllRepresentDustWithLocationList.get(includingIndex - 1).getCenterPosition(), mAllRepresentDustWithLocationList.get(includingIndex).getCenterPosition());
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mAllRepresentDustWithLocationList.get(includingIndex - 1).getCenterPosition(), mZoom));
+                        addLine(mAllRepresentDustWithLocationList.get(includingIndex - 1).getPosition(), mAllRepresentDustWithLocationList.get(includingIndex).getPosition());
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mAllRepresentDustWithLocationList.get(includingIndex - 1).getPosition(), mZoom));
                     }
                 }
             });
@@ -130,13 +130,13 @@ public class YesterdayMapActivity extends AppCompatActivity implements OnMapRead
                             addCircle(representDustWithLocation);
 
                             if (previousPositon != null)
-                                addLine(previousPositon, representDustWithLocation.getCenterPosition());
-                            previousPositon = representDustWithLocation.getCenterPosition();
+                                addLine(previousPositon, representDustWithLocation.getPosition());
+                            previousPositon = representDustWithLocation.getPosition();
                         }
 
                         if (mAllRepresentDustWithLocationList.size() > 0) {
                             RepresentDustWithLocation latestDustWithLocation = mAllRepresentDustWithLocationList.get(mAllRepresentDustWithLocationList.size() - 1);
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latestDustWithLocation.getCenterPosition(), mZoom));
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latestDustWithLocation.getPosition(), mZoom));
                         }
                     }
                     else
@@ -150,7 +150,7 @@ public class YesterdayMapActivity extends AppCompatActivity implements OnMapRead
         int circleColor = transDustToColor(representDustWithLocation.getDust().getPm100());
 
         mMap.addCircle(new CircleOptions()
-                .center(representDustWithLocation.getCenterPosition())
+                .center(representDustWithLocation.getPosition())
                 .radius(MeasurementUtils.includingArea)
                 .strokeColor(circleColor)
                 .fillColor(circleColor)

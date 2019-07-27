@@ -1,0 +1,15 @@
+authorization {
+  // Google book api에 대한 OAuth 권한을 얻은 후, OAuth_URI, client_id, client_secret, Token_URI를 알맞은 정보로 변경
+  // README를 참조
+  user {
+    oauth2-authorization-code (google){
+      authorize-endpoint (https://accounts.google.com/o/oauth2/auth)
+      client-id (595417554422-fp2f7947hp9uqa342sal0pk9u5aahavd.apps.googleusercontent.com)
+      client-secret-key (secret) 
+      scope (email profile openid)
+      token-endpoint (https://oauth2.googleapis.com/token)
+      login-button-label (구글 로그인)
+    }
+  }
+}
+

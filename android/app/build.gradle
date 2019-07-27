@@ -6,8 +6,8 @@ android {
         applicationId "com.perfect.freshair"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 11
-        versionName "2.1"
+        versionCode 13
+        versionName "2.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

@@ -1,15 +1,5 @@
 action (SignIn) {
   description (User Sign In)
-  collect {
-    input (userId) {
-      type (idConcept)
-      min (Required) max (One)
-    }
-    input (passwd) {
-      type (passwdConcept)
-      min (Required) max (One)
-    }
-  }
   output (userIdConcept) {
     throws {
       error (FailSignIn) {
