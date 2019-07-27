@@ -61,4 +61,5 @@
         <item>어제 미세지도</item>
     </string-array>
     <string name="title_activity_map">Map</string>
+    <string name="google_login_oauth_client_id">595417554422-ct8h7o3rqlhmop7468m5htcc30b9sp0v.apps.googleusercontent.com</string>
 </resources>

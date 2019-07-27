@@ -4,10 +4,13 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,6 +20,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.perfect.freshair.API.DustServerInterface;
 import com.perfect.freshair.Callback.ResponseCallback;
 import com.perfect.freshair.R;
@@ -26,6 +36,7 @@ import com.perfect.freshair.Utils.PreferencesUtils;
  * A login screen that offers login via id/password.
  */
 public class SignInActivity extends AppCompatActivity {
+    private static final String TAG = "SignInActivity";
     private AutoCompleteTextView mIdView;
     private EditText mPasswordView;
     private View mProgressView;
@@ -33,11 +44,13 @@ public class SignInActivity extends AppCompatActivity {
     private TextView mFailText;
     Button mIdSignInButton;
     Button mIdSignUpButton;
+    SignInButton googleSignInButton;
     public static SignInActivity activity = null;
-
+    private GoogleApiClient googleApiClient;
     private String mUserId;
     private String mPasswd;
     private DustServerInterface mServerInterface;
+    private static final int GOOGLE_SIGN_IN_REQUEST_CODE = 10001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +74,23 @@ public class SignInActivity extends AppCompatActivity {
         if (!PreferencesUtils.getUser(this).isEmpty()) {
             startMainActivity();
         }
+
+        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Log.e(TAG, connectionResult.getErrorMessage());
+                    }
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
+                .build();
+
+
         // Set up the login form.
         mIdView = findViewById(R.id.id);
         mPasswordView = findViewById(R.id.password);
@@ -69,6 +99,15 @@ public class SignInActivity extends AppCompatActivity {
         mFailText = findViewById(R.id.fail_text);
         mIdSignInButton = findViewById(R.id.sign_in_button);
         mIdSignUpButton = findViewById(R.id.sign_up_button);
+        googleSignInButton = findViewById(R.id.google_sign_in_button);
+        googleSignInButton.setScopes(googleSignInOptions.getScopeArray());
+        googleSignInButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent googleSignInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+                startActivityForResult(googleSignInIntent, GOOGLE_SIGN_IN_REQUEST_CODE);
+            }
+        });
 
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -130,24 +169,28 @@ public class SignInActivity extends AppCompatActivity {
             focusView.requestFocus();
         else {
             showProgress(true);
-
-            if (mServerInterface == null)
-                mServerInterface = new DustServerInterface();
-
-            //request Id
-            mServerInterface.signIn(mUserId, mPasswd, new ResponseCallback() {
-                @Override
-                public void responseCallback(int _resultCode) {
-                    if (_resultCode == 200) {
-                        PreferencesUtils.saveUser(SignInActivity.this.getApplicationContext(), mUserId);
-                        startMainActivity();
-                    } else
-                        mFailText.setVisibility(TextView.VISIBLE);
-
-                    showProgress(false);
-                }
-            });
+            successLogin(mUserId, mPasswd);
         }
+    }
+
+    private void successLogin(String userId, String passwd) {
+        if (mServerInterface == null)
+            mServerInterface = new DustServerInterface();
+
+        mUserId = userId;
+        //request Id
+        mServerInterface.signIn(userId, passwd, new ResponseCallback() {
+            @Override
+            public void responseCallback(int _resultCode) {
+                if (_resultCode == 200) {
+                    PreferencesUtils.saveUser(SignInActivity.this.getApplicationContext(), mUserId);
+                    startMainActivity();
+                } else
+                    mFailText.setVisibility(TextView.VISIBLE);
+
+                showProgress(false);
+            }
+        });
     }
 
     private boolean isIdValid(String _id) {
@@ -199,6 +242,22 @@ public class SignInActivity extends AppCompatActivity {
     private void startMainActivity() {
         startActivity(new Intent(SignInActivity.this.getApplicationContext(), MainActivity.class));
         this.finish();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
+            GoogleSignInResult googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+
+            if (googleSignInResult.isSuccess()) {
+                GoogleSignInAccount account = googleSignInResult.getSignInAccount();
+
+                PreferencesUtils.saveUser(SignInActivity.this.getApplicationContext(), account.getEmail());
+                startMainActivity();
+            }
+        }
     }
 }
 

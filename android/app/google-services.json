@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "595417554422",
+    "firebase_url": "https://massive-dynamo-246116.firebaseio.com",
+    "project_id": "massive-dynamo-246116",
+    "storage_bucket": "massive-dynamo-246116.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:595417554422:android:e2d1321b6cbe0a57",
+        "android_client_info": {
+          "package_name": "com.perfect.freshair"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "595417554422-ct8h7o3rqlhmop7468m5htcc30b9sp0v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.perfect.freshair",
+            "certificate_hash": "d852a42d902389cfa2dbd7df36beb86ce6ae2193"
+          }
+        },
+        {
+          "client_id": "595417554422-26utqvochl4o6l9i02bombgnfru39m7f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMydVe3xLiR-8qAgGTfDgRuTp9-8Lt4E8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "595417554422-26utqvochl4o6l9i02bombgnfru39m7f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
