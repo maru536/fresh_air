@@ -1,5 +1,10 @@
 package team.perfect.fresh_air.Controllers;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -46,6 +51,46 @@ public class DustApiController {
     private PublicDustRepository publicDustRepository;
     @Autowired
     private DustWithLocationRepository dustWithLocationRepository;
+//123 133
+//32 39
+//37.50 130.86
+    private int startLatitude = 32;
+    private int endLatitude = 39;
+    private int startLongitude = 123;
+    private int endLongitude = 133;
+    private int divide = 100;
+    @PostMapping("test")
+    public void test() {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("C:/Users/maru0/workspace/fresh_air/server/data/gps.csv"));
+            AddressPK[][] koreaAddress = new AddressPK[700][1000];
+            String line = "";
+            int i = 0;
+            while ((line = reader.readLine()) != null) {
+                String[] columns = line.split(",");
+
+                if (columns.length == 4) {
+                    if (i == 0)
+                        columns[0] = columns[0].substring(1);
+                    AddressPK columnAddress = new AddressPK(columns[2], columns[3]);
+                    koreaAddress[(int)(Double.valueOf(columns[0])*100) - startLatitude*divide][(int)(Double.valueOf(columns[1])*100) - startLongitude*divide] = columnAddress;
+                }
+                i++;
+            }
+            
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void fillNearestAddress(AddressPK[][] koreaAddress, int latitude, int longitude) {
+        for (int length = 1; length <= 700*1000; length++) {
+            int exploreLatitude = latitude - 1;
+            int exploreLongitude = longitude;
+
+        }
+    }
 
     @PostMapping("1.0/dust")
     public Response postDust(@RequestHeader String userId, @RequestBody JsonObject dustObject) {
