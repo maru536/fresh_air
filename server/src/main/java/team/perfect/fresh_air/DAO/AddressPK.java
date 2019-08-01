@@ -65,4 +65,14 @@ public class AddressPK implements Serializable {
 
         return address;
     }
+
+    @Override
+    public int hashCode() {
+        return (addressLevelOne+" "+addressLevelTwo).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object address) {
+        return (this.hashCode() ==  ((AddressPK)address).hashCode());
+    }
 }
