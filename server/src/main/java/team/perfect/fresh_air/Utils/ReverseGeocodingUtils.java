@@ -1,56 +1,35 @@
 package team.perfect.fresh_air.Utils;
 
-import java.util.regex.PatternSyntaxException;
+import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
-
+import team.perfect.fresh_air.DAO.AddressDAO;
 import team.perfect.fresh_air.DAO.AddressPK;
-import team.perfect.fresh_air.Geocoding.Address;
-import team.perfect.fresh_air.Geocoding.NominatimReverseGeocodingAPI;
 import team.perfect.fresh_air.Models.Position;
+import team.perfect.fresh_air.Repository.AddressRepository;
 
 public class ReverseGeocodingUtils {
-    public static AddressPK getAddressFromPosition(Position position) {
-        NominatimReverseGeocodingAPI reverseGeocoding = new NominatimReverseGeocodingAPI();
+    private static final int startLatitude = 32;
+    private static final int endLatitude = 39;
+    private static final int startLongitude = 123;
+    private static final int endLongitude = 133;
+    private static final int divide = 100;
 
-        Address address = reverseGeocoding.getAdress(position.getLatitude(), position.getLongitude());
-        return getAddressPKFromDisplayName(address.getDisplayName());
-    }
-
-    private static AddressPK getAddressPKFromDisplayName(String displayName) {
-        String[] addressLevel;
-
-        try {
-            addressLevel = displayName.split(", ");
-        } catch (PatternSyntaxException e) {
-            return null;
+    public static AddressPK getAddressFromPosition(Position position, AddressRepository addressRepository) {
+        if (isInOfBound(position)) {
+            float latitude = ((float)Math.round(position.getLatitude()*divide))/divide;
+            float longitude = ((float)Math.round(position.getLongitude()*divide))/divide;
+            Optional<AddressDAO> queryedAddressDAO = 
+                    addressRepository.findAddress(latitude, longitude);
+        
+            if (queryedAddressDAO.isPresent()) 
+                return new AddressPK(queryedAddressDAO.get().getAddressLevelOne(), queryedAddressDAO.get().getAddressLevelTwo());
         }
 
-        if (addressLevel.length >= 3 && getCountry(addressLevel).equals("대한민국"))
-            return getAddressPK(addressLevel);
-        else
-            return null;
+        return null;
     }
 
-    private static String getCountry(String[] addressLevel) {
-        return addressLevel[addressLevel.length - 1];
-    }
-
-    private static AddressPK getAddressPK(String[] addressLevel) {
-        return new AddressPK(getAddressLevelOne(addressLevel), getAddressLevelTwo(addressLevel));
-    }
-
-    private static String getAddressLevelOne(String[] addressLevel) {
-        if (StringUtils.isNumeric(addressLevel[addressLevel.length - 2]))
-            return addressLevel[addressLevel.length - 3];
-        else
-            return addressLevel[addressLevel.length - 2];
-    }
-
-    private static String getAddressLevelTwo(String[] addressLevel) {
-        if (StringUtils.isNumeric(addressLevel[addressLevel.length - 2]))
-            return addressLevel[addressLevel.length - 4];
-        else
-            return addressLevel[addressLevel.length - 3];
+    private static boolean isInOfBound(Position position) {
+        return (position.getLatitude() >= startLatitude && position.getLatitude() < endLatitude
+                && position.getLongitude() >= startLongitude && position.getLongitude() < endLongitude);
     }
 }

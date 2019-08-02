@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import team.perfect.fresh_air.Contract.TimeContract;
+import team.perfect.fresh_air.DAO.AddressDAO;
 import team.perfect.fresh_air.DAO.AddressPK;
 import team.perfect.fresh_air.DAO.PublicDust;
 import team.perfect.fresh_air.DAO.Dust;
@@ -40,6 +41,7 @@ import team.perfect.fresh_air.Models.ResponsePublicDust;
 import team.perfect.fresh_air.Models.ResponseDustList;
 import team.perfect.fresh_air.Models.ResponseRepresentDustWithLocation;
 import team.perfect.fresh_air.Models.ResponseUserLatestDust;
+import team.perfect.fresh_air.Repository.AddressRepository;
 import team.perfect.fresh_air.Repository.DustWithLocationRepository;
 import team.perfect.fresh_air.Repository.PublicDustRepository;
 import team.perfect.fresh_air.Utils.ChartUtils;
@@ -53,6 +55,8 @@ public class DustApiController {
     private PublicDustRepository publicDustRepository;
     @Autowired
     private DustWithLocationRepository dustWithLocationRepository;
+    @Autowired
+    private AddressRepository addressRepository;
 //123 133
 //32 39
 //37.50 130.86
@@ -67,9 +71,10 @@ public class DustApiController {
     @PostMapping("test")
     public void test() {
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("C:/Users/KimDC/workspace/fresh_air/server/data/gps.csv"));
+            BufferedReader reader = new BufferedReader(new FileReader("data/gps.csv"));
             AddressPK[][] koreaAddress = new AddressPK[latitudeSize][longitudeSize];
             AddressPK[][] fillAddress = new AddressPK[latitudeSize][longitudeSize];
+            List<AddressDAO> addressList = new ArrayList<AddressDAO>();
             String line = "";
             int i = 0;
             while ((line = reader.readLine()) != null) {
@@ -85,14 +90,31 @@ public class DustApiController {
             }
 
 
-            for (int latitude = 0; latitude < latitudeSize; latitude++) {
+            for (int latitude = 392; latitude < latitudeSize; latitude++) {
                 for (int longitude = 0; longitude < longitudeSize; longitude++) {
                     if (koreaAddress[latitude][longitude] == null) {
                         AddressPK filledAddress = fillNearestAddress(koreaAddress, latitude, longitude);
                         fillAddress[latitude][longitude] = filledAddress;
+                        if (fillAddress[latitude][longitude] == null)
+                            System.out.println(latitude+ "/" +longitude+ " is null");
+                        else {
+                            
+                            addressList.add(new AddressDAO((float)(startLatitude*divide+latitude)/divide, 
+                                    (float)(startLongitude*divide+longitude)/divide, 
+                                    filledAddress.getAddressLevelOne(), filledAddress.getAddressLevelTwo()));
+                        }
+                    }
+                    else {
+                        addressList.add(new AddressDAO((float)(startLatitude*divide+latitude)/divide, 
+                                (float)(startLongitude*divide+longitude)/divide, 
+                                koreaAddress[latitude][longitude].getAddressLevelOne(), 
+                                koreaAddress[latitude][longitude].getAddressLevelTwo()));
                     }
                 }
             }
+
+            addressRepository.saveAll(addressList);
+            
             
             reader.close();
         } catch (IOException e) {
@@ -481,7 +503,7 @@ public class DustApiController {
 
         if (allRepresentDustLocation.size() > 0)
             return new ResponseRepresentDustWithLocation(200, "Success", 
-                    userId, calculateAvgPublicDust(dustLocationList), allRepresentDustLocation);
+                    userId, calculateAvgPublicDust(dustLocationList), allRepresentDustLocation, addressRepository);
 
         else
             return new Response(404, "There is no dust data");
@@ -496,7 +518,7 @@ public class DustApiController {
 
         if (allRepresentDustLocation.size() > 0)
             return new ResponseRepresentDustWithLocation(200, "Success", 
-                    userId, calculateAvgMeasuredDust(dustLocationList), allRepresentDustLocation);
+                    userId, calculateAvgMeasuredDust(dustLocationList), allRepresentDustLocation, addressRepository);
 
         else
             return new Response(404, "There is no dust data");
@@ -511,7 +533,7 @@ public class DustApiController {
 
         if (allRepresentDustLocation.size() > 0)
             return new ResponseRepresentDustWithLocation(200, "Success", 
-                    userId, calculateAvgPublicDust(dustLocationList), allRepresentDustLocation);
+                    userId, calculateAvgPublicDust(dustLocationList), allRepresentDustLocation, addressRepository);
         else
             return new Response(404, "There is no dust data");
     }
@@ -525,7 +547,7 @@ public class DustApiController {
 
         if (allRepresentDustLocation.size() > 0)
             return new ResponseRepresentDustWithLocation(200, "Success", 
-                    userId, calculateAvgMeasuredDust(dustLocationList), allRepresentDustLocation);
+                    userId, calculateAvgMeasuredDust(dustLocationList), allRepresentDustLocation, addressRepository);
         else
             return new Response(404, "There is no dust data");
     }
@@ -675,7 +697,7 @@ public class DustApiController {
     }
 
     private PublicDust queryPublicDustByPosition(Position position) {
-        AddressPK address = ReverseGeocodingUtils.getAddressFromPosition(position);
+        AddressPK address = ReverseGeocodingUtils.getAddressFromPosition(position, addressRepository);
         Optional<PublicDust> publicDust = publicDustRepository.findById(address);
 
         if (publicDust.isPresent())

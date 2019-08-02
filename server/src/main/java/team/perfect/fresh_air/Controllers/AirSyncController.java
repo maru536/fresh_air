@@ -18,6 +18,7 @@ import team.perfect.fresh_air.DAO.PublicDust;
 import team.perfect.fresh_air.Models.Position;
 import team.perfect.fresh_air.Repository.PublicDustRepository;
 import team.perfect.fresh_air.Utils.ReverseGeocodingUtils;
+import team.perfect.fresh_air.Repository.AddressRepository;
 import team.perfect.fresh_air.Repository.DustWithLocationRepository;
 
 @Component
@@ -30,6 +31,8 @@ public class AirSyncController {
     private DustWithLocationRepository dustWithLocationRepository;
     @Autowired
     private PublicDustRepository publicDustRepository;
+    @Autowired
+    private AddressRepository addressRepository;
 
     @Scheduled(cron = "0 30 * * * *")
     public void syncLevelTwoAir() {
@@ -93,7 +96,7 @@ public class AirSyncController {
     }
 
     private PublicDust queryPublicDustByPosition(Position position) {
-        AddressPK address = ReverseGeocodingUtils.getAddressFromPosition(position);
+        AddressPK address = ReverseGeocodingUtils.getAddressFromPosition(position, addressRepository);
         Optional<PublicDust> publicDust = publicDustRepository.findById(address);
 
         if (publicDust.isPresent())

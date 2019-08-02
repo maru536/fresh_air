@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 
 import team.perfect.fresh_air.DAO.AddressPK;
 import team.perfect.fresh_air.DAO.DustWithLocationDAO;
+import team.perfect.fresh_air.Repository.AddressRepository;
 import team.perfect.fresh_air.Utils.ReverseGeocodingUtils;
 
 public class RepresentDustWithLocation {
@@ -81,7 +82,7 @@ public class RepresentDustWithLocation {
             return -1;
     }
 
-    public JsonObject toJsonObject() {
+    public JsonObject toJsonObject(AddressRepository addressRepository) {
         JsonObject position = new JsonObject();
         position.addProperty("latitude", this.position.getLatitude());
         position.addProperty("longitude", this.position.getLongitude());
@@ -94,7 +95,7 @@ public class RepresentDustWithLocation {
         representDustWithLocation.addProperty("latestTime", this.latestTime);
         representDustWithLocation.add("dust", dust);
         representDustWithLocation.add("position", position);
-        representDustWithLocation.add("address", ReverseGeocodingUtils.getAddressFromPosition(this.position).toJsonObject());
+        representDustWithLocation.add("address", ReverseGeocodingUtils.getAddressFromPosition(this.position, addressRepository).toJsonObject());
 
         return representDustWithLocation;
     }
